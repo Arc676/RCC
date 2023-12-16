@@ -3,6 +3,8 @@
 
 struct CmdlineArgs {
 	unsigned verbosity;
+
+	int controlPort;
 };
 
 void parseArgs(int argc, char* argv[], struct CmdlineArgs* args);
