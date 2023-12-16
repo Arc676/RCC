@@ -3,15 +3,24 @@
 #include <getopt.h>
 #include <stdlib.h>
 
+#include "logging.h"
+
 void defaultSetup(struct CmdlineArgs* const args) {
 #define DEFAULT_CONTROL_PORT 6728;  // "Open RC Vehicle" on a 10-key layout
 	args->controlPort = DEFAULT_CONTROL_PORT;
 	args->verbosity   = 0;
 }
 
-void parseArgs(int argc, char** argv, struct CmdlineArgs* args) {
-	static const char* SHORT_OPTS = "vp:";
+void dumpSetup(const struct CmdlineArgs* const args, const unsigned verbosity) {
+	logger(verbosity, DEBUG,
+	       "Configured parameters:\n\tControl port: %d\n\tVerbosity: %u\n",
+	       args->controlPort, args->verbosity);
+}
 
+void parseArgs(int argc, char** argv, struct CmdlineArgs* args) {
+	defaultSetup(args);
+
+	static const char* SHORT_OPTS = "vp:";
 #define LONG_COUNT 2
 	static const struct option LONG_OPTS[LONG_COUNT + 1] = {
 		{"verbose", optional_argument, NULL, 'V'},
