@@ -12,6 +12,9 @@ void logger(unsigned verbosity, unsigned level, const char* fmt, ...) {
 
 	switch (level) {
 		default:
+		case DEBUG:
+			printf("[DEBUG] ");
+			break;
 		case INFO:
 			printf("[INFO] ");
 			break;
