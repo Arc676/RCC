@@ -9,6 +9,6 @@ struct CmdlineArgs {
 
 void dumpSetup(const struct CmdlineArgs* args, unsigned verbosity);
 
-void parseArgs(int argc, char* argv[], struct CmdlineArgs* args);
+int parseArgs(int argc, char* argv[], struct CmdlineArgs* args);
 
 #endif

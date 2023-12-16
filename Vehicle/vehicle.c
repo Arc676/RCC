@@ -3,7 +3,9 @@
 
 int main(int argc, char* argv[]) {
 	struct CmdlineArgs opts;
-	parseArgs(argc, argv, &opts);
+	if (parseArgs(argc, argv, &opts)) {
+		return 0;
+	}
 
 	logger(opts.verbosity, INFO, "Options parsed.\n");
 	dumpSetup(&opts, opts.verbosity);

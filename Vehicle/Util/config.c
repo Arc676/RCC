@@ -1,6 +1,7 @@
 #include "config.h"
 
 #include <getopt.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "logging.h"
@@ -17,12 +18,21 @@ void dumpSetup(const struct CmdlineArgs* const args, const unsigned verbosity) {
 	       args->controlPort, args->verbosity);
 }
 
-void parseArgs(int argc, char** argv, struct CmdlineArgs* args) {
+void printHelp() {
+	printf(
+		"Arguments:\n\
+    -p <port>, --port=<port>\tsets the port on which to listen for controllers\n\
+    -v, --verbose[=level]\tsets verbosity level\n\
+    --help\t\t\tshows this help message\n");
+}
+
+int parseArgs(int argc, char** argv, struct CmdlineArgs* args) {
 	defaultSetup(args);
 
 	static const char* SHORT_OPTS = "vp:";
-#define LONG_COUNT 2
+#define LONG_COUNT 3
 	static const struct option LONG_OPTS[LONG_COUNT + 1] = {
+		{"help", no_argument, NULL, 0},
 		{"verbose", optional_argument, NULL, 'V'},
 		{"port", required_argument, NULL, 'p'},
 		{0, 0, 0, 0}};
@@ -38,6 +48,9 @@ void parseArgs(int argc, char** argv, struct CmdlineArgs* args) {
 		}
 
 		switch (opt) {
+			case 0:
+				printHelp();
+				return 1;
 			case 'p':
 				args->controlPort = atoi(optarg);
 				break;
@@ -51,4 +64,5 @@ void parseArgs(int argc, char** argv, struct CmdlineArgs* args) {
 				break;
 		}
 	}
+	return 0;
 }
