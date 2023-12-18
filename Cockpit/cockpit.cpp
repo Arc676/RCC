@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include "dashboard.h"
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -90,11 +91,15 @@ int main() {
 		return 1;
 	}
 
+	Dashboard dashboard;
+
 	while (glfwWindowShouldClose(window) == 0) {
 		glfwPollEvents();
 
 		newFrame();
-
+		if (dashboard.drawCockpitUI()) {
+			break;
+		}
 		drawFrame(window);
 	}
 

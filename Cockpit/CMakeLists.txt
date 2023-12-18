@@ -1,4 +1,6 @@
-set(COCKPIT_SRCS cockpit.cpp)
+set(COCKPIT_SRCS
+    dashboard.cpp
+    cockpit.cpp)
 add_executable(Cockpit ${COCKPIT_SRCS})
 target_link_libraries(Cockpit PUBLIC RC)
 
