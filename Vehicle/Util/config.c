@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "interface.h"
 #include "logging.h"
 
 void defaultSetup(struct CmdlineArgs* const args) {
-#define DEFAULT_CONTROL_PORT 6728;  // "Open RC Vehicle" on a 10-key layout
 	args->controlPort = DEFAULT_CONTROL_PORT;
 	args->verbosity   = 0;
 }
