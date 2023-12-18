@@ -1,5 +1,5 @@
-#include "config.h"
-#include "logging.h"
+#include "Util/config.h"
+#include "Util/logging.h"
 
 int main(int argc, char* argv[]) {
 	struct CmdlineArgs opts;
