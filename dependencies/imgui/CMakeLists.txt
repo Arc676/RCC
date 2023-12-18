@@ -6,8 +6,9 @@ FetchContent_Populate(imgui
 
 set(OpenGL_GL_PREFERENCE "LEGACY")
 set(imgui_SRC ${imgui_SOURCE_DIR} CACHE INTERNAL "")
-find_package(OpenGL 2 REQUIRED)
+find_package(OpenGL 3 REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(GLEW REQUIRED)
 
 add_library(imgui STATIC
   imgui/imgui.cpp
@@ -17,10 +18,12 @@ add_library(imgui STATIC
   imgui/imgui_widgets.cpp
 
   imgui/backends/imgui_impl_glfw.cpp
-  imgui/backends/imgui_impl_opengl2.cpp
+  imgui/backends/imgui_impl_opengl3.cpp
 )
 
 target_link_libraries(imgui PUBLIC glfw ${OPENGL_LIBRARIES})
+target_compile_options(imgui PUBLIC -DIMGUI_IMPL_OPENGL_LOADER_GLEW)
+target_link_libraries(imgui PUBLIC GLEW ${GLEW_LIBRARIES})
 
 target_include_directories(imgui
 PUBLIC
