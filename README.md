@@ -6,4 +6,4 @@ RCC uses a server-client model, where a microcontroller or computer on the vehic
 
 ## License
 
-Project available under GPLv3.
+Project available under GPLv3 (see `LICENSE` for full license text). Cockpit UI built using [Dear ImGui](https://github.com/ocornut/imgui) available under MIT license.
