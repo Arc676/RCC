@@ -1,3 +1,6 @@
+#ifndef DASHBOARD_H
+#define DASHBOARD_H
+
 #include <string>
 
 #include "Modules/ping.h"
@@ -26,3 +29,5 @@ protected:
 public:
 	bool drawCockpitUI();
 };
+
+#endif
