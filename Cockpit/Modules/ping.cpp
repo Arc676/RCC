@@ -10,6 +10,6 @@ void PingModule::render() {
 	}
 	if (response != 0x0) {
 		ImGui::SameLine();
-		ImGui::Text("Response: %#03x (%f ms)", response, latency);
+		ImGui::Text("Response: 0x%02x (%f ms)", response, latency);
 	}
 }
