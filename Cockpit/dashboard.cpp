@@ -32,12 +32,22 @@ void Dashboard::connectionWindow() {
 	ImGui::End();
 }
 
+void Dashboard::commandPanel() {
+	if (ImGui::Begin("Command Panel", &showCommandWindow)) {
+		ping.render();
+	}
+	ImGui::End();
+}
+
 bool Dashboard::drawCockpitUI() {
 	if (menuBar()) {
 		return true;
 	}
 	if (showConnectionWindow) {
 		connectionWindow();
+	}
+	if (showCommandWindow) {
+		commandPanel();
 	}
 	return false;
 }

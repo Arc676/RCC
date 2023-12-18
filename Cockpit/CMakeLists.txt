@@ -1,4 +1,5 @@
 set(COCKPIT_SRCS
+    Modules/ping.cpp
     dashboard.cpp
     cockpit.cpp)
 add_executable(Cockpit ${COCKPIT_SRCS})
