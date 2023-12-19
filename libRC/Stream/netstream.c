@@ -87,3 +87,14 @@ enum SocketStatus netstream_initClient(struct NetworkStream* const stream,
 void netstream_disconnect(struct NetworkStream* const stream) {
 	close(stream->socket);
 }
+
+void netstream_recvLoop(struct NetworkStream* const stream,
+                        const MessageHandler handler,
+                        const int* const running) {
+	while (*running) {
+		size_t bytes = read(stream->socket, stream->msgBuffer, MESSAGE_BUFLEN);
+		handler(stream->msgBuffer, bytes);
+		// NOLINTNEXTLINE (memset_s not in gcc)
+		memset(stream->msgBuffer, 0, MESSAGE_BUFLEN);
+	}
+}
