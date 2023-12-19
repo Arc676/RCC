@@ -3,6 +3,10 @@
 
 #define IP_ADDR_BUFLEN 30
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct NetworkStream {
 	int protocol;
 	int socket;
@@ -11,7 +15,8 @@ struct NetworkStream {
 };
 
 enum SocketStatus {
-	SOCKET_OK = 0,
+	DISCONNECTED = -1,
+	SOCKET_OK    = 0,
 	CREATE_FAILED,
 	BIND_FAILED,
 	LISTEN_FAILED,
@@ -24,5 +29,9 @@ enum SocketStatus netstream_initServer(struct NetworkStream*, int, int);
 
 enum SocketStatus netstream_initClient(struct NetworkStream*, const char*, int,
                                        int);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

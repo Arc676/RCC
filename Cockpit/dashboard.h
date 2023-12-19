@@ -9,7 +9,8 @@
 
 class Dashboard {
 	// connection state
-	bool connected                 = false;
+	enum SocketStatus connectionStatus = DISCONNECTED;
+	struct NetworkStream connection;
 	char vehicleIP[IP_ADDR_BUFLEN] = {0};
 	int vehiclePort                = DEFAULT_CONTROL_PORT;
 
@@ -18,7 +19,7 @@ class Dashboard {
 
 	// UI state
 	bool showConnectionWindow = true;
-	bool showCommandWindow    = true;
+	bool showCommandWindow    = false;
 
 protected:
 	bool menuBar();

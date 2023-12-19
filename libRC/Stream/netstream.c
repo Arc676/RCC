@@ -7,6 +7,8 @@
 
 const char* getSocketError(const enum SocketStatus status) {
 	switch (status) {
+		case DISCONNECTED:
+			return "Socket disconnected";
 		case SOCKET_OK:
 			return "Socket OK";
 		case CREATE_FAILED:
