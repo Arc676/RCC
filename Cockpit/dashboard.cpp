@@ -18,6 +18,9 @@ bool Dashboard::menuBar() {
 				showConnectionWindow = true;
 			}
 		}
+		if (ImGui::MenuItem("Show command panel")) {
+			showCommandWindow = true;
+		}
 		if (ImGui::MenuItem("Quit")) {
 			return true;
 		}
