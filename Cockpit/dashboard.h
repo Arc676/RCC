@@ -4,9 +4,8 @@
 #include <string>
 
 #include "Modules/ping.h"
+#include "Stream/netstream.h"
 #include "interface.h"
-
-#define IP_ADDR_BUFLEN 30
 
 class Dashboard {
 	// connection state
