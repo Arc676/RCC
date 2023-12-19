@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
 const char* getSocketError(const enum SocketStatus status) {
 	switch (status) {
@@ -81,4 +82,8 @@ enum SocketStatus netstream_initClient(struct NetworkStream* const stream,
 	}
 
 	return SOCKET_OK;
+}
+
+void netstream_disconnect(struct NetworkStream* const stream) {
+	close(stream->socket);
 }

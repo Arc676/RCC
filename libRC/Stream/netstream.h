@@ -30,6 +30,8 @@ enum SocketStatus netstream_initServer(struct NetworkStream*, int, int);
 enum SocketStatus netstream_initClient(struct NetworkStream*, const char*, int,
                                        int);
 
+void netstream_disconnect(struct NetworkStream*);
+
 #ifdef __cplusplus
 }
 #endif

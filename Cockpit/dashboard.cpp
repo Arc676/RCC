@@ -31,13 +31,17 @@ void Dashboard::connectionWindow() {
 	if (ImGui::Begin("Connection", &showConnectionWindow)) {
 		ImGui::InputText("Vehicle IP Address", vehicleIP, IP_ADDR_BUFLEN);
 		ImGui::InputInt("Control Post", &vehiclePort);
+		ImGui::Text("Status: %s", getSocketError(connectionStatus));
 
 		if (connectionStatus == DISCONNECTED && ImGui::Button("Connect")) {
 			connectionStatus = netstream_initClient(&connection, vehicleIP,
 			                                        vehiclePort, IPPROTO_TCP);
+		} else if (connectionStatus == SOCKET_OK
+		           && ImGui::Button("Disconnect")) {
+			netstream_disconnect(&connection);
+			connectionStatus = DISCONNECTED;
 		}
 
-		ImGui::Text("Connection status: %s", getSocketError(connectionStatus));
 		if (connectionStatus != DISCONNECTED && connectionStatus != SOCKET_OK
 		    && ImGui::Button("OK")) {
 			connectionStatus = DISCONNECTED;
