@@ -7,4 +7,5 @@ set(LIB_SRCS
     Stream/netstream.c
     camera.c)
 add_library(RC ${LIB_SRCS})
+target_include_directories(RC PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(RC PUBLIC Threads::Threads)

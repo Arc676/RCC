@@ -40,7 +40,7 @@ protected:
 
 	void disconnect();
 
-	void handleCommand(const char*, size_t);
+	void handleCommand(const byte*, size_t);
 
 public:
 	Dashboard() { Dashboard::instance = this; }
@@ -49,7 +49,7 @@ public:
 
 	static Dashboard* getInstance() { return instance; }
 
-	static void handler(const char* msg, size_t len) {
+	static void handler(const byte* msg, size_t len) {
 		getInstance()->handleCommand(msg, len);
 	}
 

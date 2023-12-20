@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <sys/socket.h>
 
+#include "interface.h"
+
 #define IP_ADDR_BUFLEN 30
 #define MESSAGE_BUFLEN 255
 
@@ -13,7 +15,7 @@
 extern "C" {
 #endif
 
-typedef void (*MessageHandler)(const char*, size_t);
+typedef void (*MessageHandler)(const byte*, size_t);
 typedef int (*TerminationFlag)();
 
 struct NetworkStream {
@@ -25,7 +27,7 @@ struct NetworkStream {
 	int clientSocket;
 	struct sockaddr clientAddr;
 
-	char msgBuffer[MESSAGE_BUFLEN];
+	byte msgBuffer[MESSAGE_BUFLEN];
 };
 
 enum SocketStatus {
@@ -47,7 +49,7 @@ enum SocketStatus netstream_acceptConnection(struct NetworkStream*);
 enum SocketStatus netstream_initClient(struct NetworkStream*, const char*, int,
                                        int);
 
-size_t netstream_send(struct NetworkStream*, const char*, size_t);
+size_t netstream_send(struct NetworkStream*, const byte*, size_t);
 
 void netstream_recvLoop(struct NetworkStream*, MessageHandler, TerminationFlag);
 

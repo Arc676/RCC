@@ -1,6 +1,8 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
+typedef unsigned char byte;
+
 #define DEFAULT_CONTROL_PORT 6728  // "Open RC Vehicle" on a 10-key layout
 
 #define PING         0x01

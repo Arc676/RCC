@@ -41,7 +41,7 @@ void Dashboard::disconnect() {
 	connectionStatus = DISCONNECTED;
 }
 
-void Dashboard::handleCommand(const char* msg, size_t len) {
+void Dashboard::handleCommand(const byte* msg, size_t len) {
 	for (auto* module : modules) {
 		if (module->canHandleMessage(msg[0])) {
 			module->handleMessage(msg, len);

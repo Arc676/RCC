@@ -36,7 +36,7 @@ const char* PingModule::decodeResponse() const {
 	}
 }
 
-void PingModule::handleMessage(const char* msg, size_t len) {
+void PingModule::handleMessage(const byte* msg, size_t len) {
 	response = msg[0];
 	auto now = std::chrono::system_clock::now();
 	latency  = std::chrono::duration_cast<std::chrono::microseconds>(

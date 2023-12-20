@@ -101,7 +101,7 @@ void netstream_disconnect(struct NetworkStream* const stream) {
 }
 
 size_t netstream_send(struct NetworkStream* const stream,
-                      const char* const data, const size_t len) {
+                      const byte* const data, const size_t len) {
 	int socket = stream->clientSocket ? stream->clientSocket : stream->socket;
 
 	// send message via TCP
@@ -112,7 +112,7 @@ size_t netstream_send(struct NetworkStream* const stream,
 	// send message via UDP
 	size_t sent      = 0;
 	size_t remaining = len;
-	for (const char* ptr = data; remaining;) {
+	for (const byte* ptr = data; remaining;) {
 		size_t toSend = remaining > MAX_UDP_LEN ? MAX_UDP_LEN : remaining;
 		sent += sendto(socket, ptr, toSend, 0, &stream->clientAddr,
 		               sizeof(struct sockaddr));
