@@ -5,6 +5,14 @@
 
 #include "modules.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void replyPing(const byte*, size_t, struct Response*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

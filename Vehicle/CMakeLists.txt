@@ -1,7 +1,7 @@
 set(VEHICLE_SRCS
-    vehicle.c
+    vehicle.cpp
     Modules/ping.c
-    Util/config.c
+    Util/config.cpp
     Util/logging.c)
 add_executable(Vehicle ${VEHICLE_SRCS})
 target_include_directories(Vehicle PUBLIC ${SRC_LIBRC})

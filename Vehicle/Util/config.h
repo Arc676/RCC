@@ -1,14 +1,26 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-struct CmdlineArgs {
-	unsigned verbosity;
+#include "interface.h"
 
-	int controlPort;
+class CmdlineArgs {
+	unsigned verbosity = 0;
+
+	int controlPort = DEFAULT_CONTROL_PORT;
+
+	bool helpRequested = false;
+	static void printHelp();
+
+public:
+	void dump() const;
+
+	CmdlineArgs(int argc, char* argv[]);
+
+	unsigned getVerbosity() const { return verbosity; }
+
+	int getControlPort() const { return controlPort; }
+
+	bool helpWasRequested() const { return helpRequested; }
 };
-
-void dumpSetup(const struct CmdlineArgs* args, unsigned verbosity);
-
-int parseArgs(int argc, char* argv[], struct CmdlineArgs* args);
 
 #endif

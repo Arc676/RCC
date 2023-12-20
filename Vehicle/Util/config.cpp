@@ -7,18 +7,13 @@
 #include "interface.h"
 #include "logging.h"
 
-void defaultSetup(struct CmdlineArgs* const args) {
-	args->controlPort = DEFAULT_CONTROL_PORT;
-	args->verbosity   = 0;
-}
-
-void dumpSetup(const struct CmdlineArgs* const args, const unsigned verbosity) {
+void CmdlineArgs::dump() const {
 	logger(verbosity, DEBUG,
 	       "Configured parameters:\n\tControl port: %d\n\tVerbosity: %u\n",
-	       args->controlPort, args->verbosity);
+	       controlPort, verbosity);
 }
 
-void printHelp() {
+void CmdlineArgs::printHelp() {
 	printf(
 		"Arguments:\n\
     -p <port>, --port=<port>\tsets the port on which to listen for controllers\n\
@@ -26,9 +21,7 @@ void printHelp() {
     --help\t\t\tshows this help message\n");
 }
 
-int parseArgs(int argc, char** argv, struct CmdlineArgs* args) {
-	defaultSetup(args);
-
+CmdlineArgs::CmdlineArgs(int argc, char** argv) {
 	static const char* SHORT_OPTS = "vp:";
 #define LONG_COUNT 3
 	static const struct option LONG_OPTS[LONG_COUNT + 1] = {
@@ -37,10 +30,10 @@ int parseArgs(int argc, char** argv, struct CmdlineArgs* args) {
 		{"port", required_argument, NULL, 'p'},
 		{0, 0, 0, 0}};
 
-	while (1) {
+	while (true) {
 		int idx = 0;
 		// NOLINTNEXTLINE(concurrency-mt-unsafe)
-		int opt = getopt_long(argc, argv, SHORT_OPTS, LONG_OPTS, &idx);
+		const int opt = getopt_long(argc, argv, SHORT_OPTS, LONG_OPTS, &idx);
 
 		// End of args
 		if (opt == -1) {
@@ -50,19 +43,19 @@ int parseArgs(int argc, char** argv, struct CmdlineArgs* args) {
 		switch (opt) {
 			case 0:
 				printHelp();
-				return 1;
+				helpRequested = true;
+				break;
 			case 'p':
-				args->controlPort = atoi(optarg);
+				controlPort = atoi(optarg);
 				break;
 			case 'V':
-				if (optarg) {
-					args->verbosity = atoi(optarg);
+				if (optarg != nullptr) {
+					verbosity = atoi(optarg);
 					break;
 				}
 			case 'v':
-				args->verbosity++;
+				verbosity++;
 				break;
 		}
 	}
-	return 0;
 }
