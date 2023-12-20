@@ -1,5 +1,6 @@
 set(VEHICLE_SRCS
     vehicle.c
+    Modules/ping.c
     Util/config.c
     Util/logging.c)
 add_executable(Vehicle ${VEHICLE_SRCS})
