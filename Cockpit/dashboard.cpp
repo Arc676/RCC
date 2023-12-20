@@ -17,7 +17,7 @@ bool Dashboard::menuBar() {
 	if (ImGui::BeginMenu("File")) {
 		if (connectionStatus == SOCKET_OK) {
 			if (ImGui::MenuItem("Disconnect from vehicle")) {
-				// TODO
+				disconnect();
 			}
 		} else {
 			if (ImGui::MenuItem("Connect to vehicle")) {
@@ -34,6 +34,11 @@ bool Dashboard::menuBar() {
 	}
 	ImGui::EndMainMenuBar();
 	return false;
+}
+
+void Dashboard::disconnect() {
+	netstream_disconnect(&connection);
+	connectionStatus = DISCONNECTED;
 }
 
 void Dashboard::handleCommand(const char* msg, size_t len) {
@@ -54,13 +59,13 @@ void Dashboard::connectionWindow() {
 			connectionStatus = netstream_initClient(&connection, vehicleIP,
 			                                        vehiclePort, IPPROTO_TCP);
 			if (connectionStatus == SOCKET_OK) {
-				controlThread = std::thread(netstream_recvLoop, &connection,
-				                            Dashboard::handler, &vehiclePort);
+				controlThread =
+					std::thread(netstream_recvLoop, &connection,
+				                Dashboard::handler, Dashboard::isDisconnected);
 			}
 		} else if (connectionStatus == SOCKET_OK
 		           && ImGui::Button("Disconnect")) {
-			netstream_disconnect(&connection);
-			connectionStatus = DISCONNECTED;
+			disconnect();
 		}
 
 		if (connectionStatus != DISCONNECTED && connectionStatus != SOCKET_OK

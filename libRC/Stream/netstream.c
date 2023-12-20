@@ -124,8 +124,8 @@ size_t netstream_send(struct NetworkStream* const stream,
 
 void netstream_recvLoop(struct NetworkStream* const stream,
                         const MessageHandler handler,
-                        const int* const running) {
-	while (*running) {
+                        const TerminationFlag shouldTerminate) {
+	while (!shouldTerminate()) {
 		size_t bytes = read(stream->socket, stream->msgBuffer, MESSAGE_BUFLEN);
 		handler(stream->msgBuffer, bytes);
 		// NOLINTNEXTLINE (memset_s not in gcc)

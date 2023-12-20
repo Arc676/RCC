@@ -14,6 +14,7 @@ extern "C" {
 #endif
 
 typedef void (*MessageHandler)(const char*, size_t);
+typedef int (*TerminationFlag)();
 
 struct NetworkStream {
 	int protocol;
@@ -48,7 +49,7 @@ enum SocketStatus netstream_initClient(struct NetworkStream*, const char*, int,
 
 size_t netstream_send(struct NetworkStream*, const char*, size_t);
 
-void netstream_recvLoop(struct NetworkStream*, MessageHandler, const int*);
+void netstream_recvLoop(struct NetworkStream*, MessageHandler, TerminationFlag);
 
 void netstream_disconnect(struct NetworkStream*);
 

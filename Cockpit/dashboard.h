@@ -38,6 +38,8 @@ protected:
 	void commandHandler();
 	void commandPanel();
 
+	void disconnect();
+
 	void handleCommand(const char*, size_t);
 
 public:
@@ -49,6 +51,10 @@ public:
 
 	static void handler(const char* msg, size_t len) {
 		getInstance()->handleCommand(msg, len);
+	}
+
+	static int isDisconnected() {
+		return (int)(getInstance()->connectionStatus != SOCKET_OK);
 	}
 };
 
