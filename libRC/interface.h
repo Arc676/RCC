@@ -3,7 +3,8 @@
 
 #define DEFAULT_CONTROL_PORT 6728;  // "Open RC Vehicle" on a 10-key layout
 
-#define PING                 0x01
-#define PING_ACK             0x02
+#define PING         0x01
+#define PING_ACK     0x02
+#define PING_INVALID 0xF1
 
 #endif
