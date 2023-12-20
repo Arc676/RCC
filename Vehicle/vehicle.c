@@ -11,7 +11,8 @@
 
 struct CmdlineArgs opts;
 struct NetworkStream controlStream;
-int connected = 0;
+int connected         = 0;
+int shutdownRequested = 0;
 
 int isDisconnected() {
 	return !connected;
@@ -28,6 +29,12 @@ Responder getResponder(const byte cmd) {
 
 void handler(const byte* msg, size_t len) {
 	static struct Response response;
+
+	if (len == 0) {
+		connected = 0;
+		return;
+	}
+
 	// NOLINTNEXTLINE (memset_s not in gcc)
 	memset(&response, 0, sizeof(struct Response));
 	switch (msg[0]) {
@@ -65,16 +72,20 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	logger(opts.verbosity, INFO, "Listening for client...\n");
-	res = netstream_acceptConnection(&controlStream);
-	if (res != SOCKET_OK) {
-		logger(opts.verbosity, ERROR, "%s\n", getSocketError(res));
-		return 1;
-	}
+	while (!shutdownRequested) {
+		logger(opts.verbosity, INFO, "Listening for client...\n");
+		res = netstream_acceptConnection(&controlStream);
+		if (res != SOCKET_OK) {
+			logger(opts.verbosity, ERROR, "%s\n", getSocketError(res));
+			return 1;
+		}
 
-	logger(opts.verbosity, INFO, "Got connection.\n");
-	connected = 1;
-	netstream_recvLoop(&controlStream, handler, isDisconnected);
+		logger(opts.verbosity, INFO, "Got connection.\n");
+		connected = 1;
+		netstream_recvLoop(&controlStream, handler, isDisconnected);
+
+		logger(opts.verbosity, INFO, "Client disconnected.\n");
+	}
 
 	logger(opts.verbosity, INFO, "Shutting down...\n");
 	return 0;
