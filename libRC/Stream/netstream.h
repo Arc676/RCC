@@ -2,6 +2,8 @@
 #define NETWORK_STREAM_H
 
 #include <stddef.h>
+#include <sys/socket.h>
+
 #define IP_ADDR_BUFLEN 30
 #define MESSAGE_BUFLEN 255
 
@@ -17,6 +19,9 @@ struct NetworkStream {
 	char ipAddress[IP_ADDR_BUFLEN];
 	int port;
 
+	int clientSocket;
+	struct sockaddr clientAddr;
+
 	char msgBuffer[MESSAGE_BUFLEN];
 };
 
@@ -27,11 +32,14 @@ enum SocketStatus {
 	BIND_FAILED,
 	LISTEN_FAILED,
 	CONNECT_FAILED,
+	ACCEPT_FAILED,
 };
 
 const char* getSocketError(enum SocketStatus);
 
 enum SocketStatus netstream_initServer(struct NetworkStream*, int, int);
+
+enum SocketStatus netstream_acceptConnection(struct NetworkStream*);
 
 enum SocketStatus netstream_initClient(struct NetworkStream*, const char*, int,
                                        int);

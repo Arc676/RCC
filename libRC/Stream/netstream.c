@@ -20,6 +20,8 @@ const char* getSocketError(const enum SocketStatus status) {
 			return "Failed to listen on socket";
 		case CONNECT_FAILED:
 			return "Failed to connect to host";
+		case ACCEPT_FAILED:
+			return "Failed to accept connection";
 		default:
 			return "Unknown socket error";
 	}
@@ -31,8 +33,9 @@ int typeForProtocol(const int protocol) {
 
 enum SocketStatus netstream_initServer(struct NetworkStream* const stream,
                                        const int port, const int protocol) {
-	stream->protocol = protocol;
-	stream->port     = port;
+	stream->clientSocket = 0;
+	stream->protocol     = protocol;
+	stream->port         = port;
 
 	const int type = typeForProtocol(protocol);
 	stream->socket = socket(AF_INET, type, protocol);
@@ -58,11 +61,19 @@ enum SocketStatus netstream_initServer(struct NetworkStream* const stream,
 	return SOCKET_OK;
 }
 
+enum SocketStatus netstream_acceptConnection(
+	struct NetworkStream* const stream) {
+	socklen_t len        = sizeof(stream->clientAddr);
+	stream->clientSocket = accept(stream->socket, &stream->clientAddr, &len);
+	return stream->clientSocket < 0 ? ACCEPT_FAILED : SOCKET_OK;
+}
+
 enum SocketStatus netstream_initClient(struct NetworkStream* const stream,
                                        const char* const host, const int port,
                                        const int protocol) {
-	stream->protocol = protocol;
-	stream->port     = port;
+	stream->clientSocket = 0;
+	stream->protocol     = protocol;
+	stream->port         = port;
 	// NOLINTNEXTLINE (strncpy_s not in gcc)
 	strncpy(stream->ipAddress, host, IP_ADDR_BUFLEN);
 
