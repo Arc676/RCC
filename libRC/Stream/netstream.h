@@ -55,6 +55,8 @@ void netstream_recvLoop(struct NetworkStream*, MessageHandler, TerminationFlag);
 
 void netstream_disconnect(struct NetworkStream*);
 
+void netstream_disconnectClient(struct NetworkStream*);
+
 #ifdef __cplusplus
 }
 #endif

@@ -39,6 +39,7 @@ bool Dashboard::menuBar() {
 void Dashboard::disconnect() {
 	netstream_disconnect(&connection);
 	connectionStatus = DISCONNECTED;
+	controlThread.join();
 }
 
 void Dashboard::handleCommand(const byte* msg, size_t len) {

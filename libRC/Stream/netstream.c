@@ -97,7 +97,13 @@ enum SocketStatus netstream_initClient(struct NetworkStream* const stream,
 }
 
 void netstream_disconnect(struct NetworkStream* const stream) {
+	shutdown(stream->socket, SHUT_RDWR);
 	close(stream->socket);
+}
+
+void netstream_disconnectClient(struct NetworkStream* const stream) {
+	shutdown(stream->clientSocket, SHUT_RDWR);
+	close(stream->clientSocket);
 }
 
 size_t netstream_send(struct NetworkStream* const stream,

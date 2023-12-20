@@ -32,6 +32,7 @@ void handler(const byte* msg, size_t len) {
 
 	if (len == 0) {
 		connected = 0;
+		netstream_disconnectClient(&controlStream);
 		return;
 	}
 
