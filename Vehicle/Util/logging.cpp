@@ -3,7 +3,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-void logger(unsigned verbosity, unsigned level, const char* fmt, ...) {
+unsigned Logger::verbosity = 0;
+
+void Logger::log(unsigned level, const char* fmt, ...) {
 	if (verbosity < level) {
 		return;
 	}

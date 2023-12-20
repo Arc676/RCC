@@ -8,9 +8,9 @@
 #include "logging.h"
 
 void CmdlineArgs::dump() const {
-	logger(verbosity, DEBUG,
-	       "Configured parameters:\n\tControl port: %d\n\tVerbosity: %u\n",
-	       controlPort, verbosity);
+	Logger::log(DEBUG,
+	            "Configured parameters:\n\tControl port: %d\n\tVerbosity: %u\n",
+	            controlPort, verbosity);
 }
 
 void CmdlineArgs::printHelp() {

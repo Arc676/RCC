@@ -40,7 +40,7 @@ void Vehicle::handler(const byte* msg, size_t len) {
 	memset(&response, 0, sizeof(struct Response));
 	switch (msg[0]) {
 		case SHUTDOWN:
-			logger(opts.getVerbosity(), INFO, "Client requested shutdown.\n");
+			Logger::log(INFO, "Client requested shutdown.\n");
 			shutdownRequested = true;
 			connected         = false;
 			netstream_disconnectClient(&controlStream);
@@ -54,8 +54,7 @@ void Vehicle::handler(const byte* msg, size_t len) {
 					netstream_send(&controlStream, response.data, response.len);
 				}
 			} else {
-				logger(opts.getVerbosity(), WARN, "Unhandled command: 0x%02X\n",
-				       msg[0]);
+				Logger::log(WARN, "Unhandled command: 0x%02X\n", msg[0]);
 			}
 		}
 	}
@@ -68,17 +67,18 @@ Vehicle::Vehicle(int argc, char* argv[])
 	}
 
 	Vehicle::instance = this;
+	Logger::setVerbosity(opts.getVerbosity());
 
-	logger(opts.getVerbosity(), INFO, "Options parsed.\n");
+	Logger::log(INFO, "Options parsed.\n");
 	opts.dump();
 
-	logger(opts.getVerbosity(), INFO, "Starting server...\n");
+	Logger::log(INFO, "Starting server...\n");
 
 	enum SocketStatus res = netstream_initServer(
 		&controlStream, opts.getControlPort(), IPPROTO_TCP);
 	if (res != SOCKET_OK) {
-		logger(opts.getVerbosity(), ERROR,
-		       "Failed to start server: %s\nExiting.\n", getSocketError(res));
+		Logger::log(ERROR, "Failed to start server: %s\nExiting.\n",
+		            getSocketError(res));
 		startupSuccessful = false;
 		return;
 	}
@@ -86,20 +86,20 @@ Vehicle::Vehicle(int argc, char* argv[])
 
 void Vehicle::run() {
 	while (!shutdownRequested) {
-		logger(opts.getVerbosity(), INFO, "Listening for client...\n");
+		Logger::log(INFO, "Listening for client...\n");
 		enum SocketStatus res = netstream_acceptConnection(&controlStream);
 		if (res != SOCKET_OK) {
-			logger(opts.getVerbosity(), ERROR, "%s\n", getSocketError(res));
+			Logger::log(ERROR, "%s\n", getSocketError(res));
 		}
 
-		logger(opts.getVerbosity(), INFO, "Got connection.\n");
+		Logger::log(INFO, "Got connection.\n");
 		connected = true;
 		netstream_recvLoop(&controlStream, Vehicle::handle, isDisconnected);
 
-		logger(opts.getVerbosity(), INFO, "Client disconnected.\n");
+		Logger::log(INFO, "Client disconnected.\n");
 	}
 
-	logger(opts.getVerbosity(), INFO, "Shutting down...\n");
+	Logger::log(INFO, "Shutting down...\n");
 	netstream_disconnect(&controlStream);
 }
 

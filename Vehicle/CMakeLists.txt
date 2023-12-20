@@ -2,7 +2,7 @@ set(VEHICLE_SRCS
     vehicle.cpp
     Modules/ping.c
     Util/config.cpp
-    Util/logging.c)
+    Util/logging.cpp)
 add_executable(Vehicle ${VEHICLE_SRCS})
 target_include_directories(Vehicle PUBLIC ${SRC_LIBRC})
 message(${SRC_LIBRC})

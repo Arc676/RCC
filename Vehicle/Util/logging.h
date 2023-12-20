@@ -7,14 +7,13 @@
 #define WARN  2
 #define ERROR 1
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+class Logger {
+	static unsigned verbosity;
 
-void logger(unsigned verbosity, unsigned level, const char* fmt, ...);
+public:
+	static void setVerbosity(unsigned level) { verbosity = level; }
 
-#ifdef __cplusplus
-}
-#endif
+	static void log(unsigned, const char* fmt, ...);
+};
 
 #endif
