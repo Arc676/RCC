@@ -9,4 +9,6 @@ typedef unsigned char byte;
 #define PING_ACK     0x02
 #define PING_INVALID 0xF1
 
+#define SHUTDOWN 0xBD
+
 #endif

@@ -39,6 +39,12 @@ void handler(const byte* msg, size_t len) {
 	// NOLINTNEXTLINE (memset_s not in gcc)
 	memset(&response, 0, sizeof(struct Response));
 	switch (msg[0]) {
+		case SHUTDOWN:
+			logger(opts.verbosity, INFO, "Client requested shutdown.\n");
+			shutdownRequested = 1;
+			connected         = 0;
+			netstream_disconnectClient(&controlStream);
+			break;
 		default: {
 			Responder responder = getResponder(msg[0]);
 			if (responder) {
@@ -89,5 +95,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	logger(opts.verbosity, INFO, "Shutting down...\n");
+	netstream_disconnect(&controlStream);
 	return 0;
 }

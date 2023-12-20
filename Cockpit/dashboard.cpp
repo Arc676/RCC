@@ -8,13 +8,14 @@
 
 #include "Stream/netstream.h"
 #include "imgui.h"
+#include "interface.h"
 
 Dashboard* Dashboard::instance = nullptr;
 
 bool Dashboard::menuBar() {
 	ImGui::BeginMainMenuBar();
 
-	if (ImGui::BeginMenu("File")) {
+	if (ImGui::BeginMenu("Cockpit")) {
 		if (connectionStatus == SOCKET_OK) {
 			if (ImGui::MenuItem("Disconnect from vehicle")) {
 				disconnect();
@@ -24,11 +25,19 @@ bool Dashboard::menuBar() {
 				showConnectionWindow = true;
 			}
 		}
+		if (ImGui::MenuItem("Quit")) {
+			return true;
+		}
+		ImGui::EndMenu();
+	}
+	if (connectionStatus == SOCKET_OK && ImGui::BeginMenu("Commands")) {
 		if (ImGui::MenuItem("Show command panel")) {
 			showCommandWindow = true;
 		}
-		if (ImGui::MenuItem("Quit")) {
-			return true;
+		if (ImGui::MenuItem("Shut down vehicle")) {
+			static const byte SHUTDOWN_CMD = SHUTDOWN;
+			netstream_send(&connection, &SHUTDOWN_CMD, 1);
+			disconnect();
 		}
 		ImGui::EndMenu();
 	}
@@ -38,7 +47,8 @@ bool Dashboard::menuBar() {
 
 void Dashboard::disconnect() {
 	netstream_disconnect(&connection);
-	connectionStatus = DISCONNECTED;
+	connectionStatus  = DISCONNECTED;
+	showCommandWindow = false;
 	controlThread.join();
 }
 
