@@ -2,8 +2,14 @@
 
 #include <netinet/in.h>
 
+#include <cstddef>
+#include <cstdio>
+#include <thread>
+
 #include "Stream/netstream.h"
 #include "imgui.h"
+
+Dashboard* Dashboard::instance = nullptr;
 
 bool Dashboard::menuBar() {
 	ImGui::BeginMainMenuBar();
@@ -30,6 +36,14 @@ bool Dashboard::menuBar() {
 	return false;
 }
 
+void Dashboard::handleCommand(const char* msg, size_t len) {
+	for (auto* module : modules) {
+		if (module->canHandleMessage(msg[0])) {
+			module->handleMessage(msg, len);
+		}
+	}
+}
+
 void Dashboard::connectionWindow() {
 	if (ImGui::Begin("Connection", &showConnectionWindow)) {
 		ImGui::InputText("Vehicle IP Address", vehicleIP, IP_ADDR_BUFLEN);
@@ -39,6 +53,10 @@ void Dashboard::connectionWindow() {
 		if (connectionStatus == DISCONNECTED && ImGui::Button("Connect")) {
 			connectionStatus = netstream_initClient(&connection, vehicleIP,
 			                                        vehiclePort, IPPROTO_TCP);
+			if (connectionStatus == SOCKET_OK) {
+				controlThread = std::thread(netstream_recvLoop, &connection,
+				                            Dashboard::handler, &vehiclePort);
+			}
 		} else if (connectionStatus == SOCKET_OK
 		           && ImGui::Button("Disconnect")) {
 			netstream_disconnect(&connection);
@@ -55,9 +73,23 @@ void Dashboard::connectionWindow() {
 
 void Dashboard::commandPanel() {
 	if (ImGui::Begin("Command Panel", &showCommandWindow)) {
-		ping.render();
+		for (auto* module : modules) {
+			module->render();
+		}
 	}
 	ImGui::End();
+}
+
+void Dashboard::commandHandler() {
+	if (showCommandWindow) {
+		commandPanel();
+	}
+	for (auto* module : modules) {
+		if (module->shouldSendCmd()) {
+			auto data = module->getCmdData();
+			netstream_send(&connection, data.first, data.second);
+		}
+	}
 }
 
 bool Dashboard::drawCockpitUI() {
@@ -67,8 +99,6 @@ bool Dashboard::drawCockpitUI() {
 	if (showConnectionWindow) {
 		connectionWindow();
 	}
-	if (showCommandWindow) {
-		commandPanel();
-	}
+	commandHandler();
 	return false;
 }

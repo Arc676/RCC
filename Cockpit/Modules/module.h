@@ -36,7 +36,8 @@ public:
 
 	bool shouldSendCmd() const { return cmdRequested; }
 
-	std::pair<const char*, size_t> getCmdData() const {
+	std::pair<const char*, size_t> getCmdData() {
+		cmdRequested = false;
 		return std::make_pair(cmd, cmdLength);
 	}
 };

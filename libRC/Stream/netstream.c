@@ -2,6 +2,7 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <stddef.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -97,6 +98,28 @@ enum SocketStatus netstream_initClient(struct NetworkStream* const stream,
 
 void netstream_disconnect(struct NetworkStream* const stream) {
 	close(stream->socket);
+}
+
+size_t netstream_send(struct NetworkStream* const stream,
+                      const char* const data, const size_t len) {
+	int socket = stream->clientSocket ? stream->clientSocket : stream->socket;
+
+	// send message via TCP
+	if (stream->protocol == IPPROTO_TCP) {
+		return write(socket, data, len);
+	}
+
+	// send message via UDP
+	size_t sent      = 0;
+	size_t remaining = len;
+	for (const char* ptr = data; remaining;) {
+		size_t toSend = remaining > MAX_UDP_LEN ? MAX_UDP_LEN : remaining;
+		sent += sendto(socket, ptr, toSend, 0, &stream->clientAddr,
+		               sizeof(struct sockaddr));
+		ptr += toSend;
+		remaining -= toSend;
+	}
+	return sent;
 }
 
 void netstream_recvLoop(struct NetworkStream* const stream,

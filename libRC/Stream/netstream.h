@@ -7,6 +7,8 @@
 #define IP_ADDR_BUFLEN 30
 #define MESSAGE_BUFLEN 255
 
+#define MAX_UDP_LEN 65507
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,6 +45,8 @@ enum SocketStatus netstream_acceptConnection(struct NetworkStream*);
 
 enum SocketStatus netstream_initClient(struct NetworkStream*, const char*, int,
                                        int);
+
+size_t netstream_send(struct NetworkStream*, const char*, size_t);
 
 void netstream_recvLoop(struct NetworkStream*, MessageHandler, const int*);
 
