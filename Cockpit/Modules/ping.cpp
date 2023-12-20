@@ -7,13 +7,18 @@
 #include "interface.h"
 
 void PingModule::render() {
-	if (ImGui::Button("Ping Vehicle")) {
-		latency = time(nullptr);
-		requestCmd();
-	}
-	if (response != 0x0) {
-		ImGui::SameLine();
-		ImGui::Text("Response: 0x%02x (%ld ms)", response, latency);
+	if (ImGui::CollapsingHeader("Ping")) {
+		if (ImGui::Button("Ping Vehicle")) {
+			latency  = time(nullptr);
+			response = 0;
+			requestCmd();
+		}
+		if (response != 0x0) {
+			ImGui::Text("Response: 0x%02x (%s)", response, decodeResponse());
+			ImGui::Text("Latency: %ld ms", latency);
+		} else if (latency > 0) {
+			ImGui::Text("Waiting for response from vehicle...");
+		}
 	}
 }
 
