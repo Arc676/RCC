@@ -1,14 +1,15 @@
 #ifndef PING_MODULE_H
 #define PING_MODULE_H
 
+#include <chrono>
 #include <cstddef>
 
 #include "interface.h"
 #include "module.h"
 
 class PingModule : public Module {
-	long latency  = 0;
-	char response = 0;
+	std::chrono::microseconds latency = std::chrono::microseconds(0);
+	unsigned char response            = 0;
 
 	const char* decodeResponse() const;
 

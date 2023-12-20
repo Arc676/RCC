@@ -1,5 +1,6 @@
 #include "ping.h"
 
+#include <chrono>
 #include <cstddef>
 #include <ctime>
 
@@ -9,14 +10,16 @@
 void PingModule::render() {
 	if (ImGui::CollapsingHeader("Ping")) {
 		if (ImGui::Button("Ping Vehicle")) {
-			latency  = time(nullptr);
+			auto now = std::chrono::system_clock::now();
+			latency  = std::chrono::duration_cast<std::chrono::microseconds>(
+                now.time_since_epoch());
 			response = 0;
 			requestCmd();
 		}
 		if (response != 0x0) {
-			ImGui::Text("Response: 0x%02x (%s)", response, decodeResponse());
-			ImGui::Text("Latency: %ld ms", latency);
-		} else if (latency > 0) {
+			ImGui::Text("Response: 0x%02X (%s)", response, decodeResponse());
+			ImGui::Text("Latency: %ld us", latency.count());
+		} else if (latency > std::chrono::microseconds(0)) {
 			ImGui::Text("Waiting for response from vehicle...");
 		}
 	}
@@ -35,7 +38,10 @@ const char* PingModule::decodeResponse() const {
 
 void PingModule::handleMessage(const char* msg, size_t len) {
 	response = msg[0];
-	latency  = time(nullptr) - latency;
+	auto now = std::chrono::system_clock::now();
+	latency  = std::chrono::duration_cast<std::chrono::microseconds>(
+                  now.time_since_epoch())
+	          - latency;
 	if (len != 1) {
 		response = PING_INVALID;
 		return;
