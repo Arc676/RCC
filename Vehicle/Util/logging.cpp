@@ -9,8 +9,6 @@ void Logger::log(unsigned level, const char* fmt, ...) {
 	if (verbosity < level) {
 		return;
 	}
-	va_list args;
-	va_start(args, fmt);
 
 	switch (level) {
 		default:
@@ -27,6 +25,9 @@ void Logger::log(unsigned level, const char* fmt, ...) {
 			printf("[ERR] ");
 			break;
 	}
+
+	va_list args;
+	va_start(args, fmt);
 	vprintf(fmt, args);
 	va_end(args);
 }

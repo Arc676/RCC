@@ -1,5 +1,5 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-*,bugprone-*,clang-analyzer-*,concurrency-*,misc-*,performance-*,porability-*,readability-*,-readability-isolate-declaration,-readability-identifier-length'
+Checks:          'clang-diagnostic-*,clang-analyzer-*,bugprone-*,clang-analyzer-*,concurrency-*,misc-*,performance-*,porability-*,readability-*,-readability-isolate-declaration,-readability-identifier-length,-readability-named-parameter'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
@@ -164,7 +164,6 @@ CheckOptions:
   google-readability-function-size.StatementThreshold: '800'
   llvm-else-after-return.WarnOnConditionVariables: 'false'
   bugprone-sizeof-expression.WarnOnSizeOfCompareToConstant: 'true'
-  misc-throw-by-value-catch-by-reference.MaxSize: '-1'
   bugprone-reserved-identifier.AggressiveDependentMemberLookup: 'false'
   readability-suspicious-call-argument.DiceSimilarAbove: '70'
   readability-suspicious-call-argument.Dice: 'true'

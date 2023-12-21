@@ -1,7 +1,7 @@
 #ifndef VEHICLE_MODULES_H
 #define VEHICLE_MODULES_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "Stream/netstream.h"
 #include "interface.h"

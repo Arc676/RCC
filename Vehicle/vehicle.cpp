@@ -11,8 +11,8 @@
 #include "Util/logging.h"
 #include "interface.h"
 
-Responder* Vehicle::getResponder(const byte cmd) {
-	switch (cmd) {
+Responder* Vehicle::getResponder(const byte opCode) {
+	switch (opCode) {
 		case PING:
 			return &pingReply;
 		default:
@@ -67,7 +67,7 @@ Vehicle::Vehicle(int argc, char* argv[])
 
 	Logger::log(INFO, "Starting server...\n");
 
-	enum SocketStatus res = controlStream.getStatus();
+	const enum SocketStatus res = controlStream.getStatus();
 	if (res != SOCKET_OK) {
 		Logger::log(ERROR, "Failed to start server: %s\nExiting.\n",
 		            getSocketError(res));
@@ -79,7 +79,7 @@ Vehicle::Vehicle(int argc, char* argv[])
 void Vehicle::run() {
 	while (!shutdownRequested) {
 		Logger::log(INFO, "Listening for client...\n");
-		enum SocketStatus res = controlStream.acceptConnection();
+		const enum SocketStatus res = controlStream.acceptConnection();
 		if (res != SOCKET_OK) {
 			Logger::log(ERROR, "%s\n", getSocketError(res));
 		}

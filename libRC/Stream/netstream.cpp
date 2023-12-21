@@ -113,7 +113,7 @@ void NetworkStream::disconnectClient() const {
 }
 
 size_t NetworkStream::send(const byte* const data, const size_t len) const {
-	int socket = clientSock != 0 ? clientSock : sock;
+	const int socket = clientSock != 0 ? clientSock : sock;
 
 	// send message via TCP
 	if (protocol == IPPROTO_TCP) {
@@ -124,7 +124,7 @@ size_t NetworkStream::send(const byte* const data, const size_t len) const {
 	size_t sent      = 0;
 	size_t remaining = len;
 	for (const byte* ptr = data; remaining > 0;) {
-		size_t toSend = remaining > MAX_UDP_LEN ? MAX_UDP_LEN : remaining;
+		const size_t toSend = remaining > MAX_UDP_LEN ? MAX_UDP_LEN : remaining;
 		sent += sendto(socket, ptr, toSend, 0, &clientAddr,
 		               sizeof(struct sockaddr));
 		ptr += toSend;
@@ -134,9 +134,9 @@ size_t NetworkStream::send(const byte* const data, const size_t len) const {
 }
 
 void NetworkStream::recvLoop(MessageHandler* handler) const {
-	int socket = clientSock != 0 ? clientSock : sock;
+	const int socket = clientSock != 0 ? clientSock : sock;
 	while (!handler->shouldTerminate()) {
-		size_t bytes = read(socket, (void*)msgBuffer, MESSAGE_BUFLEN);
+		const size_t bytes = read(socket, (void*)msgBuffer, MESSAGE_BUFLEN);
 		handler->handleMessage(msgBuffer, bytes);
 		// NOLINTNEXTLINE (memset_s not in gcc)
 		memset((void*)msgBuffer, 0, MESSAGE_BUFLEN);

@@ -20,11 +20,26 @@ class Vehicle : public MessageHandler {
 	Ping pingReply;
 
 protected:
-	Responder* getResponder(byte);
+	/**
+	 * @brief Get the responder for a given command
+	 *
+	 * @param opCode Command byte
+	 * @return Pointer to the appropriate responder
+	 */
+	Responder* getResponder(byte opCode);
 
 public:
-	Vehicle(int, char*[]);
+	/**
+	 * @brief Construct a new Vehicle from command line options
+	 *
+	 * @param argc Number of command line arguments
+	 * @param argv Command line arguments
+	 */
+	Vehicle(int argc, char* argv[]);
 
+	/**
+	 * @brief Vehicle server loop
+	 */
 	void run();
 
 	void handleMessage(const byte*, size_t) override;

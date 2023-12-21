@@ -13,8 +13,21 @@
 
 class MessageHandler {
 public:
-	virtual bool shouldTerminate() const            = 0;
-	virtual void handleMessage(const byte*, size_t) = 0;
+	/**
+	 * @brief Indicates that messages should no longer be received on a given
+	 * stream
+	 *
+	 * @return Whether to terminate the message reception loop
+	 */
+	virtual bool shouldTerminate() const = 0;
+
+	/**
+	 * @brief Handle an incoming message from a client
+	 *
+	 * @param msg Incoming message
+	 * @param len Message length
+	 */
+	virtual void handleMessage(const byte* msg, size_t len) = 0;
 };
 
 enum SocketStatus {
