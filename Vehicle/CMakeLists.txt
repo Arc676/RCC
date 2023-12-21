@@ -4,6 +4,6 @@ set(VEHICLE_SRCS
     Util/config.cpp
     Util/logging.cpp)
 add_executable(Vehicle ${VEHICLE_SRCS})
-target_include_directories(Vehicle PUBLIC ${SRC_LIBRC})
+target_include_directories(Vehicle PUBLIC ${SRC_LIBRC} ${LIBCAMERA_INCLUDE_DIRS})
 message(${SRC_LIBRC})
 target_link_libraries(Vehicle PUBLIC RC)
