@@ -9,11 +9,24 @@ class CmdlineArgs {
 	int controlPort = DEFAULT_CONTROL_PORT;
 
 	bool helpRequested = false;
+
+	/**
+	 * @brief Prints a help message to stdout
+	 */
 	static void printHelp();
 
 public:
+	/**
+	 * @brief Dumps the configuration to stdout
+	 */
 	void dump() const;
 
+	/**
+	 * @brief Parse the command line arguments
+	 *
+	 * @param argc Argument count
+	 * @param argv Argument vector
+	 */
 	CmdlineArgs(int argc, char* argv[]);
 
 	unsigned getVerbosity() const { return verbosity; }

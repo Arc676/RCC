@@ -40,7 +40,13 @@ enum SocketStatus {
 	ACCEPT_FAILED,
 };
 
-const char* getSocketError(enum SocketStatus);
+/**
+ * @brief Decode socket status
+ *
+ * @param status Socket status
+ * @return Human-readable description of the socket state
+ */
+const char* getSocketError(enum SocketStatus status);
 
 class NetworkStream {
 	int protocol;
@@ -56,26 +62,69 @@ class NetworkStream {
 	enum SocketStatus status = DISCONNECTED;
 
 public:
-	// server init
-	NetworkStream(int, int);
+	/**
+	 * @brief Initialize a server-side network stream
+	 *
+	 * @param port Port on which to listen for clients
+	 * @param protocol Socket protocol
+	 */
+	NetworkStream(int port, int protocol);
 
-	// client init
-	NetworkStream(const char*, int, int);
+	/**
+	 * @brief Initialize a client-side network stream
+	 *
+	 * @param host Host to which to connect
+	 * @param port Port on which to connect
+	 * @param protocol Socket protocol
+	 */
+	NetworkStream(const char* host, int port, int protocol);
 
 	NetworkStream() = default;
 
+	/**
+	 * @brief Post-construction client-side initialization
+	 */
 	void initClient(const char*, int, int);
 
+	/**
+	 * @brief Get the socket state of the network stream
+	 *
+	 * @return Current socket state
+	 */
 	enum SocketStatus getStatus() const { return status; }
 
+	/**
+	 * @brief Accept a new client connection
+	 *
+	 * @return Whether the client connection was successfully accepted
+	 */
 	enum SocketStatus acceptConnection();
 
-	size_t send(const byte*, size_t) const;
+	/**
+	 * @brief Sends a message to the connected machine
+	 *
+	 * @param msg Message buffer
+	 * @param len Message length
+	 * @return Number of bytes sent
+	 */
+	size_t send(const byte* msg, size_t len) const;
 
-	void recvLoop(MessageHandler*) const;
+	/**
+	 * @brief Message receiving loop
+	 *
+	 * @param handler Message handler for the incoming messages
+	 */
+	void recvLoop(MessageHandler* handler) const;
 
+	/**
+	 * @brief Disconnect from the host (clients) or shut down the server socket
+	 * (servers)
+	 */
 	void disconnect() const;
 
+	/**
+	 * @brief Disconnect the connected client (servers only)
+	 */
 	void disconnectClient() const;
 };
 

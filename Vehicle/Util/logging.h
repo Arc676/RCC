@@ -13,7 +13,15 @@ class Logger {
 public:
 	static void setVerbosity(unsigned level) { verbosity = level; }
 
-	static void log(unsigned, const char* fmt, ...);
+	/**
+	 * @brief Print the given message to console if the verbosity level is
+	 * sufficient
+	 *
+	 * @param level The requisite verbosity level for the message to be printed
+	 * @param fmt Format string for the message to print
+	 * @param ... Additional arguments for the format string
+	 */
+	static void log(unsigned level, const char* fmt, ...);
 };
 
 #endif

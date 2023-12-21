@@ -11,6 +11,11 @@ class PingModule : public Module {
 	std::chrono::microseconds latency = std::chrono::microseconds(0);
 	byte response                     = 0;
 
+	/**
+	 * @brief Decode the last ping response (or an internally set flag)
+	 *
+	 * @return Human-readable representation of the vehicle's ping response
+	 */
 	const char* decodeResponse() const;
 
 public:
