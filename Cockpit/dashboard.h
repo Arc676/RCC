@@ -11,13 +11,10 @@
 #include "Stream/netstream.h"
 #include "interface.h"
 
-class Dashboard {
-	// singleton instance
-	static Dashboard* instance;
-
+class Dashboard : public MessageHandler {
 	// connection state
 	enum SocketStatus connectionStatus = DISCONNECTED;
-	struct NetworkStream connection;
+	NetworkStream connection;
 	char vehicleIP[IP_ADDR_BUFLEN] = {0};
 	int vehiclePort                = DEFAULT_CONTROL_PORT;
 	std::thread controlThread;
@@ -40,21 +37,13 @@ protected:
 
 	void disconnect();
 
-	void handleCommand(const byte*, size_t);
-
 public:
-	Dashboard() { Dashboard::instance = this; }
-
 	bool drawCockpitUI();
 
-	static Dashboard* getInstance() { return instance; }
+	void handleMessage(const byte*, size_t) override;
 
-	static void handler(const byte* msg, size_t len) {
-		getInstance()->handleCommand(msg, len);
-	}
-
-	static int isDisconnected() {
-		return (int)(getInstance()->connectionStatus != SOCKET_OK);
+	bool shouldTerminate() const override {
+		return connectionStatus != SOCKET_OK;
 	}
 };
 

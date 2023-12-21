@@ -10,8 +10,6 @@
 #include "imgui.h"
 #include "interface.h"
 
-Dashboard* Dashboard::instance = nullptr;
-
 bool Dashboard::menuBar() {
 	ImGui::BeginMainMenuBar();
 
@@ -36,7 +34,7 @@ bool Dashboard::menuBar() {
 		}
 		if (ImGui::MenuItem("Shut down vehicle")) {
 			static const byte SHUTDOWN_CMD = SHUTDOWN;
-			netstream_send(&connection, &SHUTDOWN_CMD, 1);
+			connection.send(&SHUTDOWN_CMD, 1);
 			disconnect();
 		}
 		ImGui::EndMenu();
@@ -46,13 +44,13 @@ bool Dashboard::menuBar() {
 }
 
 void Dashboard::disconnect() {
-	netstream_disconnect(&connection);
+	connection.disconnect();
 	connectionStatus  = DISCONNECTED;
 	showCommandWindow = false;
 	controlThread.join();
 }
 
-void Dashboard::handleCommand(const byte* msg, size_t len) {
+void Dashboard::handleMessage(const byte* msg, size_t len) {
 	for (auto* module : modules) {
 		if (module->canHandleMessage(msg[0])) {
 			module->handleMessage(msg, len);
@@ -67,12 +65,11 @@ void Dashboard::connectionWindow() {
 		ImGui::Text("Status: %s", getSocketError(connectionStatus));
 
 		if (connectionStatus == DISCONNECTED && ImGui::Button("Connect")) {
-			connectionStatus = netstream_initClient(&connection, vehicleIP,
-			                                        vehiclePort, IPPROTO_TCP);
+			connection.initClient(vehicleIP, vehiclePort, IPPROTO_TCP);
+			connectionStatus = connection.getStatus();
 			if (connectionStatus == SOCKET_OK) {
 				controlThread =
-					std::thread(netstream_recvLoop, &connection,
-				                Dashboard::handler, Dashboard::isDisconnected);
+					std::thread(&NetworkStream::recvLoop, &connection, this);
 			}
 		} else if (connectionStatus == SOCKET_OK
 		           && ImGui::Button("Disconnect")) {
@@ -103,7 +100,7 @@ void Dashboard::commandHandler() {
 	for (auto* module : modules) {
 		if (module->shouldSendCmd()) {
 			auto data = module->getCmdData();
-			netstream_send(&connection, data.first, data.second);
+			connection.send(data.first, data.second);
 		}
 	}
 }

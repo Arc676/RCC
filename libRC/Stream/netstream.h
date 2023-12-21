@@ -11,23 +11,10 @@
 
 #define MAX_UDP_LEN 65507
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef void (*MessageHandler)(const byte*, size_t);
-typedef int (*TerminationFlag)();
-
-struct NetworkStream {
-	int protocol;
-	int socket;
-	char ipAddress[IP_ADDR_BUFLEN];
-	int port;
-
-	int clientSocket;
-	struct sockaddr clientAddr;
-
-	byte msgBuffer[MESSAGE_BUFLEN];
+class MessageHandler {
+public:
+	virtual bool shouldTerminate() const            = 0;
+	virtual void handleMessage(const byte*, size_t) = 0;
 };
 
 enum SocketStatus {
@@ -42,23 +29,41 @@ enum SocketStatus {
 
 const char* getSocketError(enum SocketStatus);
 
-enum SocketStatus netstream_initServer(struct NetworkStream*, int, int);
+class NetworkStream {
+	int protocol;
+	int sock;
+	char ipAddress[IP_ADDR_BUFLEN];
+	int port;
 
-enum SocketStatus netstream_acceptConnection(struct NetworkStream*);
+	int clientSock;
+	struct sockaddr clientAddr;
 
-enum SocketStatus netstream_initClient(struct NetworkStream*, const char*, int,
-                                       int);
+	byte msgBuffer[MESSAGE_BUFLEN];
 
-size_t netstream_send(struct NetworkStream*, const byte*, size_t);
+	enum SocketStatus status = DISCONNECTED;
 
-void netstream_recvLoop(struct NetworkStream*, MessageHandler, TerminationFlag);
+public:
+	// server init
+	NetworkStream(int, int);
 
-void netstream_disconnect(struct NetworkStream*);
+	// client init
+	NetworkStream(const char*, int, int);
 
-void netstream_disconnectClient(struct NetworkStream*);
+	NetworkStream() = default;
 
-#ifdef __cplusplus
-}
-#endif
+	void initClient(const char*, int, int);
+
+	enum SocketStatus getStatus() const { return status; }
+
+	enum SocketStatus acceptConnection();
+
+	size_t send(const byte*, size_t) const;
+
+	void recvLoop(MessageHandler*) const;
+
+	void disconnect() const;
+
+	void disconnectClient() const;
+};
 
 #endif

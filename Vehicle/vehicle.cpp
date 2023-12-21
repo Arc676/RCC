@@ -11,13 +11,6 @@
 #include "Util/logging.h"
 #include "interface.h"
 
-Vehicle* Vehicle::instance = nullptr;
-
-bool connected = false;
-int isDisconnected() {
-	return !connected;
-}
-
 Responder getResponder(const byte cmd) {
 	switch (cmd) {
 		case PING:
@@ -27,12 +20,12 @@ Responder getResponder(const byte cmd) {
 	}
 }
 
-void Vehicle::handler(const byte* msg, size_t len) {
+void Vehicle::handleMessage(const byte* msg, size_t len) {
 	static struct Response response;
 
 	if (len == 0) {
 		connected = false;
-		netstream_disconnectClient(&controlStream);
+		controlStream.disconnectClient();
 		return;
 	}
 
@@ -43,7 +36,7 @@ void Vehicle::handler(const byte* msg, size_t len) {
 			Logger::log(INFO, "Client requested shutdown.\n");
 			shutdownRequested = true;
 			connected         = false;
-			netstream_disconnectClient(&controlStream);
+			controlStream.disconnectClient();
 			break;
 		default: {
 			Responder responder = getResponder(msg[0]);
@@ -51,7 +44,7 @@ void Vehicle::handler(const byte* msg, size_t len) {
 				responder(msg, len, &response);
 
 				if (response.len > 0) {
-					netstream_send(&controlStream, response.data, response.len);
+					controlStream.send(response.data, response.len);
 				}
 			} else {
 				Logger::log(WARN, "Unhandled command: 0x%02X\n", msg[0]);
@@ -61,12 +54,12 @@ void Vehicle::handler(const byte* msg, size_t len) {
 }
 
 Vehicle::Vehicle(int argc, char* argv[])
-	: opts(argc, argv) {
+	: opts(argc, argv)
+	, controlStream(opts.getControlPort(), IPPROTO_TCP) {
 	if (opts.helpWasRequested()) {
 		return;
 	}
 
-	Vehicle::instance = this;
 	Logger::setVerbosity(opts.getVerbosity());
 
 	Logger::log(INFO, "Options parsed.\n");
@@ -74,8 +67,7 @@ Vehicle::Vehicle(int argc, char* argv[])
 
 	Logger::log(INFO, "Starting server...\n");
 
-	enum SocketStatus res = netstream_initServer(
-		&controlStream, opts.getControlPort(), IPPROTO_TCP);
+	enum SocketStatus res = controlStream.getStatus();
 	if (res != SOCKET_OK) {
 		Logger::log(ERROR, "Failed to start server: %s\nExiting.\n",
 		            getSocketError(res));
@@ -87,20 +79,20 @@ Vehicle::Vehicle(int argc, char* argv[])
 void Vehicle::run() {
 	while (!shutdownRequested) {
 		Logger::log(INFO, "Listening for client...\n");
-		enum SocketStatus res = netstream_acceptConnection(&controlStream);
+		enum SocketStatus res = controlStream.acceptConnection();
 		if (res != SOCKET_OK) {
 			Logger::log(ERROR, "%s\n", getSocketError(res));
 		}
 
 		Logger::log(INFO, "Got connection.\n");
 		connected = true;
-		netstream_recvLoop(&controlStream, Vehicle::handle, isDisconnected);
+		controlStream.recvLoop(this);
 
 		Logger::log(INFO, "Client disconnected.\n");
 	}
 
 	Logger::log(INFO, "Shutting down...\n");
-	netstream_disconnect(&controlStream);
+	controlStream.disconnect();
 }
 
 int main(int argc, char* argv[]) {

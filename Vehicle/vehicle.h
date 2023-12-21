@@ -6,26 +6,22 @@
 #include "Stream/netstream.h"
 #include "Util/config.h"
 
-class Vehicle {
+class Vehicle : public MessageHandler {
 	CmdlineArgs opts;
-	struct NetworkStream controlStream;
+	NetworkStream controlStream;
 	bool connected         = false;
 	bool shutdownRequested = false;
 
 	bool startupSuccessful = true;
 
-	static Vehicle* instance;
-
-	void handler(const byte*, size_t);
-
 public:
 	Vehicle(int, char*[]);
 
-	static void handle(const byte* msg, size_t len) {
-		instance->handler(msg, len);
-	}
-
 	void run();
+
+	void handleMessage(const byte*, size_t) override;
+
+	bool shouldTerminate() const override { return !connected; };
 
 	operator bool() const { return startupSuccessful; }
 };
