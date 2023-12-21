@@ -45,7 +45,7 @@ CheckOptions:
   bugprone-narrowing-conversions.WarnOnIntegerToFloatingPointNarrowingConversion: 'true'
   bugprone-easily-swappable-parameters.SuppressParametersUsedTogether: 'true'
   bugprone-argument-comment.StrictMode: '0'
-  misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: 'false'
+  misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic: 'true'
   readability-avoid-const-params-in-decls.IgnoreMacros: 'true'
   bugprone-easily-swappable-parameters.NamePrefixSuffixSilenceDissimilarityTreshold: '1'
   bugprone-unhandled-self-assignment.WarnOnlyIfThisHasSuspiciousField: 'true'

@@ -16,6 +16,9 @@ Responder* Vehicle::getResponder(const byte opCode) {
 		case PING:
 			return &pingReply;
 		default:
+			if ((opCode & CAMERA_FLAG) != 0) {
+				return &camHandler;
+			}
 			return nullptr;
 	}
 }
@@ -29,8 +32,6 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 		return;
 	}
 
-	// NOLINTNEXTLINE (memset_s not in gcc)
-	memset(&response, 0, sizeof(struct Response));
 	switch (msg[0]) {
 		case SHUTDOWN:
 			Logger::log(INFO, "Client requested shutdown.\n");
@@ -39,6 +40,9 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 			controlStream.disconnectClient();
 			break;
 		default: {
+			// NOLINTNEXTLINE (memset_s not in gcc)
+			memset(&response, 0, sizeof(struct Response));
+
 			Responder* responder = getResponder(msg[0]);
 			if (responder != nullptr) {
 				responder->respond(msg, len, response);

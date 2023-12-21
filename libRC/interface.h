@@ -19,6 +19,7 @@ typedef unsigned char byte;
 
 // Camera commands
 #define CAM_QUERY      0x41
+#define CAM_STATE      0x4C
 #define CAM_ACTIVATE   0x4A
 #define CAM_DEACTIVATE 0x4D
 

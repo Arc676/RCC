@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 
+#include "Modules/camera.h"
 #include "Modules/modules.h"
 #include "Modules/ping.h"
 #include "Stream/netstream.h"
@@ -18,6 +19,7 @@ class Vehicle : public MessageHandler {
 	bool startupSuccessful = true;
 
 	Ping pingReply;
+	Camera camHandler;
 
 protected:
 	/**

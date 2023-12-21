@@ -1,4 +1,5 @@
 set(COCKPIT_SRCS
+    Modules/camera.cpp
     Modules/ping.cpp
     dashboard.cpp
     cockpit.cpp)
