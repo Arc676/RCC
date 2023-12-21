@@ -11,12 +11,12 @@
 #include "Util/logging.h"
 #include "interface.h"
 
-Responder getResponder(const byte cmd) {
+Responder* Vehicle::getResponder(const byte cmd) {
 	switch (cmd) {
 		case PING:
-			return replyPing;
+			return &pingReply;
 		default:
-			return NULL;
+			return nullptr;
 	}
 }
 
@@ -39,9 +39,9 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 			controlStream.disconnectClient();
 			break;
 		default: {
-			Responder responder = getResponder(msg[0]);
-			if (responder) {
-				responder(msg, len, &response);
+			Responder* responder = getResponder(msg[0]);
+			if (responder != nullptr) {
+				responder->respond(msg, len, response);
 
 				if (response.len > 0) {
 					controlStream.send(response.data, response.len);

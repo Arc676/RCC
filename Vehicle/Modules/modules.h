@@ -11,6 +11,9 @@ struct Response {
 	size_t len;
 };
 
-typedef void (*Responder)(const byte*, size_t, struct Response*);
+class Responder {
+public:
+	virtual void respond(const byte*, size_t, struct Response&) = 0;
+};
 
 #endif

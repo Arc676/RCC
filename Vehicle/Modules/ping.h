@@ -1,18 +1,13 @@
 #ifndef PING_MODULE_H
 #define PING_MODULE_H
 
-#include <stddef.h>
+#include <cstddef>
 
 #include "modules.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void replyPing(const byte*, size_t, struct Response*);
-
-#ifdef __cplusplus
-}
-#endif
+class Ping : public Responder {
+public:
+	void respond(const byte*, size_t, struct Response&) override;
+};
 
 #endif

@@ -1,8 +1,11 @@
 #ifndef VEHICLE_H
 #define VEHICLE_H
 
+#include <array>
 #include <cstddef>
 
+#include "Modules/modules.h"
+#include "Modules/ping.h"
 #include "Stream/netstream.h"
 #include "Util/config.h"
 
@@ -13,6 +16,11 @@ class Vehicle : public MessageHandler {
 	bool shutdownRequested = false;
 
 	bool startupSuccessful = true;
+
+	Ping pingReply;
+
+protected:
+	Responder* getResponder(byte);
 
 public:
 	Vehicle(int, char*[]);

@@ -4,7 +4,7 @@ project(
     RCC
     VERSION 1.0.0
     HOMEPAGE_URL https://github.com/Arc676/RCC
-    LANGUAGES C CXX
+    LANGUAGES CXX
 )
 
 set(CMAKE_CXX_STANDARD 20)
