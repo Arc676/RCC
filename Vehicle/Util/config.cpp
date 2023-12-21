@@ -51,6 +51,8 @@ CmdlineArgs::CmdlineArgs(int argc, char** argv) {
 			case 'V':
 				if (optarg != nullptr) {
 					verbosity = atoi(optarg);
+					// If no verbosity level was provided, fall though to normal
+					// short form flag
 					break;
 				}
 			case 'v':

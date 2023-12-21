@@ -49,6 +49,7 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 			} else {
 				Logger::log(WARN, "Unhandled command: 0x%02X\n", msg[0]);
 			}
+			break;
 		}
 	}
 }
