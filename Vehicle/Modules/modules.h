@@ -26,6 +26,8 @@ public:
 	 */
 	virtual void respond(const byte* msg, size_t len,
 	                     struct Response& response) = 0;
+
+	virtual const char* name() const = 0;
 };
 
 #endif

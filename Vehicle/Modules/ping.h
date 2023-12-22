@@ -7,6 +7,8 @@
 
 class Ping : public Responder {
 public:
+	const char* name() const override { return "Ping"; }
+
 	void respond(const byte*, size_t, struct Response&) override;
 };
 

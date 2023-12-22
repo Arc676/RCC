@@ -43,6 +43,10 @@ void CameraModule::renderController() {
 			setCmd(CAM_QUERY);
 			requestCmd();
 		}
+		if (state.deserializedSize > 0) {
+			ImGui::Text("Received %zu data bytes from last query",
+			            state.deserializedSize);
+		}
 	}
 }
 

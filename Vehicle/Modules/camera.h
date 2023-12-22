@@ -21,6 +21,8 @@ public:
 
 	~Camera();
 
+	const char* name() const override { return "Camera"; }
+
 	void respond(const byte*, size_t, struct Response&) override;
 };
 

@@ -48,6 +48,10 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 				responder->respond(msg, len, response);
 
 				if (response.len > 0) {
+					Logger::log(DEBUG,
+					            "\"%s\" responder prepared %zu bytes for reply "
+					            "to command 0x%02X\n",
+					            responder->name(), response.len, msg[0]);
 					controlStream.send(response.data, response.len);
 				}
 			} else {
