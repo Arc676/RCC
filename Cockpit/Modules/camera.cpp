@@ -12,26 +12,30 @@ void CameraModule::render() {
 	}
 }
 
+void CameraModule::cameraSelect() {
+	if (ImGui::BeginCombo("Selected camera",
+	                      state.cameras[state.selectedCam].c_str())) {
+		for (int i = 0; i < state.cameras.size(); i++) {
+			const bool selected = state.selectedCam == i;
+			if (ImGui::Selectable(state.cameras[i].c_str(), selected)) {
+				state.selectedCam = i;
+				viewfinderTitle   = "Camera: " + state.cameras[i];
+			}
+
+			if (selected) {
+				ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndCombo();
+	}
+}
+
 void CameraModule::renderController() {
 	if (ImGui::CollapsingHeader("Camera")) {
 		if (state.cameras.empty()) {
 			ImGui::Text("No cameras available");
 		} else {
-			if (ImGui::BeginCombo("Selected camera",
-			                      state.cameras[state.selectedCam].c_str())) {
-				for (int i = 0; i < state.cameras.size(); i++) {
-					const bool selected = state.selectedCam == i;
-					if (ImGui::Selectable(state.cameras[i].c_str(), selected)) {
-						state.selectedCam = i;
-						viewfinderTitle   = "Camera: " + state.cameras[i];
-					}
-
-					if (selected) {
-						ImGui::SetItemDefaultFocus();
-					}
-				}
-				ImGui::EndCombo();
-			}
+			cameraSelect();
 		}
 
 		ImGui::Text("Camera state: %s", state.enabled ? "enabled" : "disabled");

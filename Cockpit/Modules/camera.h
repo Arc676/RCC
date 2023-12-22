@@ -12,6 +12,8 @@ class CameraModule : public Module {
 	std::string viewfinderTitle;
 
 protected:
+	void cameraSelect();
+
 	void renderController();
 
 	void renderViewfinder();
