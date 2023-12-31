@@ -21,7 +21,11 @@ class Camera : public Responder {
 
 	enum CameraState::CameraResult activateCamera();
 
+	enum CameraState::CameraResult configureCamera();
+
 	void deactivateCamera();
+
+	static void writeResult(enum CameraState::CameraResult, struct Response&);
 
 public:
 	Camera();

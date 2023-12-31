@@ -32,17 +32,31 @@ enum CameraState::CameraResult Camera::activateCamera() {
 	if (camera->acquire() != 0) {
 		return CameraState::ACQUIRE_FAILED;
 	}
+	return configureCamera();
+}
+
+enum CameraState::CameraResult Camera::configureCamera() {
 	auto res = camState.configureCamera(camera);
-	if (res != CameraState::CAMERA_OK) {
+	if (res == CameraState::BAD_CONFIG) {
 		return res;
 	}
 	// TODO: allocate frame buffers and set up video output
-	return CameraState::CAMERA_OK;
+	return res;
 }
 
 void Camera::deactivateCamera() {
 	if (camera) {
+		camera->stop();
 		camera->release();
+	}
+}
+
+void Camera::writeResult(const enum CameraState::CameraResult res,
+                         struct Response& response) {
+	if (res == CameraState::CAMERA_OK) {
+		response << CAM_OK;
+	} else {
+		response << CAM_ERROR << res;
 	}
 }
 
@@ -57,15 +71,12 @@ void Camera::respond(const byte* const msg, const size_t len,
 			deactivateCamera();
 			response << CAM_OK;
 			break;
-		case CAM_ACTIVATE: {
-			auto res = activateCamera();
-			if (res == CameraState::CAMERA_OK) {
-				response << CAM_OK;
-			} else {
-				response << CAM_ERROR << res;
-			}
+		case CAM_ACTIVATE:
+			writeResult(activateCamera(), response);
 			break;
-		}
+		case CAM_CONFIGURE:
+			writeResult(configureCamera(), response);
+			break;
 		default:
 			Logger::log(
 				ERROR,
