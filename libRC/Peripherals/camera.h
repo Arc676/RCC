@@ -26,10 +26,10 @@ public:
 	using SharedCamera = std::shared_ptr<libcamera::Camera>;
 
 	struct RoleSelect {
-		bool raw;
-		bool stills;
-		bool video = true;
-		bool viewfinder;
+		bool raw        = false;
+		bool stills     = false;
+		bool video      = true;
+		bool viewfinder = false;
 	};
 
 private:
