@@ -8,6 +8,7 @@
 
 #include "interface.h"
 #include "libcamera/camera.h"
+#include "libcamera/stream.h"
 
 class CameraState {
 	bool enabled = false;
@@ -24,6 +25,19 @@ class CameraState {
 public:
 	using SharedCamera = std::shared_ptr<libcamera::Camera>;
 
+	struct RoleSelect {
+		bool raw;
+		bool stills;
+		bool video = true;
+		bool viewfinder;
+	};
+
+private:
+	RoleSelect selectedRoles;
+
+	std::vector<libcamera::StreamRole> getRoleVec() const;
+
+public:
 	struct __attribute__((packed)) Metadata {
 		byte enabled;
 		unsigned selectedCam;
@@ -54,6 +68,8 @@ public:
 	bool selectCamera(unsigned);
 
 	enum CameraResult configureCamera(const SharedCamera&);
+
+	RoleSelect& getRoles() { return selectedRoles; }
 
 	size_t serialize(byte*) const;
 

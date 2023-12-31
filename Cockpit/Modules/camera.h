@@ -14,6 +14,8 @@ class CameraModule : public Module {
 protected:
 	void cameraSelect();
 
+	void roleSelect();
+
 	void renderController();
 
 	void renderViewfinder();

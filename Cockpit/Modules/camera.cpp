@@ -31,12 +31,23 @@ void CameraModule::cameraSelect() {
 	}
 }
 
+void CameraModule::roleSelect() {
+	ImGui::Checkbox("Raw", &state.getRoles().raw);
+	ImGui::SameLine();
+	ImGui::Checkbox("Stills", &state.getRoles().stills);
+	ImGui::SameLine();
+	ImGui::Checkbox("Video", &state.getRoles().video);
+	ImGui::SameLine();
+	ImGui::Checkbox("Viewfinder", &state.getRoles().viewfinder);
+}
+
 void CameraModule::renderController() {
 	if (ImGui::CollapsingHeader("Camera")) {
 		if (state.getCameraNames().empty()) {
 			ImGui::Text("No cameras available");
 		} else {
 			cameraSelect();
+			roleSelect();
 		}
 
 		ImGui::Text("Camera state: %s",

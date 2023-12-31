@@ -70,6 +70,7 @@ void Dashboard::connectionWindow() {
 			if (connectionStatus == SOCKET_OK) {
 				controlThread =
 					std::thread(&NetworkStream::recvLoop, &connection, this);
+				showCommandWindow = true;
 			}
 		} else if (connectionStatus == SOCKET_OK
 		           && ImGui::Button("Disconnect")) {
