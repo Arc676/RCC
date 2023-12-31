@@ -37,6 +37,8 @@ public:
 		BAD_CONFIG,
 		CONFIG_CHANGED,
 		BUFFER_ALLOC_FAILED,
+		STOP_FAILED,
+		RELEASE_FAILED,
 	};
 
 	void loadCameraNames(const std::vector<SharedCamera>&);

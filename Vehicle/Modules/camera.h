@@ -12,6 +12,7 @@
 
 class Camera : public Responder {
 	using SharedCamera = CameraState::SharedCamera;
+	using CameraResult = enum CameraState::CameraResult;
 
 	CameraState camState;
 	std::unique_ptr<libcamera::CameraManager> camMgr;
@@ -19,13 +20,13 @@ class Camera : public Responder {
 
 	void queryState();
 
-	enum CameraState::CameraResult activateCamera();
+	CameraResult activateCamera();
 
-	enum CameraState::CameraResult configureCamera();
+	CameraResult configureCamera();
 
-	void deactivateCamera();
+	CameraResult deactivateCamera(int&, int&);
 
-	static void writeResult(enum CameraState::CameraResult, struct Response&);
+	static void writeResult(CameraResult, struct Response&);
 
 public:
 	Camera();

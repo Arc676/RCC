@@ -26,12 +26,15 @@ void Camera::queryState() {
 
 enum CameraState::CameraResult Camera::activateCamera() {
 	if (camState.getSelected() >= camMgr->cameras().size()) {
+		Logger::log(ERROR, "Tried to get camera at invalid index %d\n",
+		            camState.getSelected());
 		return CameraState::BAD_CAMERA;
 	}
 	camera = camMgr->cameras()[camState.getSelected()];
 	if (camera->acquire() != 0) {
 		return CameraState::ACQUIRE_FAILED;
 	}
+	Logger::log(DEBUG, "Acquired camera\n");
 	return configureCamera();
 }
 
@@ -44,15 +47,23 @@ enum CameraState::CameraResult Camera::configureCamera() {
 	return res;
 }
 
-void Camera::deactivateCamera() {
+enum CameraState::CameraResult Camera::deactivateCamera(int& stop,
+                                                        int& release) {
 	if (camera) {
-		camera->stop();
-		camera->release();
+		stop = camera->stop();
+		if (stop != 0) {
+			return CameraState::STOP_FAILED;
+		}
+		release = camera->release();
+		if (release != 0) {
+			return CameraState::RELEASE_FAILED;
+		}
+		return CameraState::CAMERA_OK;
 	}
+	return CameraState::BAD_CAMERA;
 }
 
-void Camera::writeResult(const enum CameraState::CameraResult res,
-                         struct Response& response) {
+void Camera::writeResult(const CameraResult res, struct Response& response) {
 	if (res == CameraState::CAMERA_OK) {
 		response << CAM_OK;
 	} else {
@@ -67,10 +78,33 @@ void Camera::respond(const byte* const msg, const size_t len,
 		case CAM_QUERY:
 			response << CAM_STATE << camState;
 			break;
-		case CAM_DEACTIVATE:
-			deactivateCamera();
-			response << CAM_OK;
+		case CAM_DEACTIVATE: {
+			int stop = 0, release = 0;
+			auto res = deactivateCamera(stop, release);
+			if (res == CameraState::CAMERA_OK) {
+				response << CAM_OK;
+			} else {
+				if (stop == -ENODEV) {
+					Logger::log(
+						ERROR,
+						"Failed to stop camera: device disconnected (%d)\n",
+						stop);
+				} else if (stop == -EACCES) {
+					Logger::log(ERROR,
+					            "Failed to stop camera: camera cannot be "
+					            "stopped (%d)\n",
+					            stop);
+				}
+				if (stop == -EBUSY) {
+					Logger::log(
+						ERROR,
+						"Failed to release camera: device is running (%d)\n",
+						release);
+				}
+				response << CAM_ERROR << res;
+			}
 			break;
+		}
 		case CAM_ACTIVATE:
 			writeResult(activateCamera(), response);
 			break;
