@@ -43,22 +43,26 @@ void CameraModule::roleSelect() {
 
 void CameraModule::renderController() {
 	if (ImGui::CollapsingHeader("Camera")) {
-		if (state.getCameraNames().empty()) {
+		const auto size = state.getDeserializedSize();
+		if (size == 0) {
+			ImGui::Text("No camera data");
+		} else if (state.getCameraNames().empty()) {
 			ImGui::Text("No cameras available");
 		} else {
+			ImGui::Text("Camera state: %s",
+			            state.cameraIsEnabled() ? "enabled" : "disabled");
+
 			cameraSelect();
 			roleSelect();
 		}
 
-		ImGui::Text("Camera state: %s",
-		            state.cameraIsEnabled() ? "enabled" : "disabled");
 		if (ImGui::Button("Refresh camera information")) {
 			setCmd(CAM_QUERY);
 			requestCmd();
 		}
-		const auto size = state.getDeserializedSize();
 		if (size > 0) {
-			ImGui::Text("Received %zu data bytes from last query", size);
+			ImGui::Text("Received %zu bytes of camera data with last query",
+			            size);
 		}
 	}
 }
