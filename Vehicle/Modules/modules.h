@@ -12,6 +12,11 @@
 struct Response {
 	byte data[MESSAGE_BUFLEN];
 	size_t len;
+
+	void setOneByte(const byte response) {
+		data[0] = response;
+		len     = 1;
+	}
 };
 
 class Responder {

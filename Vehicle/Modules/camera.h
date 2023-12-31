@@ -11,10 +11,17 @@
 #include "modules.h"
 
 class Camera : public Responder {
+	using SharedCamera = CameraState::SharedCamera;
+
 	CameraState camState;
 	std::unique_ptr<libcamera::CameraManager> camMgr;
+	SharedCamera camera = nullptr;
 
 	void queryState();
+
+	enum CameraState::CameraResult activateCamera();
+
+	void deactivateCamera();
 
 public:
 	Camera();

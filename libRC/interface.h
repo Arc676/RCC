@@ -17,8 +17,9 @@ constexpr byte CAMERA_CMD        = 0x40;
 constexpr byte SHUTDOWN = CORE_CMD | 0x0D;
 
 // Ping commands
-constexpr byte PING         = MISC_CMD | 0x01;
-constexpr byte PING_ACK     = MISC_CMD | 0x02;
+constexpr byte PING     = MISC_CMD | 0x01;
+constexpr byte PING_ACK = MISC_CMD | 0x02;
+
 constexpr byte PING_INVALID = ERROR_BIT | PING;
 
 // Camera commands
@@ -26,5 +27,8 @@ constexpr byte CAM_QUERY      = CAMERA_CMD | 0x01;
 constexpr byte CAM_STATE      = CAMERA_CMD | 0x02;
 constexpr byte CAM_ACTIVATE   = CAMERA_CMD | 0x03;
 constexpr byte CAM_DEACTIVATE = CAMERA_CMD | 0x04;
+
+constexpr byte CAM_OK    = CAMERA_CMD | 0x01;
+constexpr byte CAM_ERROR = ERROR_BIT | CAMERA_CMD | 0x07;
 
 #endif
