@@ -47,12 +47,13 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 			if (responder != nullptr) {
 				responder->respond(msg, len, response);
 
-				if (response.len > 0) {
+				size_t len = response.getSize();
+				if (len > 0) {
 					Logger::log(DEBUG,
 					            "\"%s\" responder prepared %zu bytes for reply "
 					            "to command 0x%02X\n",
-					            responder->name(), response.len, msg[0]);
-					controlStream.send(response.data, response.len);
+					            responder->name(), len, msg[0]);
+					controlStream.send(response.getBuffer(), len);
 				}
 			} else {
 				Logger::log(WARN, "Unhandled command: 0x%02X\n", msg[0]);

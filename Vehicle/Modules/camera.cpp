@@ -50,25 +50,19 @@ void Camera::deactivateCamera() {
 void Camera::respond(const byte* const msg, const size_t len,
                      struct Response& response) {
 	switch (msg[0]) {
-		case CAM_QUERY: {
-			response.data[0]     = CAM_STATE;
-			const size_t written = camState.serialize(response.data + 1);
-			response.len         = 1 + written;
+		case CAM_QUERY:
+			response << CAM_STATE << camState;
 			break;
-		}
 		case CAM_DEACTIVATE:
 			deactivateCamera();
-			response.setOneByte(CAM_OK);
+			response << CAM_OK;
 			break;
 		case CAM_ACTIVATE: {
 			auto res = activateCamera();
 			if (res == CameraState::CAMERA_OK) {
-				response.setOneByte(CAM_OK);
+				response << CAM_OK;
 			} else {
-				response.data[0] = CAM_ERROR;
-				memcpy(response.data + 1, &res,
-				       sizeof(enum CameraState::CameraResult));
-				response.len = 1 + sizeof(enum CameraState::CameraResult);
+				response << CAM_ERROR << res;
 			}
 			break;
 		}
