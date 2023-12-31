@@ -65,9 +65,11 @@ enum CameraState::CameraResult CameraState::configureCamera(
 size_t CameraState::serialize(byte* buf) const {
 	size_t written = 0;
 
-	Metadata meta{(byte)enabled, selectedCam, cameras.size()};
-	memcpy((void*)buf, &meta, sizeof(Metadata));
-	written += sizeof(Metadata);
+	struct Metadata meta {
+		(byte) enabled, selectedCam, cameras.size()
+	};
+	memcpy((void*)buf, &meta, sizeof(struct Metadata));
+	written += sizeof(struct Metadata);
 
 	for (const auto& cam : cameras) {
 		size_t len = cam.length();
@@ -94,11 +96,11 @@ size_t CameraState::serialize(byte* buf) const {
 }
 
 void CameraState::deserialize(const byte* buf, const size_t len) {
-	Metadata meta;
-	memcpy(&meta, (void*)buf, sizeof(Metadata));
+	struct Metadata meta;
+	memcpy(&meta, (void*)buf, sizeof(struct Metadata));
 	enabled     = (meta.enabled != 0U);
 	selectedCam = meta.selectedCam;
-	size_t pos  = sizeof(Metadata);
+	size_t pos  = sizeof(struct Metadata);
 
 	prepareCameraList(meta.camCount);
 	for (int i = 0; i < meta.camCount; i++) {
