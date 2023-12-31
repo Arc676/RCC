@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "libcamera/camera.h"
+#include "libcamera/stream.h"
 
 void CameraState::prepareCameraList(const size_t count) {
 	cameras.reserve(count);
@@ -27,6 +28,22 @@ bool CameraState::selectCamera(unsigned idx) {
 	}
 	selectedCam = idx;
 	return true;
+}
+
+enum CameraState::CameraResult CameraState::configureCamera(
+	const SharedCamera& cam) {
+	config =
+		cam->generateConfiguration({libcamera::StreamRole::VideoRecording});
+	auto res = config->validate();
+	auto ret = CAMERA_OK;
+	if (res == libcamera::CameraConfiguration::Invalid) {
+		return BAD_CONFIG;
+	}
+	if (res == libcamera::CameraConfiguration::Adjusted) {
+		ret = CONFIG_CHANGED;
+	}
+	cam->configure(config.get());
+	return ret;
 }
 
 size_t CameraState::serialize(byte* buf) const {

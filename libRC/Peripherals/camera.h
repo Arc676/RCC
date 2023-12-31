@@ -15,19 +15,31 @@ class CameraState {
 	unsigned selectedCam = 0;
 	std::vector<std::string> cameras;
 
+	std::unique_ptr<libcamera::CameraConfiguration> config = nullptr;
+
 	size_t deserializedSize = 0;
 
 	void prepareCameraList(size_t);
 
 public:
+	using SharedCamera = std::shared_ptr<libcamera::Camera>;
+
 	struct __attribute__((packed)) Metadata {
 		byte enabled;
 		unsigned selectedCam;
 		size_t camCount;
 	};
 
-	void loadCameraNames(
-		const std::vector<std::shared_ptr<libcamera::Camera>>&);
+	enum CameraResult {
+		CAMERA_OK,
+		BAD_CAMERA,
+		ACQUIRE_FAILED,
+		BAD_CONFIG,
+		CONFIG_CHANGED,
+		BUFFER_ALLOC_FAILED,
+	};
+
+	void loadCameraNames(const std::vector<SharedCamera>&);
 
 	const std::vector<std::string>& getCameraNames() const { return cameras; }
 
@@ -38,6 +50,8 @@ public:
 	unsigned getSelected() const { return selectedCam; }
 
 	bool selectCamera(unsigned);
+
+	enum CameraResult configureCamera(const SharedCamera&);
 
 	size_t serialize(byte*) const;
 
