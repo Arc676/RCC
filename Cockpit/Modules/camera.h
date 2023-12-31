@@ -16,6 +16,8 @@ protected:
 
 	void roleSelect();
 
+	void dstSelect();
+
 	void renderController();
 
 	void renderViewfinder();

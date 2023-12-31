@@ -10,6 +10,10 @@
 #include "libcamera/camera.h"
 #include "libcamera/stream.h"
 
+#define DST_BUFLEN 100
+// "RC Video Stream" on a 10-key layout
+#define DEFAULT_STREAM_PORT 7287
+
 class CameraState {
 	bool enabled = false;
 
@@ -32,8 +36,20 @@ public:
 		bool viewfinder = false;
 	};
 
+	enum StreamDestination : int {
+		STREAM_IS_NAMED = 0b10,
+		STREAM_HAS_PORT = 0b01,
+
+		STREAM_TO_CONTROLLER = 0b01,
+		STREAM_TO_EXTERNAL   = 0b11,
+		STREAM_TO_DISK       = 0b10,
+	};
+
 private:
-	RoleSelect selectedRoles;
+	struct RoleSelect selectedRoles;
+	enum StreamDestination chosenDst = STREAM_TO_CONTROLLER;
+	char streamDst[DST_BUFLEN]       = {0};
+	int streamPort                   = DEFAULT_STREAM_PORT;
 
 	std::vector<libcamera::StreamRole> getRoleVec() const;
 
@@ -70,6 +86,12 @@ public:
 	enum CameraResult configureCamera(const SharedCamera&);
 
 	RoleSelect& getRoles() { return selectedRoles; }
+
+	enum StreamDestination& getStreamDst() { return chosenDst; }
+
+	char* getStreamBuf() { return streamDst; }
+
+	int& getStreamPort() { return streamPort; }
 
 	size_t serialize(byte*) const;
 

@@ -4,7 +4,7 @@
 typedef unsigned char byte;
 
 // "Open RC Vehicle" on a 10-key layout
-constexpr int DEFAULT_CONTROL_PORT = 6728;
+#define DEFAULT_CONTROL_PORT 6728
 
 // See OpCodes.md for bitmask table
 constexpr byte OPCODE_ID_BITMASK = 0b01111000;

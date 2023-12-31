@@ -77,20 +77,36 @@ size_t CameraState::serialize(byte* buf) const {
 		written += len + 1;
 	}
 
-	byte roles = 0;
+	// Compactly send boolean values
+	// Bits 1-4: selected roles
+	// Bits 5, 6: stream destination
+	// NOLINTBEGIN(readability-magic-numbers)
+	byte b = 0;
 	if (selectedRoles.raw) {
-		roles |= 1 << 0;
+		b |= 1 << 0;
 	}
 	if (selectedRoles.stills) {
-		roles |= 1 << 1;
+		b |= 1 << 1;
 	}
 	if (selectedRoles.video) {
-		roles |= 1 << 2;
+		b |= 1 << 2;
 	}
 	if (selectedRoles.viewfinder) {
-		roles |= 1 << 3;
+		b |= 1 << 3;
 	}
-	buf[written++] = roles;
+	b |= chosenDst << 4;
+	buf[written++] = b;
+	// NOLINTEND(readability-magic-numbers)
+
+	if ((chosenDst & STREAM_IS_NAMED) != 0) {
+		size_t len = strlen(streamDst) + 1;
+		memcpy(buf + written, streamDst, len);
+		written += len;
+	}
+	if ((chosenDst & STREAM_HAS_PORT) != 0) {
+		memcpy(buf + written, &streamPort, sizeof(int));
+		written += sizeof(int);
+	}
 
 	return written;
 }
@@ -108,11 +124,23 @@ void CameraState::deserialize(const byte* buf, const size_t len) {
 		pos += cameras.back().size() + 1;
 	}
 
-	byte roles               = buf[pos++];
-	selectedRoles.raw        = (roles & (1 << 0)) != 0;
-	selectedRoles.stills     = (roles & (1 << 1)) != 0;
-	selectedRoles.video      = (roles & (1 << 2)) != 0;
-	selectedRoles.viewfinder = (roles & (1 << 3)) != 0;
+	// See CameraState::serialize for bits
+	byte b                   = buf[pos++];
+	selectedRoles.raw        = (b & (1 << 0)) != 0;
+	selectedRoles.stills     = (b & (1 << 1)) != 0;
+	selectedRoles.video      = (b & (1 << 2)) != 0;
+	selectedRoles.viewfinder = (b & (1 << 3)) != 0;
+	chosenDst                = (enum StreamDestination)((b >> 4) & 0b11);
+
+	if ((chosenDst & STREAM_IS_NAMED) != 0) {
+		size_t len = strlen(streamDst) + 1;
+		memcpy(streamDst, buf + pos, len);
+		pos += len;
+	}
+	if ((chosenDst & STREAM_HAS_PORT) != 0) {
+		memcpy(&streamPort, buf + pos, sizeof(int));
+		pos += sizeof(int);
+	}
 
 	deserializedSize = len;
 }

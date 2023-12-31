@@ -2,6 +2,7 @@
 
 #include <cstddef>
 
+#include "Peripherals/camera.h"
 #include "imgui.h"
 #include "interface.h"
 
@@ -41,6 +42,24 @@ void CameraModule::roleSelect() {
 	ImGui::Checkbox("Viewfinder", &state.getRoles().viewfinder);
 }
 
+void CameraModule::dstSelect() {
+	auto& dst = state.getStreamDst();
+	ImGui::RadioButton("Stream to cockpit", (int*)&dst,
+	                   CameraState::STREAM_TO_CONTROLLER);
+	ImGui::RadioButton("Stream to another device", (int*)&dst,
+	                   CameraState::STREAM_TO_EXTERNAL);
+	ImGui::RadioButton("Stream to disk on vehicle", (int*)&dst,
+	                   CameraState::STREAM_TO_DISK);
+
+	if ((dst & CameraState::STREAM_IS_NAMED) != 0) {
+		ImGui::InputText("Stream destination", state.getStreamBuf(),
+		                 DST_BUFLEN);
+	}
+	if ((dst & CameraState::STREAM_HAS_PORT) != 0) {
+		ImGui::InputInt("Port", &state.getStreamPort());
+	}
+}
+
 void CameraModule::renderController() {
 	if (ImGui::CollapsingHeader("Camera")) {
 		const auto size = state.getDeserializedSize();
@@ -54,6 +73,7 @@ void CameraModule::renderController() {
 
 			cameraSelect();
 			roleSelect();
+			dstSelect();
 		}
 
 		if (ImGui::Button("Refresh camera information")) {
