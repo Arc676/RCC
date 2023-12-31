@@ -3,24 +3,28 @@
 
 typedef unsigned char byte;
 
-#define DEFAULT_CONTROL_PORT 6728  // "Open RC Vehicle" on a 10-key layout
+// "Open RC Vehicle" on a 10-key layout
+constexpr int DEFAULT_CONTROL_PORT = 6728;
 
 // See OpCodes.md for bitmask table
-#define ERROR_CORE_FLAG 0x80
-#define CAMERA_FLAG     0x40
+constexpr byte OPCODE_ID_BITMASK = 0b01111000;
+constexpr byte ERROR_BIT         = 0x80;
+constexpr byte CORE_CMD          = 0x10;
+constexpr byte MISC_CMD          = 0x20;
+constexpr byte CAMERA_CMD        = 0x40;
 
 // Core commands
-#define SHUTDOWN 0x8D
+constexpr byte SHUTDOWN = CORE_CMD | 0x0D;
 
 // Ping commands
-#define PING         0x01
-#define PING_ACK     0x02
-#define PING_INVALID 0x81
+constexpr byte PING         = MISC_CMD | 0x01;
+constexpr byte PING_ACK     = MISC_CMD | 0x02;
+constexpr byte PING_INVALID = ERROR_BIT | PING;
 
 // Camera commands
-#define CAM_QUERY      0x41
-#define CAM_STATE      0x4C
-#define CAM_ACTIVATE   0x4A
-#define CAM_DEACTIVATE 0x4D
+constexpr byte CAM_QUERY      = CAMERA_CMD | 0x01;
+constexpr byte CAM_STATE      = CAMERA_CMD | 0x02;
+constexpr byte CAM_ACTIVATE   = CAMERA_CMD | 0x03;
+constexpr byte CAM_DEACTIVATE = CAMERA_CMD | 0x04;
 
 #endif

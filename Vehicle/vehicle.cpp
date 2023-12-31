@@ -16,7 +16,7 @@ Responder* Vehicle::getResponder(const byte opCode) {
 		case PING:
 			return &pingReply;
 		default:
-			if ((opCode & CAMERA_FLAG) != 0) {
+			if ((opCode & OPCODE_ID_BITMASK) == CAMERA_CMD) {
 				return &camHandler;
 			}
 			return nullptr;

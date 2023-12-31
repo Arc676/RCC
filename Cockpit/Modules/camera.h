@@ -22,7 +22,7 @@ public:
 	void render() override;
 
 	bool canHandleMessage(const byte opCode) const override {
-		return (opCode & CAMERA_FLAG) != 0;
+		return (opCode & OPCODE_ID_BITMASK) == CAMERA_CMD;
 	}
 
 	void handleMessage(const byte*, size_t) override;
