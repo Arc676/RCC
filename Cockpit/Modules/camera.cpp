@@ -7,19 +7,20 @@
 
 void CameraModule::render() {
 	renderController();
-	if (state.enabled) {
+	if (state.cameraIsEnabled()) {
 		renderViewfinder();
 	}
 }
 
 void CameraModule::cameraSelect() {
+	const auto& cameras = state.getCameraNames();
 	if (ImGui::BeginCombo("Selected camera",
-	                      state.cameras[state.selectedCam].c_str())) {
-		for (int i = 0; i < state.cameras.size(); i++) {
-			const bool selected = state.selectedCam == i;
-			if (ImGui::Selectable(state.cameras[i].c_str(), selected)) {
-				state.selectedCam = i;
-				viewfinderTitle   = "Camera: " + state.cameras[i];
+	                      cameras[state.getSelected()].c_str())) {
+		for (int i = 0; i < cameras.size(); i++) {
+			const bool selected = state.getSelected() == i;
+			if (ImGui::Selectable(cameras[i].c_str(), selected)) {
+				state.selectCamera(i);
+				viewfinderTitle = "Camera: " + cameras[i];
 			}
 
 			if (selected) {
@@ -32,20 +33,21 @@ void CameraModule::cameraSelect() {
 
 void CameraModule::renderController() {
 	if (ImGui::CollapsingHeader("Camera")) {
-		if (state.cameras.empty()) {
+		if (state.getCameraNames().empty()) {
 			ImGui::Text("No cameras available");
 		} else {
 			cameraSelect();
 		}
 
-		ImGui::Text("Camera state: %s", state.enabled ? "enabled" : "disabled");
+		ImGui::Text("Camera state: %s",
+		            state.cameraIsEnabled() ? "enabled" : "disabled");
 		if (ImGui::Button("Refresh camera information")) {
 			setCmd(CAM_QUERY);
 			requestCmd();
 		}
-		if (state.deserializedSize > 0) {
-			ImGui::Text("Received %zu data bytes from last query",
-			            state.deserializedSize);
+		const auto size = state.getDeserializedSize();
+		if (size > 0) {
+			ImGui::Text("Received %zu data bytes from last query", size);
 		}
 	}
 }

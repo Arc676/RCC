@@ -9,13 +9,7 @@
 #include "interface.h"
 #include "libcamera/camera.h"
 
-struct CameraState {
-	struct __attribute__((packed)) Metadata {
-		byte enabled;
-		unsigned selectedCam;
-		size_t camCount;
-	};
-
+class CameraState {
 	bool enabled = false;
 
 	unsigned selectedCam = 0;
@@ -25,8 +19,25 @@ struct CameraState {
 
 	void prepareCameraList(size_t);
 
+public:
+	struct __attribute__((packed)) Metadata {
+		byte enabled;
+		unsigned selectedCam;
+		size_t camCount;
+	};
+
 	void loadCameraNames(
 		const std::vector<std::shared_ptr<libcamera::Camera>>&);
+
+	const std::vector<std::string>& getCameraNames() const { return cameras; }
+
+	size_t getDeserializedSize() const { return deserializedSize; }
+
+	bool cameraIsEnabled() const { return enabled; }
+
+	unsigned getSelected() const { return selectedCam; }
+
+	bool selectCamera(unsigned);
 
 	size_t serialize(byte*) const;
 

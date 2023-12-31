@@ -21,6 +21,14 @@ void CameraState::loadCameraNames(
 	}
 }
 
+bool CameraState::selectCamera(unsigned idx) {
+	if (idx >= cameras.size()) {
+		return false;
+	}
+	selectedCam = idx;
+	return true;
+}
+
 size_t CameraState::serialize(byte* buf) const {
 	size_t written = 0;
 	Metadata meta{(byte)enabled, selectedCam, cameras.size()};
