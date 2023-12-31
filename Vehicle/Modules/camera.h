@@ -26,6 +26,8 @@ class Camera : public Responder {
 
 	CameraResult deactivateCamera(int&, int&);
 
+	void handleCameraDeactivation(struct Response&);
+
 	static void writeResult(CameraResult, struct Response&);
 
 public:

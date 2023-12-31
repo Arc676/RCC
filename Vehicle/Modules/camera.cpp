@@ -71,6 +71,31 @@ void Camera::writeResult(const CameraResult res, struct Response& response) {
 	}
 }
 
+void Camera::handleCameraDeactivation(struct Response& response) {
+	int stop = 0, release = 0;
+	auto res = deactivateCamera(stop, release);
+	if (res == CameraState::CAMERA_OK) {
+		response << CAM_OK;
+	} else {
+		if (stop == -ENODEV) {
+			Logger::log(ERROR,
+			            "Failed to stop camera: device disconnected (%d)\n",
+			            stop);
+		} else if (stop == -EACCES) {
+			Logger::log(ERROR,
+			            "Failed to stop camera: camera cannot be "
+			            "stopped (%d)\n",
+			            stop);
+		}
+		if (stop == -EBUSY) {
+			Logger::log(ERROR,
+			            "Failed to release camera: device is running (%d)\n",
+			            release);
+		}
+		response << CAM_ERROR << res;
+	}
+}
+
 // NOLINTNEXTLINE(misc-unused-parameters)
 void Camera::respond(const byte* const msg, const size_t len,
                      struct Response& response) {
@@ -78,33 +103,9 @@ void Camera::respond(const byte* const msg, const size_t len,
 		case CAM_QUERY:
 			response << CAM_STATE << camState;
 			break;
-		case CAM_DEACTIVATE: {
-			int stop = 0, release = 0;
-			auto res = deactivateCamera(stop, release);
-			if (res == CameraState::CAMERA_OK) {
-				response << CAM_OK;
-			} else {
-				if (stop == -ENODEV) {
-					Logger::log(
-						ERROR,
-						"Failed to stop camera: device disconnected (%d)\n",
-						stop);
-				} else if (stop == -EACCES) {
-					Logger::log(ERROR,
-					            "Failed to stop camera: camera cannot be "
-					            "stopped (%d)\n",
-					            stop);
-				}
-				if (stop == -EBUSY) {
-					Logger::log(
-						ERROR,
-						"Failed to release camera: device is running (%d)\n",
-						release);
-				}
-				response << CAM_ERROR << res;
-			}
+		case CAM_DEACTIVATE:
+			handleCameraDeactivation(response);
 			break;
-		}
 		case CAM_ACTIVATE:
 			writeResult(activateCamera(), response);
 			break;
