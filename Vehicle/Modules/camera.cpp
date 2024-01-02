@@ -3,11 +3,13 @@
 #include <cstddef>
 #include <cstring>
 #include <memory>
+#include <utility>
 
 #include "Peripherals/camera.h"
 #include "Util/logging.h"
 #include "interface.h"
 #include "libcamera/camera_manager.h"
+#include "libcamera/framebuffer_allocator.h"
 #include "modules.h"
 
 Camera::Camera() {
@@ -39,11 +41,36 @@ enum CameraState::CameraResult Camera::activateCamera() {
 }
 
 enum CameraState::CameraResult Camera::configureCamera() {
+	// configure camera
 	auto res = camState.configureCamera(camera);
 	if (res == CameraState::BAD_CONFIG) {
 		return res;
 	}
-	// TODO: allocate frame buffers and set up video output
+	// allocate frame buffers
+	const auto& cfg = *camState.getConfiguration();
+	allocator       = std::make_unique<libcamera::FrameBufferAllocator>(camera);
+	for (const auto& streamCfg : cfg) {
+		if (allocator->allocate(streamCfg.stream()) < 0) {
+			return CameraState::BUFFER_ALLOC_FAILED;
+		}
+		Logger::log(DEBUG, "Allocated %d buffers for stream\n",
+		            allocator->buffers(streamCfg.stream()).size());
+	}
+	// set up frame capture requests
+	for (const auto& streamCfg : cfg) {
+		const auto& buffers = allocator->buffers(streamCfg.stream());
+		for (const auto& buffer : buffers) {
+			auto request = camera->createRequest();
+			if (!request) {
+				return CameraState::CREATE_REQUEST_FAILED;
+			}
+			if (request->addBuffer(streamCfg.stream(), buffer.get()) < 0) {
+				return CameraState::SET_BUFFER_FAILED;
+			}
+			requests.push_back(std::move(request));
+		}
+	}
+	// TODO: set up event handlers
 	return res;
 }
 
@@ -54,10 +81,14 @@ enum CameraState::CameraResult Camera::deactivateCamera(int& stop,
 		if (stop != 0) {
 			return CameraState::STOP_FAILED;
 		}
+		for (const auto& streamCfg : *camState.getConfiguration()) {
+			allocator->free(streamCfg.stream());
+		}
 		release = camera->release();
 		if (release != 0) {
 			return CameraState::RELEASE_FAILED;
 		}
+		camera.reset();
 		return CameraState::CAMERA_OK;
 	}
 	return CameraState::BAD_CAMERA;

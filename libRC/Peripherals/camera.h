@@ -67,6 +67,8 @@ public:
 		BAD_CONFIG,
 		CONFIG_CHANGED,
 		BUFFER_ALLOC_FAILED,
+		CREATE_REQUEST_FAILED,
+		SET_BUFFER_FAILED,
 		STOP_FAILED,
 		RELEASE_FAILED,
 	};
@@ -84,6 +86,10 @@ public:
 	bool selectCamera(unsigned);
 
 	enum CameraResult configureCamera(const SharedCamera&);
+
+	const libcamera::CameraConfiguration* getConfiguration() const {
+		return config.get();
+	}
 
 	RoleSelect& getRoles() { return selectedRoles; }
 

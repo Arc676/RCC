@@ -3,10 +3,13 @@
 
 #include <cstddef>
 #include <memory>
+#include <vector>
 
 #include "Peripherals/camera.h"
 #include "libcamera/camera_manager.h"
+#include "libcamera/framebuffer_allocator.h"
 #include "libcamera/libcamera.h"
+#include "libcamera/request.h"
 #include "libcamera/stream.h"
 #include "modules.h"
 
@@ -17,6 +20,8 @@ class Camera : public Responder {
 	CameraState camState;
 	std::unique_ptr<libcamera::CameraManager> camMgr;
 	SharedCamera camera = nullptr;
+	std::unique_ptr<libcamera::FrameBufferAllocator> allocator;
+	std::vector<std::unique_ptr<libcamera::Request>> requests;
 
 	void queryState();
 
