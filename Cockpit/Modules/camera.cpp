@@ -63,23 +63,19 @@ void CameraModule::dstSelect() {
 void CameraModule::cameraControls() {
 	if (state.cameraIsEnabled()) {
 		if (ImGui::Button("Reconfigure")) {
-			setCmd(CAM_CONFIGURE);
-			requestCmd();
+			requestCmd(CAM_CONFIGURE);
 		}
 		ImGui::SameLine();
 		if (state.cameraIsRunning()) {
 			if (ImGui::Button("Release Camera")) {
-				setCmd(CAM_DEACTIVATE);
-				requestCmd();
+				requestCmd(CAM_DEACTIVATE);
 			}
 		} else if (ImGui::Button("Start Camera")) {
-			setCmd(CAM_START);
-			requestCmd();
+			requestCmd(CAM_START);
 		}
 	} else {
 		if (ImGui::Button("Acquire Camera")) {
-			setCmd(CAM_ACTIVATE);
-			requestCmd();
+			requestCmd(CAM_ACTIVATE);
 		}
 	}
 }
@@ -105,8 +101,7 @@ void CameraModule::renderController() {
 		}
 
 		if (ImGui::Button("Refresh camera information")) {
-			setCmd(CAM_QUERY);
-			requestCmd();
+			requestCmd(CAM_QUERY);
 		}
 		if (size > 0) {
 			ImGui::Text("Received %zu bytes of camera data with last query",

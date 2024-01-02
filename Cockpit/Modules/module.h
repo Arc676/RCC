@@ -37,6 +37,16 @@ protected:
 		cmdLength    = 1;
 	}
 
+	void requestCmd(const byte* cmd, size_t len) {
+		setCmd(cmd, len);
+		requestCmd();
+	}
+
+	void requestCmd(const byte cmd) {
+		setCmd(cmd);
+		requestCmd();
+	}
+
 	/**
 	 * @brief Indicate that the provided command should be sent to the vehicle
 	 */
