@@ -54,14 +54,56 @@ private:
 
 	std::vector<libcamera::StreamRole> getRoleVec() const;
 
-public:
 	struct __attribute__((packed)) Metadata {
-		byte enabled;
-		byte running;
+		// camera state
+		bool enabled : 1;
+		bool running : 1;
+		// camera roles
+		bool rawEnabled : 1;
+		bool stillsEnabled : 1;
+		bool videoEnabled : 1;
+		bool viewfinderEnabled : 1;
+		// stream output
+		enum StreamDestination dst : 2;
+
+		// user config
 		unsigned selectedCam;
 		size_t camCount;
+
+		Metadata() {}
+
+		Metadata(const CameraState& cam) { store(cam); }
+
+		void store(const CameraState& cam) {
+			enabled     = cam.enabled;
+			running     = cam.running;
+			selectedCam = cam.selectedCam;
+			camCount    = cam.cameras.size();
+
+			rawEnabled        = cam.selectedRoles.raw;
+			stillsEnabled     = cam.selectedRoles.stills;
+			videoEnabled      = cam.selectedRoles.video;
+			viewfinderEnabled = cam.selectedRoles.viewfinder;
+
+			dst = cam.chosenDst;
+		}
+
+		void retrieve(CameraState& cam) const {
+			cam.enabled     = enabled;
+			cam.running     = running;
+			cam.selectedCam = selectedCam;
+			cam.prepareCameraList(camCount);
+
+			cam.selectedRoles.raw        = rawEnabled;
+			cam.selectedRoles.stills     = stillsEnabled;
+			cam.selectedRoles.video      = videoEnabled;
+			cam.selectedRoles.viewfinder = viewfinderEnabled;
+
+			cam.chosenDst = dst;
+		}
 	};
 
+public:
 	enum CameraResult {
 		CAMERA_OK,
 		BAD_CAMERA,
