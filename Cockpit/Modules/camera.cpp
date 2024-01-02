@@ -127,7 +127,7 @@ void CameraModule::handleMessage(const byte* const msg, const size_t len) {
 			state.deserialize(msg + 1, len - 1);
 			if (state.cameraIsRunning()) {
 				const auto& names = state.getCameraNames();
-				unsigned idx      = state.getSelected();
+				size_t idx        = state.getSelected();
 				if (idx < names.size()) {
 					viewfinderTitle = "Camera: " + names[idx];
 				} else {

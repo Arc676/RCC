@@ -22,7 +22,7 @@ void CameraState::loadCameraNames(
 	}
 }
 
-bool CameraState::selectCamera(unsigned idx) {
+bool CameraState::selectCamera(size_t idx) {
 	if (idx >= cameras.size()) {
 		return false;
 	}

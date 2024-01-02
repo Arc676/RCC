@@ -18,7 +18,7 @@ class CameraState {
 	bool enabled = false;
 	bool running = false;
 
-	unsigned selectedCam = 0;
+	size_t selectedCam = 0;
 	std::vector<std::string> cameras;
 
 	std::unique_ptr<libcamera::CameraConfiguration> config = nullptr;
@@ -67,7 +67,7 @@ private:
 		enum StreamDestination dst : 2;
 
 		// user config
-		unsigned selectedCam;
+		size_t selectedCam;
 		size_t camCount;
 
 		Metadata() {}
@@ -129,9 +129,9 @@ public:
 
 	bool cameraIsRunning() const { return running; }
 
-	unsigned getSelected() const { return selectedCam; }
+	size_t getSelected() const { return selectedCam; }
 
-	bool selectCamera(unsigned);
+	bool selectCamera(size_t);
 
 	enum CameraResult configureCamera(const SharedCamera&);
 
