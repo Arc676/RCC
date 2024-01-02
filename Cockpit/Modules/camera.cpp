@@ -1,6 +1,7 @@
 #include "camera.h"
 
 #include <cstddef>
+#include <cstring>
 
 #include "Peripherals/camera.h"
 #include "imgui.h"
@@ -107,6 +108,10 @@ void CameraModule::renderController() {
 			ImGui::Text("Received %zu bytes of camera data with last query",
 			            size);
 		}
+		if (lastResult != CameraState::CAMERA_OK) {
+			ImGui::Text("Error from last operation: %s",
+			            CameraState::decodeResult(lastResult));
+		}
 	}
 }
 
@@ -128,6 +133,18 @@ void CameraModule::handleMessage(const byte* const msg, const size_t len) {
 				} else {
 					viewfinderTitle = "Unknown camera";
 				}
+			}
+			break;
+		case CAM_OK:
+			requestCmd(CAM_QUERY);
+			lastResult = CameraState::CAMERA_OK;
+			break;
+		case CAM_ERROR:
+			if (len >= 1 + sizeof(enum CameraState::CameraResult)) {
+				memcpy(&lastResult, msg + 1,
+				       sizeof(enum CameraState::CameraResult));
+			} else {
+				lastResult = CameraState::UNKNOWN_ERROR;
 			}
 			break;
 		default:

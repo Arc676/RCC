@@ -117,7 +117,10 @@ public:
 		SET_BUFFER_FAILED,
 		STOP_FAILED,
 		RELEASE_FAILED,
+		UNKNOWN_ERROR,
 	};
+
+	static const char* decodeResult(enum CameraResult);
 
 	void loadCameraNames(const std::vector<SharedCamera>&);
 

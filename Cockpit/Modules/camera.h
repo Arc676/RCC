@@ -2,6 +2,7 @@
 #define CAMERA_MODULE_H
 
 #include <cstddef>
+#include <string>
 
 #include "Peripherals/camera.h"
 #include "interface.h"
@@ -10,6 +11,7 @@
 class CameraModule : public Module {
 	CameraState state;
 	std::string viewfinderTitle;
+	enum CameraState::CameraResult lastResult = CameraState::CAMERA_OK;
 
 protected:
 	void cameraSelect();

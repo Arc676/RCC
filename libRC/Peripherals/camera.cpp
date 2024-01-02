@@ -9,6 +9,38 @@
 #include "libcamera/camera.h"
 #include "libcamera/stream.h"
 
+const char* CameraState::decodeResult(const enum CameraResult result) {
+	switch (result) {
+		case CAMERA_OK:
+			return "Camera operation successful";
+		case BAD_CAMERA:
+			return "Invalid camera";
+		case START_FAILED:
+			return "Failed to start camera";
+		case ACQUIRE_FAILED:
+			return "Failed to acquire camera";
+		case BAD_CONFIG:
+			return "Invalid camera configuration";
+		case CONFIG_CHANGED:
+			return "Camera configuration was changed";
+		case BUFFER_ALLOC_FAILED:
+			return "Failed to allocate frame buffers";
+		case CREATE_REQUEST_FAILED:
+			return "Failed to create frame request for camera";
+		case QUEUE_REQUEST_FAILED:
+			return "Failed to queue camera frame request";
+		case SET_BUFFER_FAILED:
+			return "Failed to set buffer for camera request";
+		case STOP_FAILED:
+			return "Failed to stop camera";
+		case RELEASE_FAILED:
+			return "Failed to release camera";
+		default:
+		case UNKNOWN_ERROR:
+			return "Unknown error";
+	}
+}
+
 void CameraState::prepareCameraList(const size_t count) {
 	cameras.reserve(count);
 	cameras.clear();
