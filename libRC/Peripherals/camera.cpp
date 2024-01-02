@@ -59,6 +59,7 @@ enum CameraState::CameraResult CameraState::configureCamera(
 		ret = CONFIG_CHANGED;
 	}
 	cam->configure(config.get());
+	enabled = true;
 	return ret;
 }
 

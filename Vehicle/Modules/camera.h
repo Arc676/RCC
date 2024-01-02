@@ -7,6 +7,7 @@
 
 #include "Peripherals/camera.h"
 #include "libcamera/camera_manager.h"
+#include "libcamera/framebuffer.h"
 #include "libcamera/framebuffer_allocator.h"
 #include "libcamera/libcamera.h"
 #include "libcamera/request.h"
@@ -25,11 +26,17 @@ class Camera : public Responder {
 
 	void queryState();
 
+	CameraResult startCamera(int&);
+
 	CameraResult activateCamera();
 
 	CameraResult configureCamera();
 
 	CameraResult deactivateCamera(int&, int&);
+
+	void bufferCompleted(libcamera::Request*, libcamera::FrameBuffer*);
+
+	void requestCompleted(libcamera::Request*);
 
 	void handleCameraDeactivation(struct Response&);
 

@@ -63,11 +63,13 @@ public:
 	enum CameraResult {
 		CAMERA_OK,
 		BAD_CAMERA,
+		START_FAILED,
 		ACQUIRE_FAILED,
 		BAD_CONFIG,
 		CONFIG_CHANGED,
 		BUFFER_ALLOC_FAILED,
 		CREATE_REQUEST_FAILED,
+		QUEUE_REQUEST_FAILED,
 		SET_BUFFER_FAILED,
 		STOP_FAILED,
 		RELEASE_FAILED,
@@ -86,6 +88,8 @@ public:
 	bool selectCamera(unsigned);
 
 	enum CameraResult configureCamera(const SharedCamera&);
+
+	void deactivateCamera() { enabled = false; }
 
 	const libcamera::CameraConfiguration* getConfiguration() const {
 		return config.get();

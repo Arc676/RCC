@@ -9,7 +9,9 @@
 #include "Util/logging.h"
 #include "interface.h"
 #include "libcamera/camera_manager.h"
+#include "libcamera/framebuffer.h"
 #include "libcamera/framebuffer_allocator.h"
+#include "libcamera/request.h"
 #include "modules.h"
 
 Camera::Camera() {
@@ -24,6 +26,20 @@ Camera::~Camera() {
 
 void Camera::queryState() {
 	camState.loadCameraNames(camMgr->cameras());
+}
+
+enum CameraState::CameraResult Camera::startCamera(int& start) {
+	start = camera->start();
+	if (start == 0) {
+		for (auto& request : requests) {
+			start = camera->queueRequest(request.get());
+			if (start != 0) {
+				return CameraState::QUEUE_REQUEST_FAILED;
+			}
+		}
+		return CameraState::CAMERA_OK;
+	}
+	return CameraState::START_FAILED;
 }
 
 enum CameraState::CameraResult Camera::activateCamera() {
@@ -70,9 +86,27 @@ enum CameraState::CameraResult Camera::configureCamera() {
 			requests.push_back(std::move(request));
 		}
 	}
-	// TODO: set up event handlers
+	// set up event handlers
+	camera->requestCompleted.connect(this, &Camera::requestCompleted);
+	camera->bufferCompleted.connect(this, &Camera::bufferCompleted);
 	return res;
 }
+
+void Camera::requestCompleted(libcamera::Request* const request) {
+	// skip cancelled requests
+	if (request->status() == libcamera::Request::RequestCancelled) {
+		return;
+	}
+
+	// TODO: process data
+
+	// reuse request
+	request->reuse(libcamera::Request::ReuseBuffers);
+	camera->queueRequest(request);
+}
+
+void Camera::bufferCompleted(libcamera::Request* const request,
+                             libcamera::FrameBuffer* const buf) {}
 
 enum CameraState::CameraResult Camera::deactivateCamera(int& stop,
                                                         int& release) {
@@ -89,6 +123,7 @@ enum CameraState::CameraResult Camera::deactivateCamera(int& stop,
 			return CameraState::RELEASE_FAILED;
 		}
 		camera.reset();
+		camState.deactivateCamera();
 		return CameraState::CAMERA_OK;
 	}
 	return CameraState::BAD_CAMERA;
@@ -118,7 +153,7 @@ void Camera::handleCameraDeactivation(struct Response& response) {
 			            "stopped (%d)\n",
 			            stop);
 		}
-		if (stop == -EBUSY) {
+		if (release == -EBUSY) {
 			Logger::log(ERROR,
 			            "Failed to release camera: device is running (%d)\n",
 			            release);
@@ -143,6 +178,11 @@ void Camera::respond(const byte* const msg, const size_t len,
 		case CAM_CONFIGURE:
 			writeResult(configureCamera(), response);
 			break;
+		case CAM_START: {
+			int start;
+			writeResult(startCamera(start), response);
+			break;
+		}
 		default:
 			Logger::log(
 				ERROR,
