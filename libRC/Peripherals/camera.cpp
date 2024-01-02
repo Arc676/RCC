@@ -67,7 +67,7 @@ size_t CameraState::serialize(byte* buf) const {
 	size_t written = 0;
 
 	struct Metadata meta {
-		(byte) enabled, selectedCam, cameras.size()
+		(byte) enabled, (byte)running, selectedCam, cameras.size()
 	};
 	memcpy((void*)buf, &meta, sizeof(struct Metadata));
 	written += sizeof(struct Metadata);
@@ -116,6 +116,7 @@ void CameraState::deserialize(const byte* buf, const size_t len) {
 	struct Metadata meta;
 	memcpy(&meta, (void*)buf, sizeof(struct Metadata));
 	enabled     = (meta.enabled != 0U);
+	running     = meta.running != 0U;
 	selectedCam = meta.selectedCam;
 	size_t pos  = sizeof(struct Metadata);
 

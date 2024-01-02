@@ -16,6 +16,7 @@
 
 class CameraState {
 	bool enabled = false;
+	bool running = false;
 
 	unsigned selectedCam = 0;
 	std::vector<std::string> cameras;
@@ -56,6 +57,7 @@ private:
 public:
 	struct __attribute__((packed)) Metadata {
 		byte enabled;
+		byte running;
 		unsigned selectedCam;
 		size_t camCount;
 	};
@@ -83,13 +85,20 @@ public:
 
 	bool cameraIsEnabled() const { return enabled; }
 
+	bool cameraIsRunning() const { return running; }
+
 	unsigned getSelected() const { return selectedCam; }
 
 	bool selectCamera(unsigned);
 
 	enum CameraResult configureCamera(const SharedCamera&);
 
-	void deactivateCamera() { enabled = false; }
+	void startCamera() { running = true; }
+
+	void deactivateCamera() {
+		enabled = false;
+		running = false;
+	}
 
 	const libcamera::CameraConfiguration* getConfiguration() const {
 		return config.get();

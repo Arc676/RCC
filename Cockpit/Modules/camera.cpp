@@ -8,7 +8,7 @@
 
 void CameraModule::render() {
 	renderController();
-	if (state.cameraIsEnabled()) {
+	if (state.cameraIsRunning()) {
 		renderViewfinder();
 	}
 }
@@ -60,6 +60,30 @@ void CameraModule::dstSelect() {
 	}
 }
 
+void CameraModule::cameraControls() {
+	if (state.cameraIsEnabled()) {
+		if (ImGui::Button("Reconfigure")) {
+			setCmd(CAM_CONFIGURE);
+			requestCmd();
+		}
+		ImGui::SameLine();
+		if (state.cameraIsRunning()) {
+			if (ImGui::Button("Release Camera")) {
+				setCmd(CAM_DEACTIVATE);
+				requestCmd();
+			}
+		} else if (ImGui::Button("Start Camera")) {
+			setCmd(CAM_START);
+			requestCmd();
+		}
+	} else {
+		if (ImGui::Button("Acquire Camera")) {
+			setCmd(CAM_ACTIVATE);
+			requestCmd();
+		}
+	}
+}
+
 void CameraModule::renderController() {
 	if (ImGui::CollapsingHeader("Camera")) {
 		const auto size = state.getDeserializedSize();
@@ -71,9 +95,13 @@ void CameraModule::renderController() {
 			ImGui::Text("Camera state: %s",
 			            state.cameraIsEnabled() ? "enabled" : "disabled");
 
+			// camera configuration
 			cameraSelect();
 			roleSelect();
 			dstSelect();
+
+			// camera controls
+			cameraControls();
 		}
 
 		if (ImGui::Button("Refresh camera information")) {
@@ -97,6 +125,15 @@ void CameraModule::handleMessage(const byte* const msg, const size_t len) {
 	switch (msg[0]) {
 		case CAM_STATE:
 			state.deserialize(msg + 1, len - 1);
+			if (state.cameraIsRunning()) {
+				const auto& names = state.getCameraNames();
+				unsigned idx      = state.getSelected();
+				if (idx < names.size()) {
+					viewfinderTitle = "Camera: " + names[idx];
+				} else {
+					viewfinderTitle = "Unknown camera";
+				}
+			}
 			break;
 		default:
 			break;

@@ -18,6 +18,8 @@ protected:
 
 	void dstSelect();
 
+	void cameraControls();
+
 	void renderController();
 
 	void renderViewfinder();

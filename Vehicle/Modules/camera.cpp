@@ -37,6 +37,7 @@ enum CameraState::CameraResult Camera::startCamera(int& start) {
 				return CameraState::QUEUE_REQUEST_FAILED;
 			}
 		}
+		camState.startCamera();
 		return CameraState::CAMERA_OK;
 	}
 	return CameraState::START_FAILED;
@@ -118,6 +119,7 @@ enum CameraState::CameraResult Camera::deactivateCamera(int& stop,
 		for (const auto& streamCfg : *camState.getConfiguration()) {
 			allocator->free(streamCfg.stream());
 		}
+		allocator.reset();
 		release = camera->release();
 		if (release != 0) {
 			return CameraState::RELEASE_FAILED;
