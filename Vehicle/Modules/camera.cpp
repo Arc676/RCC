@@ -30,6 +30,7 @@ void Camera::queryState() {
 
 enum CameraState::CameraResult Camera::startCamera(int& start) {
 	start = camera->start();
+	camState.startCamera();
 	if (start == 0) {
 		for (auto& request : requests) {
 			start = camera->queueRequest(request.get());
@@ -37,7 +38,6 @@ enum CameraState::CameraResult Camera::startCamera(int& start) {
 				return CameraState::QUEUE_REQUEST_FAILED;
 			}
 		}
-		camState.startCamera();
 		return CameraState::CAMERA_OK;
 	}
 	return CameraState::START_FAILED;
