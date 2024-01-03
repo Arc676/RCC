@@ -8,7 +8,7 @@
 struct RCSetup {
 	bool running = false;
 	int port     = DEFAULT_RC_PORT;
-	int proto    = IPPROTO_UDP;
+	int protocol = IPPROTO_UDP;
 };
 
 #endif

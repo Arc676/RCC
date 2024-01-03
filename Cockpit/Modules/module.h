@@ -52,6 +52,15 @@ protected:
 	 */
 	void requestCmd() { cmdRequested = true; }
 
+	/**
+	 * @brief Check last requested command (for internal use)
+	 *
+	 * @return Buffer and length for last requested command
+	 */
+	std::pair<const byte*, size_t> checkLastCmd() const {
+		return std::make_pair(cmd, cmdLength);
+	}
+
 public:
 	/**
 	 * @brief Determine whether this module is set up to handle a given response

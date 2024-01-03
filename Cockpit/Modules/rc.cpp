@@ -13,11 +13,11 @@ void RCModule::render() {
 	if (ImGui::CollapsingHeader("Remote Control Stream")) {
 		if (setup.running) {
 			ImGui::Text("Vehicle is listening on port %d using %s", setup.port,
-			            setup.proto == IPPROTO_TCP ? "TCP" : "UDP");
+			            setup.protocol == IPPROTO_TCP ? "TCP" : "UDP");
 		} else {
-			ImGui::RadioButton("TCP", &setup.proto, IPPROTO_TCP);
+			ImGui::RadioButton("TCP", &setup.protocol, IPPROTO_TCP);
 			ImGui::SameLine();
-			ImGui::RadioButton("UDP", &setup.proto, IPPROTO_UDP);
+			ImGui::RadioButton("UDP", &setup.protocol, IPPROTO_UDP);
 			ImGui::InputInt("RC Port", &setup.port);
 		}
 		if (ImGui::Button("Query Status")) {
@@ -32,6 +32,10 @@ void RCModule::render() {
 
 void RCModule::handleMessage(const byte* const buf, size_t len) {
 	if (buf[0] == RC_OK) {
+		const auto* last = checkLastCmd().first;
+		if (last[0] == RC_CONFIG) {
+			result = SOCKET_OK;
+		}
 	} else {
 		memcpy(&result, buf + 1, sizeof(enum SocketStatus));
 	}
