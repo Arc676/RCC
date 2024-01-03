@@ -9,6 +9,7 @@
 #include "Modules/camera.h"
 #include "Modules/module.h"
 #include "Modules/ping.h"
+#include "Modules/rc.h"
 #include "Stream/netstream.h"
 #include "interface.h"
 
@@ -21,11 +22,12 @@ class Dashboard : public MessageHandler {
 	std::thread controlThread;
 
 	// command modules
-	static constexpr unsigned MODULE_COUNT = 2;
+	static constexpr unsigned MODULE_COUNT = 3;
 	PingModule ping;
 	CameraModule cam;
+	RCModule rc;
 
-	const std::array<Module*, MODULE_COUNT> modules = {&ping, &cam};
+	const std::array<Module*, MODULE_COUNT> modules = {&ping, &cam, &rc};
 
 	// UI state
 	bool showConnectionWindow = true;

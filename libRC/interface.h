@@ -5,6 +5,8 @@ typedef unsigned char byte;
 
 // "Open RC Vehicle" on a 10-key layout
 #define DEFAULT_CONTROL_PORT 6728
+// "Open RC Stream"
+#define DEFAULT_RC_PORT 6727
 
 // See OpCodes.md for bitmask table
 constexpr byte OPCODE_ID_BITMASK = 0b01111000;
@@ -15,6 +17,12 @@ constexpr byte CAMERA_CMD        = 0x40;
 
 // Core commands
 constexpr byte SHUTDOWN = CORE_CMD | 0x07;
+
+constexpr byte RC_QUERY  = CORE_CMD | 0x01;
+constexpr byte RC_CONFIG = CORE_CMD | 0x04;
+
+constexpr byte RC_OK    = RC_QUERY;
+constexpr byte RC_ERROR = ERROR_BIT | RC_QUERY;
 
 // Ping commands
 constexpr byte PING     = MISC_CMD | 0x01;
