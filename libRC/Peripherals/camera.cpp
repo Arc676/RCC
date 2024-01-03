@@ -95,7 +95,7 @@ enum CameraState::CameraResult CameraState::configureCamera(
 	return ret;
 }
 
-size_t CameraState::serialize(byte* buf) const {
+size_t CameraState::serialize(byte* const buf) const {
 	size_t written = 0;
 
 	Metadata meta(*this);
@@ -103,9 +103,9 @@ size_t CameraState::serialize(byte* buf) const {
 	written += sizeof(struct Metadata);
 
 	for (const auto& cam : cameras) {
-		size_t len = cam.length();
-		memcpy(buf + written, cam.c_str(), len + 1);
-		written += len + 1;
+		size_t len = cam.length() + 1;
+		memcpy(buf + written, cam.c_str(), len);
+		written += len;
 	}
 
 	return written;
