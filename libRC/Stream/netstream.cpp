@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <cstddef>
 #include <thread>
 
 const char* getSocketError(const enum SocketStatus status) {
@@ -25,6 +26,8 @@ const char* getSocketError(const enum SocketStatus status) {
 			return "Failed to connect to host";
 		case ACCEPT_FAILED:
 			return "Failed to accept connection";
+		case INVALID_REQUEST:
+			return "Invalid request";
 		default:
 			return "Unknown socket error";
 	}
@@ -138,10 +141,19 @@ size_t NetworkStream::send(const byte* const data, const size_t len) const {
 	return sent;
 }
 
+size_t NetworkStream::receive() const {
+	if (protocol == IPPROTO_TCP) {
+		const int socket = clientSock != 0 ? clientSock : sock;
+		return read(socket, (void*)msgBuffer, MESSAGE_BUFLEN);
+	}
+	struct sockaddr addr;
+	socklen_t len = sizeof(sockaddr);
+	return recvfrom(sock, (void*)msgBuffer, MESSAGE_BUFLEN, 0, &addr, &len);
+}
+
 void NetworkStream::recvLoop(MessageHandler* handler) const {
-	const int socket = clientSock != 0 ? clientSock : sock;
 	while (!handler->shouldTerminate()) {
-		const size_t bytes = read(socket, (void*)msgBuffer, MESSAGE_BUFLEN);
+		const size_t bytes = receive();
 		handler->handleMessage(msgBuffer, bytes);
 		// NOLINTNEXTLINE (memset_s not in gcc)
 		memset((void*)msgBuffer, 0, MESSAGE_BUFLEN);

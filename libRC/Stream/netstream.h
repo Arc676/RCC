@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <sys/socket.h>
 
+#include <cstddef>
 #include <thread>
 
 #include "interface.h"
@@ -40,6 +41,7 @@ enum SocketStatus {
 	LISTEN_FAILED,
 	CONNECT_FAILED,
 	ACCEPT_FAILED,
+	INVALID_REQUEST,
 };
 
 /**
@@ -62,6 +64,8 @@ class NetworkStream {
 	byte msgBuffer[MESSAGE_BUFLEN];
 
 	enum SocketStatus status = DISCONNECTED;
+
+	size_t receive() const;
 
 public:
 	/**

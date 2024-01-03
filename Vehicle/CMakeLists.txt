@@ -2,6 +2,7 @@ set(VEHICLE_SRCS
     vehicle.cpp
     Modules/camera.cpp
     Modules/ping.cpp
+    Modules/rc.cpp
     Util/config.cpp
     Util/logging.cpp)
 add_executable(Vehicle ${VEHICLE_SRCS})

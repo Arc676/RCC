@@ -15,6 +15,9 @@ Responder* Vehicle::getResponder(const byte opCode) {
 	switch (opCode) {
 		case PING:
 			return &pingReply;
+		case RC_QUERY:
+		case RC_CONFIG:
+			return &rc;
 		default:
 			if ((opCode & OPCODE_ID_BITMASK) == CAMERA_CMD) {
 				return &camHandler;

@@ -7,6 +7,7 @@
 #include "Modules/camera.h"
 #include "Modules/modules.h"
 #include "Modules/ping.h"
+#include "Modules/rc.h"
 #include "Stream/netstream.h"
 #include "Util/config.h"
 
@@ -20,6 +21,7 @@ class Vehicle : public MessageHandler {
 
 	Ping pingReply;
 	Camera camHandler;
+	RC rc;
 
 protected:
 	/**
