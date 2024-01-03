@@ -1,108 +1,77 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
+#include <SDL2/SDL_video.h>
 
 #include <iostream>
 
 #include "dashboard.h"
 #include "imgui.h"
-#include "imgui_impl_glfw.h"
-#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
 
-void glfwErrorCallback(int error, const char* description) {
-	std::cerr << "GFLW error " << error << ": " << description << std::endl;
-}
+#define FRAME_DELAY 1000 / 60
 
-bool glSetup(GLFWwindow*& window, bool lightMode = false) {
-	glfwSetErrorCallback(glfwErrorCallback);
-	if (glfwInit() == 0) {
-		return false;
-	}
-#ifdef __APPLE__
-	const char* glslVersion = "#version 150";
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#else
-	const char* glslVersion = "#version 130";
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-
-#endif
-
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-#define WINDOW_WIDTH  700
-#define WINDOW_HEIGHT 600
-	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Open RC Cockpit",
-	                          NULL, NULL);
-	if (window == nullptr) {
-		return false;
-	}
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
-	if (glewInit() != GLEW_OK) {
-		std::cerr << "Failed to initialize OpenGL loader" << std::endl;
-		return false;
-	}
-
+void initializeUI(SDL_Window* const window, SDL_Renderer* const renderer) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	if (lightMode) {
-		ImGui::StyleColorsLight();
-	} else {
-		ImGui::StyleColorsDark();
-	}
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init(glslVersion);
 
-	return true;
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |=
+		ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
+
+	ImGui_ImplSDL2_InitForSDLRenderer(window, renderer);
+	ImGui_ImplSDLRenderer2_Init(renderer);
 }
 
 void newFrame() {
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
+	ImGui_ImplSDLRenderer2_NewFrame();
+	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 }
 
-void drawFrame(GLFWwindow*& window) {
-	ImGui::Render();
-
-	int dw, dh;
-	glfwGetFramebufferSize(window, &dw, &dh);
-	glViewport(0, 0, dw, dh);
-	glClearColor(0, 0, 0, 1);
-	glClear(GL_COLOR_BUFFER_BIT);
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-	glfwSwapBuffers(window);
-}
-
-void glCleanup(GLFWwindow* window) {
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-	glfwDestroyWindow(window);
-	glfwTerminate();
-}
-
 int main() {
-	GLFWwindow* window;
-	if (!glSetup(window)) {
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+		std::cerr << "Failed to initialize SDL: " << SDL_GetError()
+				  << std::endl;
 		return 1;
 	}
 
+	SDL_Window* win =
+		SDL_CreateWindow("Open RC Cockpit", SDL_WINDOWPOS_CENTERED,
+	                     SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_FULLSCREEN);
+
+	unsigned flags         = SDL_RENDERER_ACCELERATED;
+	SDL_Renderer* renderer = SDL_CreateRenderer(win, -1, flags);
+	initializeUI(win, renderer);
+
 	Dashboard dashboard;
 
-	while (glfwWindowShouldClose(window) == 0) {
-		glfwPollEvents();
+	while (true) {
+		SDL_Event event;
+		while (SDL_PollEvent(&event) != 0) {
+			ImGui_ImplSDL2_ProcessEvent(&event);
+		}
 
 		newFrame();
 		if (dashboard.drawCockpitUI()) {
 			break;
 		}
-		drawFrame(window);
+		ImGui::Render();
+
+		// NOLINTNEXTLINE(readability-magic-numbers)
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderClear(renderer);
+
+		ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData());
+		SDL_RenderPresent(renderer);
+		SDL_Delay(FRAME_DELAY);
 	}
 
-	glCleanup(window);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(win);
+	SDL_Quit();
+
 	return 0;
 }
