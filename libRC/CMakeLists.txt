@@ -4,6 +4,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(libcamera REQUIRED IMPORTED_TARGET libcamera)
 
 set(LIB_SRCS
+    Stream/camdata.cpp
     Stream/netstream.cpp
     Peripherals/camera.cpp)
 add_library(RC ${LIB_SRCS})

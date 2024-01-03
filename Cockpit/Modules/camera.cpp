@@ -6,6 +6,7 @@
 #include "Peripherals/camera.h"
 #include "imgui.h"
 #include "interface.h"
+#include "libcamera/property_ids.h"
 
 void CameraModule::render() {
 	renderController();
@@ -30,6 +31,33 @@ void CameraModule::cameraSelect() {
 			}
 		}
 		ImGui::EndCombo();
+	}
+	if (ImGui::TreeNode("Camera Properties")) {
+		if (ImGui::BeginTable("CamProps", 3)) {
+			ImGui::TableSetupColumn("ID");
+			ImGui::TableSetupColumn("Property");
+			ImGui::TableSetupColumn("Value");
+			ImGui::TableHeadersRow();
+			for (const auto& [id, value] : camProps) {
+				ImGui::TableNextColumn();
+				ImGui::Text("%d", id);
+				ImGui::TableNextColumn();
+				const auto& it = libcamera::properties::properties.find(id);
+				ImGui::Text("%s", it == libcamera::properties::properties.end()
+				                      ? "Unknown property"
+				                      : it->second->name().c_str());
+				ImGui::TableNextColumn();
+				ImGui::Text("%s", value.c_str());
+			}
+			ImGui::EndTable();
+		}
+		if (ImGui::Button("Get camera data")) {
+			byte cmd[1 + sizeof(size_t)] = {CAM_QUERY};
+			size_t selected              = state.getSelected();
+			memcpy(cmd + 1, &selected, sizeof(size_t));
+			requestCmd(cmd, sizeof(cmd));
+		}
+		ImGui::TreePop();
 	}
 }
 
@@ -134,6 +162,9 @@ void CameraModule::handleMessage(const byte* const msg, const size_t len) {
 					viewfinderTitle = "Unknown camera";
 				}
 			}
+			break;
+		case CAM_PROPS:
+			camProps = CameraData::deserialize(msg + 1, len - 1);
 			break;
 		case CAM_OK:
 			requestCmd(CAM_QUERY);

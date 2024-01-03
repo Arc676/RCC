@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Peripherals/camera.h"
+#include "Stream/camdata.h"
 #include "interface.h"
 #include "module.h"
 
@@ -12,6 +13,7 @@ class CameraModule : public Module {
 	CameraState state;
 	std::string viewfinderTitle;
 	enum CameraState::CameraResult lastResult = CameraState::CAMERA_OK;
+	CameraData::CameraProperties camProps;
 
 protected:
 	void cameraSelect();

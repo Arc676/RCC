@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "Peripherals/camera.h"
+#include "Stream/camdata.h"
 #include "Util/logging.h"
 #include "interface.h"
 #include "libcamera/camera_manager.h"
@@ -164,12 +165,22 @@ void Camera::handleCameraDeactivation(struct Response& response) {
 	}
 }
 
-// NOLINTNEXTLINE(misc-unused-parameters)
 void Camera::respond(const byte* const msg, const size_t len,
                      struct Response& response) {
 	switch (msg[0]) {
 		case CAM_QUERY:
-			response << CAM_STATE << camState;
+			if (len >= 1 + sizeof(size_t)) {
+				size_t idx;
+				memcpy(&idx, msg + 1, sizeof(size_t));
+				if (idx < camMgr->cameras().size()) {
+					auto cam = CameraData(camMgr->cameras()[idx]);
+					response << CAM_PROPS << cam;
+				} else {
+					response << CAM_ERROR << CameraState::BAD_CAMERA;
+				}
+			} else {
+				response << CAM_STATE << camState;
+			}
 			break;
 		case CAM_DEACTIVATE:
 			handleCameraDeactivation(response);
