@@ -1,6 +1,8 @@
 #ifndef MODULE_H
 #define MODULE_H
 
+#include <SDL_events.h>
+
 #include <cassert>
 #include <cstddef>
 #include <cstring>
@@ -77,6 +79,20 @@ public:
 	 * @param len Message length
 	 */
 	virtual void handleMessage(const byte* msg, size_t len) = 0;
+
+	/**
+	 * @brief Determine whether this module should be used to handle SDL events
+	 *
+	 * @return Whether the module handles events
+	 */
+	virtual bool handlesEvents() const { return false; }
+
+	/**
+	 * @brief Handle an SDL event
+	 *
+	 * @param event The SDL event
+	 */
+	virtual void handleEvent(const SDL_Event* event) {}
 
 	/**
 	 * @brief Render the module UI

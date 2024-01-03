@@ -50,6 +50,14 @@ void Dashboard::disconnect() {
 	controlThread.join();
 }
 
+void Dashboard::handleEvent(const SDL_Event* const event) {
+	for (const auto& module : modules) {
+		if (module->handlesEvents()) {
+			module->handleEvent(event);
+		}
+	}
+}
+
 void Dashboard::handleMessage(const byte* msg, size_t len) {
 	for (const auto& module : modules) {
 		if (module->canHandleMessage(msg[0])) {

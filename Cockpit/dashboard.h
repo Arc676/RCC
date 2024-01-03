@@ -1,6 +1,8 @@
 #ifndef DASHBOARD_H
 #define DASHBOARD_H
 
+#include <SDL_events.h>
+
 #include <array>
 #include <cstddef>
 #include <memory>
@@ -47,6 +49,8 @@ protected:
 
 public:
 	bool drawCockpitUI();
+
+	void handleEvent(const SDL_Event* event);
 
 	void handleMessage(const byte*, size_t) override;
 

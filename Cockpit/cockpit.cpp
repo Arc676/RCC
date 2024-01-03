@@ -52,6 +52,7 @@ int main() {
 		SDL_Event event;
 		while (SDL_PollEvent(&event) != 0) {
 			ImGui_ImplSDL2_ProcessEvent(&event);
+			dashboard.handleEvent(&event);
 		}
 
 		newFrame();
