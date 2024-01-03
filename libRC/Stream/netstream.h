@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <sys/socket.h>
 
+#include <thread>
+
 #include "interface.h"
 
 #define IP_ADDR_BUFLEN 30
@@ -129,6 +131,14 @@ public:
 	 * @param handler Message handler for the incoming messages
 	 */
 	void recvLoop(MessageHandler* handler) const;
+
+	/**
+	 * @brief Create a new thread on which to receive messages using the stream
+	 *
+	 * @param handler The message handler
+	 * @return Thread on which the receive-loop runs
+	 */
+	std::thread createRecvThread(MessageHandler* handler) const;
 
 	/**
 	 * @brief Disconnect from the host (clients) or shut down the server socket

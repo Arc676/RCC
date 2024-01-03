@@ -68,8 +68,7 @@ void Dashboard::connectionWindow() {
 			connectionStatus =
 				connection.initClient(vehicleIP, vehiclePort, IPPROTO_TCP);
 			if (connectionStatus == SOCKET_OK) {
-				controlThread =
-					std::thread(&NetworkStream::recvLoop, &connection, this);
+				controlThread     = connection.createRecvThread(this);
 				showCommandWindow = true;
 			}
 		} else if (connectionStatus == SOCKET_OK

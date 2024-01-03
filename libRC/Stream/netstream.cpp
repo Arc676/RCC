@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <thread>
+
 const char* getSocketError(const enum SocketStatus status) {
 	switch (status) {
 		case DISCONNECTED:
@@ -144,4 +146,9 @@ void NetworkStream::recvLoop(MessageHandler* handler) const {
 		// NOLINTNEXTLINE (memset_s not in gcc)
 		memset((void*)msgBuffer, 0, MESSAGE_BUFLEN);
 	}
+}
+
+std::thread NetworkStream::createRecvThread(
+	MessageHandler* const handler) const {
+	return std::thread(&NetworkStream::recvLoop, this, handler);
 }
