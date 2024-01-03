@@ -33,6 +33,11 @@ int typeForProtocol(const int protocol) {
 }
 
 NetworkStream::NetworkStream(const int port, const int protocol) {
+	status = initServer(port, protocol);
+}
+
+enum SocketStatus NetworkStream::initServer(const int port,
+                                            const int protocol) {
 	clientSock     = 0;
 	this->protocol = protocol;
 	this->port     = port;
@@ -40,8 +45,7 @@ NetworkStream::NetworkStream(const int port, const int protocol) {
 	const int type = typeForProtocol(protocol);
 	sock           = socket(AF_INET, type, protocol);
 	if (sock < 0) {
-		status = CREATE_FAILED;
-		return;
+		return CREATE_FAILED;
 	}
 
 	struct sockaddr_in myAddr;
@@ -49,19 +53,17 @@ NetworkStream::NetworkStream(const int port, const int protocol) {
 	myAddr.sin_port        = htons(port);
 	myAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 	if (bind(sock, (struct sockaddr*)&myAddr, sizeof(myAddr)) < 0) {
-		status = BIND_FAILED;
-		return;
+		return BIND_FAILED;
 	}
 
 	struct linger opt = {1, 0};
 	setsockopt(sock, SOL_SOCKET, SO_LINGER, &opt, sizeof(opt));
 
 	if (listen(sock, 1) < 0) {
-		status = LISTEN_FAILED;
-		return;
+		return LISTEN_FAILED;
 	}
 
-	status = SOCKET_OK;
+	return SOCKET_OK;
 }
 
 enum SocketStatus NetworkStream::acceptConnection() {
@@ -72,11 +74,12 @@ enum SocketStatus NetworkStream::acceptConnection() {
 
 NetworkStream::NetworkStream(const char* const host, const int port,
                              const int protocol) {
-	initClient(host, port, protocol);
+	status = initClient(host, port, protocol);
 }
 
-void NetworkStream::initClient(const char* const host, const int port,
-                               const int protocol) {
+enum SocketStatus NetworkStream::initClient(const char* const host,
+                                            const int port,
+                                            const int protocol) {
 	clientSock     = 0;
 	this->protocol = protocol;
 	this->port     = port;
@@ -86,8 +89,7 @@ void NetworkStream::initClient(const char* const host, const int port,
 	const int type = typeForProtocol(protocol);
 	sock           = socket(AF_INET, type, protocol);
 	if (sock < 0) {
-		status = CREATE_FAILED;
-		return;
+		return CREATE_FAILED;
 	}
 
 	struct sockaddr_in hostAddr;
@@ -95,11 +97,10 @@ void NetworkStream::initClient(const char* const host, const int port,
 	hostAddr.sin_port        = htons(port);
 	hostAddr.sin_addr.s_addr = inet_addr(host);
 	if (connect(sock, (struct sockaddr*)&hostAddr, sizeof(hostAddr)) < 0) {
-		status = CONNECT_FAILED;
-		return;
+		return CONNECT_FAILED;
 	}
 
-	status = SOCKET_OK;
+	return SOCKET_OK;
 }
 
 void NetworkStream::disconnect() const {

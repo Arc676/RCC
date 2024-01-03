@@ -65,8 +65,8 @@ void Dashboard::connectionWindow() {
 		ImGui::Text("Status: %s", getSocketError(connectionStatus));
 
 		if (connectionStatus == DISCONNECTED && ImGui::Button("Connect")) {
-			connection.initClient(vehicleIP, vehiclePort, IPPROTO_TCP);
-			connectionStatus = connection.getStatus();
+			connectionStatus =
+				connection.initClient(vehicleIP, vehiclePort, IPPROTO_TCP);
 			if (connectionStatus == SOCKET_OK) {
 				controlThread =
 					std::thread(&NetworkStream::recvLoop, &connection, this);

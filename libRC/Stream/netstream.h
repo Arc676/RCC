@@ -82,9 +82,23 @@ public:
 	NetworkStream() = default;
 
 	/**
-	 * @brief Post-construction client-side initialization
+	 * @brief Post-construction server-side initialization
+	 *
+	 * @param port
+	 * @param protocol
+	 * @return Socket status
 	 */
-	void initClient(const char*, int, int);
+	enum SocketStatus initServer(int port, int protocol);
+
+	/**
+	 * @brief Post-construction client-side initialization
+	 *
+	 * @param host
+	 * @param port
+	 * @param protocol
+	 * @return Socket status
+	 */
+	enum SocketStatus initClient(const char* host, int port, int protocol);
 
 	/**
 	 * @brief Get the socket state of the network stream
@@ -103,11 +117,11 @@ public:
 	/**
 	 * @brief Sends a message to the connected machine
 	 *
-	 * @param msg Message buffer
+	 * @param data Message buffer
 	 * @param len Message length
 	 * @return Number of bytes sent
 	 */
-	size_t send(const byte* msg, size_t len) const;
+	size_t send(const byte* data, size_t len) const;
 
 	/**
 	 * @brief Message receiving loop

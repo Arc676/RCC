@@ -64,8 +64,7 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 }
 
 Vehicle::Vehicle(int argc, char* argv[])
-	: opts(argc, argv)
-	, controlStream(opts.getControlPort(), IPPROTO_TCP) {
+	: opts(argc, argv) {
 	if (opts.helpWasRequested()) {
 		return;
 	}
@@ -77,7 +76,8 @@ Vehicle::Vehicle(int argc, char* argv[])
 
 	Logger::log(INFO, "Starting server...\n");
 
-	const enum SocketStatus res = controlStream.getStatus();
+	const auto res =
+		controlStream.initServer(opts.getControlPort(), IPPROTO_TCP);
 	if (res != SOCKET_OK) {
 		Logger::log(ERROR, "Failed to start server: %s\nExiting.\n",
 		            getSocketError(res));
