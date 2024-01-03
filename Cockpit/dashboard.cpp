@@ -51,7 +51,7 @@ void Dashboard::disconnect() {
 }
 
 void Dashboard::handleMessage(const byte* msg, size_t len) {
-	for (auto* module : modules) {
+	for (const auto& module : modules) {
 		if (module->canHandleMessage(msg[0])) {
 			module->handleMessage(msg, len);
 		}
@@ -87,7 +87,7 @@ void Dashboard::connectionWindow() {
 
 void Dashboard::commandPanel() {
 	if (ImGui::Begin("Command Panel", &showCommandWindow)) {
-		for (auto* module : modules) {
+		for (const auto& module : modules) {
 			module->render();
 		}
 	}
@@ -98,7 +98,7 @@ void Dashboard::commandHandler() {
 	if (showCommandWindow) {
 		commandPanel();
 	}
-	for (auto* module : modules) {
+	for (const auto& module : modules) {
 		if (module->shouldSendCmd()) {
 			auto data = module->getCmdData();
 			connection.send(data.first, data.second);

@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <memory>
 #include <string>
 #include <thread>
 
@@ -22,12 +23,15 @@ class Dashboard : public MessageHandler {
 	std::thread controlThread;
 
 	// command modules
-	static constexpr unsigned MODULE_COUNT = 3;
-	PingModule ping;
-	CameraModule cam;
-	RCModule rc;
-
-	const std::array<Module*, MODULE_COUNT> modules = {&ping, &cam, &rc};
+	template <typename... Modules>
+	static std::array<std::unique_ptr<Module>, sizeof...(Modules)>
+	makeModules() {
+		return {std::make_unique<Modules>()...};
+	}
+#define MAKE_MODULES(name, ...)                       \
+	const decltype(makeModules<__VA_ARGS__>()) name = \
+		makeModules<__VA_ARGS__>();
+	MAKE_MODULES(modules, PingModule, CameraModule)
 
 	// UI state
 	bool showConnectionWindow = true;
