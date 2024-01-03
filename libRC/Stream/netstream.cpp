@@ -103,14 +103,16 @@ enum SocketStatus NetworkStream::initClient(const char* const host,
 	return SOCKET_OK;
 }
 
-void NetworkStream::disconnect() const {
+void NetworkStream::disconnect() {
 	shutdown(sock, SHUT_RDWR);
 	close(sock);
+	status = DISCONNECTED;
 }
 
-void NetworkStream::disconnectClient() const {
+void NetworkStream::disconnectClient() {
 	shutdown(clientSock, SHUT_RDWR);
 	close(clientSock);
+	status = DISCONNECTED;
 }
 
 size_t NetworkStream::send(const byte* const data, const size_t len) const {

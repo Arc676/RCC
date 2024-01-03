@@ -134,12 +134,12 @@ public:
 	 * @brief Disconnect from the host (clients) or shut down the server socket
 	 * (servers)
 	 */
-	void disconnect() const;
+	void disconnect();
 
 	/**
 	 * @brief Disconnect the connected client (servers only)
 	 */
-	void disconnectClient() const;
+	void disconnectClient();
 };
 
 #endif
