@@ -2,6 +2,7 @@ set(COCKPIT_SRCS
     Modules/camera.cpp
     Modules/ping.cpp
     Modules/rc.cpp
+    Modules/rc_default_controls.cpp
     dashboard.cpp
     cockpit.cpp)
 add_executable(Cockpit ${COCKPIT_SRCS})

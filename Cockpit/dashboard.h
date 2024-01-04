@@ -33,7 +33,7 @@ class Dashboard : public MessageHandler {
 #define MAKE_MODULES(name, ...)                       \
 	const decltype(makeModules<__VA_ARGS__>()) name = \
 		makeModules<__VA_ARGS__>();
-	MAKE_MODULES(modules, PingModule, CameraModule)
+	MAKE_MODULES(modules, PingModule, CameraModule, RCModule)
 
 	// UI state
 	bool showConnectionWindow = true;
