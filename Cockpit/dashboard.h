@@ -26,14 +26,12 @@ class Dashboard : public MessageHandler {
 
 	// command modules
 	template <typename... Modules>
-	static std::array<std::unique_ptr<Module>, sizeof...(Modules)>
-	makeModules() {
-		return {std::make_unique<Modules>()...};
+	static std::array<std::unique_ptr<Module>, sizeof...(Modules)> makeModules(
+		const Dashboard* dash) {
+		return {std::make_unique<Modules>(dash)...};
 	}
-#define MAKE_MODULES(name, ...)                       \
-	const decltype(makeModules<__VA_ARGS__>()) name = \
-		makeModules<__VA_ARGS__>();
-	MAKE_MODULES(modules, PingModule, CameraModule, RCModule)
+#define MODULES PingModule, CameraModule, RCModule
+	const decltype(makeModules<MODULES>(nullptr)) modules;
 
 	// UI state
 	bool showConnectionWindow = true;
@@ -48,6 +46,9 @@ protected:
 	void disconnect();
 
 public:
+	Dashboard()
+		: modules(makeModules<MODULES>(this)) {}
+
 	bool drawCockpitUI();
 
 	void handleEvent(const SDL_Event* event);

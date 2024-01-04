@@ -19,7 +19,10 @@ class PingModule : public Module {
 	const char* decodeResponse() const;
 
 public:
-	PingModule() { setCmd(PING); }
+	PingModule(const Dashboard* dash)
+		: Module(dash) {
+		setCmd(PING);
+	}
 
 	bool canHandleMessage(const byte opCode) const override {
 		return opCode == PING_ACK;

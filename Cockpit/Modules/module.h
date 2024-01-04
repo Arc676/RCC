@@ -11,12 +11,23 @@
 #include "Stream/netstream.h"
 #include "interface.h"
 
+class Dashboard;
+
 class Module {
 	bool cmdRequested = false;
 	byte cmd[MESSAGE_BUFLEN];
 	size_t cmdLength = 0;
 
+	const Dashboard* dash;
+
 protected:
+	/**
+	 * @brief Get the dashboard object
+	 *
+	 * @return Pointer to dashboard
+	 */
+	const Dashboard* getDashboard() const { return dash; }
+
 	/**
 	 * @brief Set the command to be sent
 	 *
@@ -64,6 +75,15 @@ protected:
 	}
 
 public:
+	/**
+	 * @brief Construct a new module
+	 *
+	 * @param dash The dashboard from which modules can retrieve relevant
+	 * information
+	 */
+	Module(const Dashboard* dash)
+		: dash(dash) {}
+
 	/**
 	 * @brief Determine whether this module is set up to handle a given response
 	 *

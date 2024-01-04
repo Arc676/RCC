@@ -29,6 +29,9 @@ protected:
 	void renderViewfinder();
 
 public:
+	CameraModule(const Dashboard* dash)
+		: Module(dash) {}
+
 	void render() override;
 
 	bool canHandleMessage(const byte opCode) const override {

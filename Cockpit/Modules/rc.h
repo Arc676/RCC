@@ -48,8 +48,10 @@ public:
 	/**
 	 * @brief Set up the RC module with the default controls defined in
 	 * Modules/default_controls.cpp
+	 *
+	 * @param dash Owning dashboard
 	 */
-	RCModule();
+	RCModule(const Dashboard* dash);
 
 	bool canHandleMessage(const byte cmd) const override {
 		return cmd == RC_OK || cmd == RC_ERROR;

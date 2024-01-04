@@ -1,9 +1,11 @@
 #include <SDL_scancode.h>
 
 #include "Stream/rc.h"
+#include "module.h"
 #include "rc.h"
 
-RCModule::RCModule() {
+RCModule::RCModule(const Dashboard* dash)
+	: Module(dash) {
 	using RCS = RCState;
 	using CH  = RCS::ControlHandler;
 
