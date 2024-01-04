@@ -6,7 +6,9 @@ set(COCKPIT_SRCS
     dashboard.cpp
     cockpit.cpp)
 add_executable(Cockpit ${COCKPIT_SRCS})
-target_include_directories(Cockpit PUBLIC ${SRC_LIBRC})
+target_include_directories(Cockpit PUBLIC
+    ${SRC_LIBRC}
+    ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(Cockpit PUBLIC RC)
 
 target_include_directories(Cockpit PUBLIC

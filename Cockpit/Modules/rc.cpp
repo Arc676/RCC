@@ -5,6 +5,7 @@
 #include <SDL_timer.h>
 #include <netinet/in.h>
 
+#include <cassert>
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
@@ -12,6 +13,7 @@
 
 #include "Stream/netstream.h"
 #include "Stream/rc.h"
+#include "dashboard.h"
 #include "imgui.h"
 #include "interface.h"
 
@@ -55,8 +57,10 @@ void RCModule::transmissionControls() {
 			}
 		} else {
 			if (ImGui::Button("Start Transmitting")) {
+				const char* address = getDashboard()->getDeviceAddress();
+				assert(address != nullptr);
 				localSockState =
-					stream.initClient("127.0.0.1", setup.port, setup.protocol);
+					stream.initClient(address, setup.port, setup.protocol);
 			}
 		}
 	}

@@ -58,6 +58,10 @@ public:
 	bool shouldTerminate() const override {
 		return connectionStatus != SOCKET_OK;
 	}
+
+	const char* getDeviceAddress() const {
+		return connectionStatus == SOCKET_OK ? vehicleIP : nullptr;
+	};
 };
 
 #endif
