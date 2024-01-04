@@ -2,17 +2,11 @@
 
 using ControlHandler = RCState::ControlHandler;
 
-ControlHandler::ControlHandler(RCState& state, CCPtr dst, bool isDoubleMapped)
-	: state(state)
-	, ccDst(dst)
-	, isDoubleMapped(isDoubleMapped) {}
-
 ControlHandler::ControlHandler(RCState& state, CCPtr dst, CC_t val,
-                               bool isBidirectional, bool isDoubleMapped)
+                               bool isDoubleMapped)
 	: state(state)
 	, ccDst(dst)
 	, ccValue(val)
-	, isBidirectional(isBidirectional)
 	, isDoubleMapped(isDoubleMapped)
 	, isDiscreteInput(true) {}
 
@@ -37,12 +31,10 @@ bool ControlHandler::valueIsSet() const {
 
 void ControlHandler::operator()(const float& val) const {
 	if (isDiscreteInput) {
-		if (!isDoubleMapped || valueIsSet()) {
-			if (val == 1) {
-				setValue();
-			} else {
-				unsetValue();
-			}
+		if (val == 1) {
+			setValue();
+		} else if (!isDoubleMapped || valueIsSet()) {
+			unsetValue();
 		}
 	} else {
 		if (isContinuous) {
