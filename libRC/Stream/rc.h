@@ -13,7 +13,7 @@ struct RCSetup {
 	int protocol = IPPROTO_UDP;
 };
 
-struct RCState {
+struct __attribute__((packed)) RCState {
 	// Continuous control type
 	using CC_t = float;
 
@@ -21,9 +21,9 @@ struct RCState {
 	constexpr static CC_t CC_NEUTRAL = 0;
 	constexpr static CC_t CC_MIN     = -1;
 
-	CC_t acceleration;
-	CC_t brakes;
-	CC_t steering;
+	CC_t acceleration = CC_NEUTRAL;
+	CC_t brakes       = CC_NEUTRAL;
+	CC_t steering     = CC_NEUTRAL;
 
 	class ControlHandler {
 		bool isBidirectional = false;
