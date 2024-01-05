@@ -24,6 +24,8 @@ const char* getSocketError(const enum SocketStatus status) {
 			return "Failed to listen on socket";
 		case CONNECT_FAILED:
 			return "Failed to connect to host";
+		case ACCEPT_WAITING:
+			return "Waiting for client";
 		case ACCEPT_FAILED:
 			return "Failed to accept connection";
 		case INVALID_REQUEST:
@@ -72,9 +74,11 @@ enum SocketStatus NetworkStream::initServer(const int port,
 }
 
 enum SocketStatus NetworkStream::acceptConnection() {
+	status        = ACCEPT_WAITING;
 	socklen_t len = sizeof(clientAddr);
 	clientSock    = accept(sock, &clientAddr, &len);
-	return clientSock < 0 ? ACCEPT_FAILED : SOCKET_OK;
+	status        = clientSock < 0 ? ACCEPT_FAILED : SOCKET_OK;
+	return status;
 }
 
 NetworkStream::NetworkStream(const char* const host, const int port,
