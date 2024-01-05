@@ -7,6 +7,7 @@
 #include <cstring>
 #include <thread>
 
+#include "Drivers/interface.h"
 #include "Modules/modules.h"
 #include "Stream/netstream.h"
 #include "Stream/rc.h"
@@ -109,6 +110,5 @@ void RC::handleMessage(const byte* const msg, const size_t len) {
 		return;
 	}
 	memcpy(&state, msg, sizeof(RCState));
-	printf("Vehicle got %.02f %.02f %.02f\r", state.acceleration, state.brakes,
-	       state.steering);
+	update(state);
 }

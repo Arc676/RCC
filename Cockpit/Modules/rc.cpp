@@ -163,8 +163,6 @@ void RCModule::handleEvent(const SDL_Event* const event) {
 
 void RCModule::transmitLoop() const {
 	while (remoteSockState == SOCKET_OK) {
-		printf("Cockpit sent %.02f %.02f %.02f\r", state.acceleration,
-		       state.brakes, state.steering);
 		stream.send((byte*)&state, sizeof(RCState));
 		if (transmitDelay > 0) {
 			SDL_Delay(transmitDelay);
