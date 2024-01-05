@@ -113,14 +113,17 @@ void RCModule::handleMessage(const byte* const buf, size_t len) {
 	if (buf[0] == RC_OK) {
 		const auto* last = checkLastCmd().first;
 		switch (last[0]) {
-			case RC_CONFIG:
-				remoteSockState = SOCKET_OK;
+			case RC_CONFIG: {
+				remoteSockState     = SOCKET_OK;
+				const char* address = getDashboard()->getDeviceAddress();
+				assert(address != nullptr);
 				localSockState =
-					stream.initClient("127.0.0.1", setup.port, setup.protocol);
+					stream.initClient(address, setup.port, setup.protocol);
 				if (localSockState == SOCKET_OK) {
 					transmitThread = std::thread(&RCModule::transmitLoop, this);
 				}
 				break;
+			}
 			case RC_QUERY:
 				if (len >= 1 + sizeof(RCSetup)) {
 					memcpy(&setup, buf + 1, sizeof(RCSetup));
