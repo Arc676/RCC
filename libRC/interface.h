@@ -17,7 +17,7 @@ constexpr byte CAMERA_CMD        = 0x40;
 
 // Core commands
 constexpr byte SHUTDOWN = CORE_CMD | 0x07;
-
+// RC commands
 constexpr byte RC_QUERY  = CORE_CMD | 0x01;
 constexpr byte RC_CONFIG = CORE_CMD | 0x04;
 constexpr byte RC_STOP   = CORE_CMD | 0x06;
@@ -26,9 +26,9 @@ constexpr byte RC_OK    = RC_QUERY;
 constexpr byte RC_ERROR = ERROR_BIT | RC_QUERY;
 
 // Ping commands
-constexpr byte PING     = MISC_CMD | 0x01;
-constexpr byte PING_ACK = MISC_CMD | 0x02;
+constexpr byte PING = MISC_CMD | 0x01;
 
+constexpr byte PING_ACK     = MISC_CMD | 0x02;
 constexpr byte PING_INVALID = ERROR_BIT | PING;
 
 // Camera commands
@@ -43,5 +43,33 @@ constexpr byte CAM_PROPS = CAMERA_CMD | 0x04;
 
 constexpr byte CAM_OK    = CAMERA_CMD | 0x01;
 constexpr byte CAM_ERROR = ERROR_BIT | CAMERA_CMD | 0x07;
+
+#ifndef NDEBUG
+#include <array>
+#include <utility>
+
+template <byte... OpCodes>
+constexpr std::pair<int, int> inline verifyUnique() {
+	constexpr unsigned N              = sizeof...(OpCodes);
+	constexpr std::array<byte, N> ops = {OpCodes...};
+	for (int i = 0; i < N; i++) {
+		for (int j = i + 1; j < N; j++) {
+			if (ops[i] == ops[j]) {
+				return std::make_pair(i, j);
+			}
+		}
+	}
+	return std::make_pair(-1, -1);
+}
+
+#define OPCODES                                                            \
+	SHUTDOWN, RC_QUERY, RC_CONFIG, RC_STOP, PING, CAM_QUERY, CAM_ACTIVATE, \
+		CAM_CONFIGURE, CAM_START, CAM_DEACTIVATE
+
+static_assert(verifyUnique<OPCODES>().first == verifyUnique<OPCODES>().second,
+              "Duplicate opcode detected");
+
+#undef OPCODES
+#endif
 
 #endif
