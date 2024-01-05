@@ -69,6 +69,7 @@ void RCModule::stopTransmitting() {
 	stream.disconnect();
 	transmitThread.join();
 	remoteSockState = tmp;
+	localSockState  = DISCONNECTED;
 }
 
 void RCModule::transmissionControls() {
@@ -97,8 +98,7 @@ void RCModule::setTransmissionDelay() {
 }
 
 void RCModule::renderSocketStates() const {
-	ImGui::Text("Control stream transmission: %s",
-	            getSocketError(localSockState));
+	ImGui::Text("RC stream transmission: %s", getSocketError(localSockState));
 
 	switch (remoteSockState) {
 		case DISCONNECTED:

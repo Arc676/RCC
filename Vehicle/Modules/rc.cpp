@@ -26,12 +26,14 @@ void RC::stopStream() {
 	}
 	stopReceiving = true;
 	stream.disconnect();
-	rcThread.join();
+	if (rcThread.joinable()) {
+		rcThread.join();
+	}
 }
 
 enum SocketStatus RC::setupStream() {
 	// disconnect existing stream to reconfigure
-	if (stream.getStatus() == SOCKET_OK) {
+	if (rcThread.joinable()) {
 		stopStream();
 	}
 	const auto res = stream.initServer(setup.port, setup.protocol);
