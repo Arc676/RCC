@@ -44,6 +44,8 @@ class RCModule : public Module {
 
 	void renderSocketStates() const;
 
+	void startTransmitting();
+
 	void stopTransmitting();
 
 public:

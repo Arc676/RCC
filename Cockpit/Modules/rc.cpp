@@ -51,7 +51,19 @@ void RCModule::render() {
 	}
 }
 
+void RCModule::startTransmitting() {
+	const char* address = getDashboard()->getDeviceAddress();
+	assert(address != nullptr);
+	localSockState = stream.initClient(address, setup.port, setup.protocol);
+	if (localSockState == SOCKET_OK) {
+		transmitThread = std::thread(&RCModule::transmitLoop, this);
+	}
+}
+
 void RCModule::stopTransmitting() {
+	if (localSockState != SOCKET_OK) {
+		return;
+	}
 	auto tmp        = remoteSockState;
 	remoteSockState = DISCONNECTED;
 	stream.disconnect();
@@ -68,10 +80,7 @@ void RCModule::transmissionControls() {
 			}
 		} else {
 			if (ImGui::Button("Start Transmitting")) {
-				const char* address = getDashboard()->getDeviceAddress();
-				assert(address != nullptr);
-				localSockState =
-					stream.initClient(address, setup.port, setup.protocol);
+				startTransmitting();
 			}
 		}
 	}
@@ -114,19 +123,15 @@ void RCModule::handleMessage(const byte* const buf, size_t len) {
 		const auto* last = checkLastCmd().first;
 		switch (last[0]) {
 			case RC_CONFIG: {
-				remoteSockState     = SOCKET_OK;
-				const char* address = getDashboard()->getDeviceAddress();
-				assert(address != nullptr);
-				localSockState =
-					stream.initClient(address, setup.port, setup.protocol);
-				if (localSockState == SOCKET_OK) {
-					transmitThread = std::thread(&RCModule::transmitLoop, this);
-				}
+				remoteSockState = SOCKET_OK;
+				startTransmitting();
 				break;
 			}
 			case RC_QUERY:
-				if (len >= 1 + sizeof(RCSetup)) {
+				if (len >= 1 + sizeof(RCSetup) + sizeof(enum SocketStatus)) {
 					memcpy(&setup, buf + 1, sizeof(RCSetup));
+					memcpy(&remoteSockState, buf + 1 + sizeof(RCSetup),
+					       sizeof(enum SocketStatus));
 				}
 				break;
 			case RC_STOP:

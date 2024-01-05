@@ -15,57 +15,67 @@
 
 RC::~RC() {
 	if (rcThread.joinable()) {
-		stopRCStream();
+		stopStream();
 	}
 }
 
-void RC::stopRCStream() {
-	stopStream = true;
+void RC::stopStream() {
 	if (setup.protocol == IPPROTO_TCP) {
+		stopAccepting = true;
 		stream.disconnectClient();
 	}
+	stopReceiving = true;
 	stream.disconnect();
 	rcThread.join();
 }
 
-enum SocketStatus RC::setupRCThread() {
+enum SocketStatus RC::setupStream() {
 	// disconnect existing stream to reconfigure
 	if (stream.getStatus() == SOCKET_OK) {
-		stopRCStream();
+		stopStream();
 	}
 	const auto res = stream.initServer(setup.port, setup.protocol);
 	if (res == SOCKET_OK) {
 		if (setup.protocol == IPPROTO_TCP) {
-			setupAcceptThread();
+			Logger::log(DEBUG, "Setting up read loop for TCP RC stream\n");
+			stopAccepting = false;
+			rcThread      = std::thread([this]() {
+                while (!stopAccepting) {
+                    Logger::log(DEBUG, "Waiting for RC stream to connect...\n");
+                    auto res = stream.acceptConnection();
+                    if (res == SOCKET_OK) {
+                        Logger::log(
+                            DEBUG,
+                            "RC stream connected. Starting read loop...\n");
+                        stopReceiving = false;
+                        stream.recvLoop(this);
+                        Logger::log(DEBUG, "RC stream disconnected\n");
+                    } else {
+                        Logger::log(DEBUG, "%s\n", getSocketError(res));
+                        stream.disconnect();
+                        break;
+                    }
+                }
+            });
 		} else {
-			rcThread = stream.createRecvThread(this);
+			Logger::log(DEBUG, "Setting up read loop for UDP RC stream\n");
+			stopReceiving = false;
+			rcThread      = stream.createRecvThread(this);
 		}
 	}
 	return res;
-}
-
-void RC::setupAcceptThread() {
-	if (acceptThread.joinable() && stream.getStatus() != ACCEPT_WAITING) {
-		acceptThread.join();
-	}
-	acceptThread = std::thread([this]() {
-		Logger::log(DEBUG, "Waiting for control stream to connect...\n");
-		stream.acceptConnection();
-		Logger::log(DEBUG, "Control stream connected\n");
-		rcThread = stream.createRecvThread(this);
-	});
 }
 
 void RC::respond(const byte* const msg, const size_t len,
                  struct Response& response) {
 	switch (msg[0]) {
 		case RC_QUERY:
-			response << RC_OK << setup;
+			response << RC_OK << setup << stream.getStatus();
 			break;
 		case RC_CONFIG:
 			if (len >= 1 + sizeof(RCSetup)) {
 				memcpy(&setup, msg + 1, sizeof(RCSetup));
-				const auto res = setupRCThread();
+				const auto res = setupStream();
 				if (res == SOCKET_OK) {
 					response << RC_OK;
 				} else {
@@ -76,7 +86,7 @@ void RC::respond(const byte* const msg, const size_t len,
 			}
 			break;
 		case RC_STOP:
-			stopRCStream();
+			stopStream();
 			response << RC_OK << stream.getStatus();
 			break;
 		default:
@@ -89,6 +99,10 @@ void RC::respond(const byte* const msg, const size_t len,
 }
 
 void RC::handleMessage(const byte* const msg, const size_t len) {
+	if (setup.protocol == IPPROTO_TCP && len == 0) {
+		stopReceiving = true;
+		return;
+	}
 	if (len < sizeof(RCState)) {
 		return;
 	}

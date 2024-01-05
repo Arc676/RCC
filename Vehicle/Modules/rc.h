@@ -10,16 +10,16 @@
 
 class RC : public Responder, public MessageHandler {
 	NetworkStream stream;
-	std::thread rcThread, acceptThread;
-	bool stopStream = false;
+	bool stopAccepting = false;
+	bool stopReceiving = false;
+	std::thread rcThread;
+
 	RCSetup setup;
 	RCState state;
 
-	void setupAcceptThread();
+	enum SocketStatus setupStream();
 
-	enum SocketStatus setupRCThread();
-
-	void stopRCStream();
+	void stopStream();
 
 public:
 	~RC();
@@ -28,7 +28,7 @@ public:
 
 	void respond(const byte*, size_t, struct Response&) override;
 
-	bool shouldTerminate() const override { return stopStream; }
+	bool shouldTerminate() const override { return stopReceiving; }
 
 	void handleMessage(const byte*, size_t) override;
 };
