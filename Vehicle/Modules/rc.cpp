@@ -33,7 +33,18 @@ void RC::respond(const byte* const msg, const size_t len,
 				memcpy(&setup, msg + 1, sizeof(RCSetup));
 				const auto res = stream.initServer(setup.port, setup.protocol);
 				if (res == SOCKET_OK) {
-					rcThread = stream.createRecvThread(this);
+					if (setup.protocol == IPPROTO_TCP) {
+						acceptThread = std::thread([this]() {
+							Logger::log(
+								DEBUG,
+								"Waiting for control stream to connect...\n");
+							stream.acceptConnection();
+							Logger::log(DEBUG, "Control stream connected\n");
+							rcThread = stream.createRecvThread(this);
+						});
+					} else {
+						rcThread = stream.createRecvThread(this);
+					}
 					response << RC_OK;
 				} else {
 					response << RC_ERROR << res;
@@ -41,6 +52,9 @@ void RC::respond(const byte* const msg, const size_t len,
 			} else {
 				response << RC_ERROR << INVALID_REQUEST;
 			}
+			break;
+		case RC_STOP:
+			stopStream = true;
 			break;
 		default:
 			Logger::log(
@@ -52,5 +66,11 @@ void RC::respond(const byte* const msg, const size_t len,
 }
 
 void RC::handleMessage(const byte* const msg, const size_t len) {
-	printf("Received %zu bytes starting with 0x%02X\r", len, msg[0]);
+	if (setup.protocol == IPPROTO_TCP && len == 0) {
+		stopStream = true;
+		return;
+	}
+	memcpy(&state, msg, sizeof(RCState));
+	printf("Vehicle got %.02f %.02f %.02f\r", state.acceleration, state.brakes,
+	       state.steering);
 }

@@ -10,9 +10,10 @@
 
 class RC : public Responder, public MessageHandler {
 	NetworkStream stream;
-	std::thread rcThread;
+	std::thread rcThread, acceptThread;
 	bool stopStream = false;
 	RCSetup setup;
+	RCState state;
 
 public:
 	const char* name() const override { return "RC Stream"; }

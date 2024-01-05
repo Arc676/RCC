@@ -20,6 +20,7 @@ constexpr byte SHUTDOWN = CORE_CMD | 0x07;
 
 constexpr byte RC_QUERY  = CORE_CMD | 0x01;
 constexpr byte RC_CONFIG = CORE_CMD | 0x04;
+constexpr byte RC_STOP   = CORE_CMD | 0x06;
 
 constexpr byte RC_OK    = RC_QUERY;
 constexpr byte RC_ERROR = ERROR_BIT | RC_QUERY;

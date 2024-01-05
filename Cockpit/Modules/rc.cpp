@@ -45,7 +45,7 @@ void RCModule::render() {
 }
 
 void RCModule::transmissionControls() {
-	if (remoteSockState <= SOCKET_OK) {
+	if (remoteSockState == SOCKET_OK) {
 		ImGui::SameLine();
 		if (transmitThread.joinable()) {
 			if (ImGui::Button("Stop Transmitting")) {
@@ -54,6 +54,7 @@ void RCModule::transmissionControls() {
 				stream.disconnect();
 				transmitThread.join();
 				remoteSockState = tmp;
+				requestCmd(RC_STOP);
 			}
 		} else {
 			if (ImGui::Button("Start Transmitting")) {
