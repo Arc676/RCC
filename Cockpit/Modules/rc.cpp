@@ -33,10 +33,17 @@ void RCModule::render() {
 		}
 
 		ImGui::SameLine();
-		if (ImGui::Button("Configure Stream")) {
-			static byte buf[1 + sizeof(RCSetup)] = {RC_CONFIG};
-			memcpy(buf + 1, &setup, sizeof(RCSetup));
-			requestCmd(buf, sizeof(buf));
+		if (remoteSockState == SOCKET_OK) {
+			if (ImGui::Button("Disable Stream")) {
+				stopTransmitting();
+				requestCmd(RC_STOP);
+			}
+		} else {
+			if (ImGui::Button("Configure Stream")) {
+				static byte buf[1 + sizeof(RCSetup)] = {RC_CONFIG};
+				memcpy(buf + 1, &setup, sizeof(RCSetup));
+				requestCmd(buf, sizeof(buf));
+			}
 		}
 
 		transmissionControls();
@@ -44,17 +51,20 @@ void RCModule::render() {
 	}
 }
 
+void RCModule::stopTransmitting() {
+	auto tmp        = remoteSockState;
+	remoteSockState = DISCONNECTED;
+	stream.disconnect();
+	transmitThread.join();
+	remoteSockState = tmp;
+}
+
 void RCModule::transmissionControls() {
 	if (remoteSockState == SOCKET_OK) {
 		ImGui::SameLine();
 		if (transmitThread.joinable()) {
 			if (ImGui::Button("Stop Transmitting")) {
-				auto tmp        = remoteSockState;
-				remoteSockState = DISCONNECTED;
-				stream.disconnect();
-				transmitThread.join();
-				remoteSockState = tmp;
-				requestCmd(RC_STOP);
+				stopTransmitting();
 			}
 		} else {
 			if (ImGui::Button("Start Transmitting")) {
@@ -114,6 +124,12 @@ void RCModule::handleMessage(const byte* const buf, size_t len) {
 			case RC_QUERY:
 				if (len >= 1 + sizeof(RCSetup)) {
 					memcpy(&setup, buf + 1, sizeof(RCSetup));
+				}
+				break;
+			case RC_STOP:
+				if (len >= 1 + sizeof(enum SocketStatus)) {
+					memcpy(&remoteSockState, buf + 1,
+					       sizeof(enum SocketStatus));
 				}
 				break;
 		}

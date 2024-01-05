@@ -44,6 +44,8 @@ class RCModule : public Module {
 
 	void renderSocketStates() const;
 
+	void stopTransmitting();
+
 public:
 	/**
 	 * @brief Set up the RC module with the default controls defined in
