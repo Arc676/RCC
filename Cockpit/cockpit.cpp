@@ -3,7 +3,9 @@
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_video.h>
+#include <getopt.h>
 
+#include <cstddef>
 #include <iostream>
 
 #include "dashboard.h"
@@ -31,16 +33,56 @@ void newFrame() {
 	ImGui::NewFrame();
 }
 
-int main() {
+void printHelp() {
+	std::cout
+		<< "Options:\n"
+		<< "\t-w|--windowed: launch in windowed mode instead of fullscreen\n"
+		<< "\t-h|--help: show this help message" << std::endl;
+}
+
+int main(int argc, char* argv[]) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
 		std::cerr << "Failed to initialize SDL: " << SDL_GetError()
 				  << std::endl;
 		return 1;
 	}
 
-	SDL_Window* win =
-		SDL_CreateWindow("Open RC Cockpit", SDL_WINDOWPOS_CENTERED,
-	                     SDL_WINDOWPOS_CENTERED, 0, 0, SDL_WINDOW_FULLSCREEN);
+	constexpr int WINDOW_WIDTH  = 1000;
+	constexpr int WINDOW_HEIGHT = 1000;
+
+	unsigned winFlags = SDL_WINDOW_FULLSCREEN;
+
+	static const char* shortOpts    = "wh";
+	static struct option longOpts[] = {
+		{"help", no_argument, NULL, 'h'},
+		{"windowed", no_argument, NULL, 'w'},
+		{0, 0, 0, 0},
+	};
+
+	while (true) {
+		int idx = 0;
+		// NOLINTNEXTLINE(concurrency-mt-unsafe)
+		int opt = getopt_long(argc, argv, shortOpts, longOpts, &idx);
+
+		if (opt == -1) {
+			break;
+		}
+
+		switch (opt) {
+			case 'h':
+				printHelp();
+				return 0;
+			case 'w':
+				winFlags = SDL_WINDOW_MAXIMIZED;
+				break;
+			default:
+				return 1;
+		}
+	}
+
+	SDL_Window* win = SDL_CreateWindow(
+		"Open RC Cockpit", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		WINDOW_WIDTH, WINDOW_HEIGHT, winFlags);
 
 	unsigned flags         = SDL_RENDERER_ACCELERATED;
 	SDL_Renderer* renderer = SDL_CreateRenderer(win, -1, flags);
