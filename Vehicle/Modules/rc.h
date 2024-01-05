@@ -15,7 +15,15 @@ class RC : public Responder, public MessageHandler {
 	RCSetup setup;
 	RCState state;
 
+	void setupAcceptThread();
+
+	enum SocketStatus setupRCThread();
+
+	void stopRCStream();
+
 public:
+	~RC();
+
 	const char* name() const override { return "RC Stream"; }
 
 	void respond(const byte*, size_t, struct Response&) override;

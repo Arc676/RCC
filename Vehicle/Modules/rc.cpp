@@ -13,6 +13,49 @@
 #include "Util/logging.h"
 #include "interface.h"
 
+RC::~RC() {
+	if (rcThread.joinable()) {
+		stopRCStream();
+	}
+}
+
+void RC::stopRCStream() {
+	stopStream = true;
+	if (setup.protocol == IPPROTO_TCP) {
+		stream.disconnectClient();
+	}
+	stream.disconnect();
+	rcThread.join();
+}
+
+enum SocketStatus RC::setupRCThread() {
+	// disconnect existing stream to reconfigure
+	if (stream.getStatus() == SOCKET_OK) {
+		stopRCStream();
+	}
+	const auto res = stream.initServer(setup.port, setup.protocol);
+	if (res == SOCKET_OK) {
+		if (setup.protocol == IPPROTO_TCP) {
+			setupAcceptThread();
+		} else {
+			rcThread = stream.createRecvThread(this);
+		}
+	}
+	return res;
+}
+
+void RC::setupAcceptThread() {
+	if (acceptThread.joinable() && stream.getStatus() != ACCEPT_WAITING) {
+		acceptThread.join();
+	}
+	acceptThread = std::thread([this]() {
+		Logger::log(DEBUG, "Waiting for control stream to connect...\n");
+		stream.acceptConnection();
+		Logger::log(DEBUG, "Control stream connected\n");
+		rcThread = stream.createRecvThread(this);
+	});
+}
+
 void RC::respond(const byte* const msg, const size_t len,
                  struct Response& response) {
 	switch (msg[0]) {
@@ -21,30 +64,9 @@ void RC::respond(const byte* const msg, const size_t len,
 			break;
 		case RC_CONFIG:
 			if (len >= 1 + sizeof(RCSetup)) {
-				// disconnect existing stream to reconfigure
-				if (stream.getStatus() == SOCKET_OK) {
-					stopStream = true;
-					if (setup.protocol == IPPROTO_TCP) {
-						stream.disconnectClient();
-					}
-					stream.disconnect();
-					rcThread.join();
-				}
 				memcpy(&setup, msg + 1, sizeof(RCSetup));
-				const auto res = stream.initServer(setup.port, setup.protocol);
+				const auto res = setupRCThread();
 				if (res == SOCKET_OK) {
-					if (setup.protocol == IPPROTO_TCP) {
-						acceptThread = std::thread([this]() {
-							Logger::log(
-								DEBUG,
-								"Waiting for control stream to connect...\n");
-							stream.acceptConnection();
-							Logger::log(DEBUG, "Control stream connected\n");
-							rcThread = stream.createRecvThread(this);
-						});
-					} else {
-						rcThread = stream.createRecvThread(this);
-					}
 					response << RC_OK;
 				} else {
 					response << RC_ERROR << res;
@@ -54,7 +76,8 @@ void RC::respond(const byte* const msg, const size_t len,
 			}
 			break;
 		case RC_STOP:
-			stopStream = true;
+			stopRCStream();
+			response << RC_OK << stream.getStatus();
 			break;
 		default:
 			Logger::log(
@@ -66,8 +89,7 @@ void RC::respond(const byte* const msg, const size_t len,
 }
 
 void RC::handleMessage(const byte* const msg, const size_t len) {
-	if (setup.protocol == IPPROTO_TCP && len == 0) {
-		stopStream = true;
+	if (len < sizeof(RCState)) {
 		return;
 	}
 	memcpy(&state, msg, sizeof(RCState));
