@@ -29,13 +29,15 @@ class Buffer {
 public:
 	Buffer(size_t capacity = MESSAGE_BUFLEN);
 
-	Buffer(Data* buf, size_t capacity);
+	Buffer(Data* buf, size_t size);
 
 	~Buffer();
 
 	size_t getSize() const { return len; }
 
 	const Data* getBuffer() const { return data; }
+
+	Data peek() const { return data[readPos]; }
 
 	bool ok() const { return good; }
 
@@ -61,7 +63,7 @@ public:
 
 	template <typename T>
 	Buffer& operator>>(T& out) {
-		if (readPos + sizeof(T) >= len) {
+		if (readPos + sizeof(T) > len) {
 			good = false;
 		}
 		if (good) {

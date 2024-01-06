@@ -24,9 +24,10 @@ Buffer<Data>::Buffer(size_t capacity)
 
 template <typename Data>
 	requires IsByte<Data>
-Buffer<Data>::Buffer(Data* buf, size_t capacity)
+Buffer<Data>::Buffer(Data* buf, size_t size)
 	: data(buf)
-	, capacity(capacity)
+	, len(size)
+	, capacity(size)
 	, owned(false) {}
 
 template <typename Data>
