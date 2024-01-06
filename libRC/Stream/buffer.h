@@ -9,8 +9,13 @@
 #include "Stream/netstream.h"
 #include "interface.h"
 
+template <typename T>
+concept IsByte = sizeof(T) == 1;
+
+template <typename Data>
+	requires IsByte<Data>
 class Buffer {
-	byte* data;
+	Data* data;
 	size_t len            = 0;
 	const size_t capacity = 0;
 	const bool owned      = true;
@@ -18,20 +23,21 @@ class Buffer {
 	bool good      = true;
 	size_t readPos = 0;
 
-	void append(const void* src, size_t size);
+	void append(const void* src, size_t size)
+		requires(!std::is_const_v<Data>);
 
 public:
 	Buffer(size_t capacity = MESSAGE_BUFLEN);
 
-	Buffer(byte* buf, size_t capacity);
+	Buffer(Data* buf, size_t capacity);
 
 	~Buffer();
 
 	size_t getSize() const { return len; }
 
-	const byte* getBuffer() const { return data; }
+	const Data* getBuffer() const { return data; }
 
-	operator bool() const { return good; }
+	bool ok() const { return good; }
 
 	void reset() { good = true; }
 
@@ -40,7 +46,9 @@ public:
 	void rewind() { readPos = 0; }
 
 	template <typename T>
-	Buffer& operator<<(const T& in) {
+	Buffer& operator<<(const T& in)
+		requires(!std::is_const_v<Data>)
+	{
 		if (good) {
 			if constexpr (std::is_same_v<T, std::string>) {
 				append(in.c_str(), in.length() + 1);
