@@ -7,6 +7,7 @@
 #include <string>
 #include <type_traits>
 
+#include "Stream/buffer.h"
 #include "Stream/netstream.h"
 #include "interface.h"
 
@@ -51,17 +52,18 @@ public:
 };
 
 class Responder {
+protected:
+	using Buf = Buffer<const byte>;
+
 public:
 	/**
 	 * @brief Respond to an incoming command
 	 *
 	 * @param msg Command buffer
-	 * @param len Command length
 	 * @param response Response object in which to construct reply message, if
 	 * any
 	 */
-	virtual void respond(const byte* msg, size_t len,
-	                     struct Response& response) = 0;
+	virtual void respond(Buf& msg, struct Response& response) = 0;
 
 	virtual const char* name() const = 0;
 };

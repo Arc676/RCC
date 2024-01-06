@@ -69,15 +69,16 @@ enum SocketStatus RC::setupStream() {
 	return res;
 }
 
-void RC::respond(const byte* const msg, const size_t len,
-                 struct Response& response) {
-	switch (msg[0]) {
+void RC::respond(Buf& msg, struct Response& response) {
+	byte opCode;
+	msg >> opCode;
+	switch (opCode) {
 		case RC_QUERY:
 			response << RC_OK << setup << stream.getStatus();
 			break;
 		case RC_CONFIG:
-			if (len >= 1 + sizeof(RCSetup)) {
-				memcpy(&setup, msg + 1, sizeof(RCSetup));
+			msg >> setup;
+			if (msg.ok()) {
 				const auto res = setupStream();
 				if (res == SOCKET_OK) {
 					response << RC_OK;
@@ -96,7 +97,7 @@ void RC::respond(const byte* const msg, const size_t len,
 			Logger::log(
 				ERROR,
 				"Command 0x%02X was improperly dispatched to RC module\n",
-				msg[0]);
+				opCode);
 			break;
 	}
 }

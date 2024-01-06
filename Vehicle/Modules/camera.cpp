@@ -165,13 +165,14 @@ void Camera::handleCameraDeactivation(struct Response& response) {
 	}
 }
 
-void Camera::respond(const byte* const msg, const size_t len,
-                     struct Response& response) {
-	switch (msg[0]) {
-		case CAM_QUERY:
-			if (len >= 1 + sizeof(size_t)) {
-				size_t idx;
-				memcpy(&idx, msg + 1, sizeof(size_t));
+void Camera::respond(Buf& msg, struct Response& response) {
+	byte opCode;
+	msg >> opCode;
+	switch (opCode) {
+		case CAM_QUERY: {
+			size_t idx;
+			msg >> idx;
+			if (msg.ok()) {
 				if (idx < camMgr->cameras().size()) {
 					auto cam = CameraData(camMgr->cameras()[idx]);
 					response << CAM_PROPS << cam;
@@ -182,6 +183,7 @@ void Camera::respond(const byte* const msg, const size_t len,
 				response << CAM_STATE << camState;
 			}
 			break;
+		}
 		case CAM_DEACTIVATE:
 			handleCameraDeactivation(response);
 			break;
@@ -200,7 +202,7 @@ void Camera::respond(const byte* const msg, const size_t len,
 			Logger::log(
 				ERROR,
 				"Command 0x%02X was improperly dispatched to camera module\n",
-				msg[0]);
+				opCode);
 			break;
 	}
 }

@@ -6,6 +6,7 @@
 
 #include "Modules/modules.h"
 #include "Modules/ping.h"
+#include "Stream/buffer.h"
 #include "Stream/netstream.h"
 #include "Util/config.h"
 #include "Util/logging.h"
@@ -36,7 +37,10 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 		return;
 	}
 
-	switch (msg[0]) {
+	Buffer buf(msg, len);
+	byte opCode = buf.peek();
+
+	switch (opCode) {
 		case SHUTDOWN:
 			Logger::log(INFO, "Client requested shutdown.\n");
 			shutdownRequested = true;
@@ -47,9 +51,9 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 			// NOLINTNEXTLINE (memset_s not in gcc)
 			memset(&response, 0, sizeof(struct Response));
 
-			Responder* responder = getResponder(msg[0]);
+			Responder* responder = getResponder(opCode);
 			if (responder != nullptr) {
-				responder->respond(msg, len, response);
+				responder->respond(buf, response);
 
 				size_t len = response.getSize();
 				if (len > 0) {

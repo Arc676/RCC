@@ -49,7 +49,7 @@ public:
 
 	const char* name() const override { return "Camera"; }
 
-	void respond(const byte*, size_t, struct Response&) override;
+	void respond(Buf&, struct Response&) override;
 };
 
 #endif
