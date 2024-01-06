@@ -155,7 +155,6 @@ void CameraModule::handleMessage(ConstBuf& msg) {
 	switch (response) {
 		case CAM_STATE:
 			msg >> state;
-			// state.deserialize(msg + 1, len - 1);
 			if (state.cameraIsRunning()) {
 				const auto& names = state.getCameraNames();
 				size_t idx        = state.getSelected();
@@ -168,7 +167,6 @@ void CameraModule::handleMessage(ConstBuf& msg) {
 			break;
 		case CAM_PROPS:
 			msg >> camProps;
-			// camProps = CameraData::deserialize(msg + 1, len - 1);
 			break;
 		case CAM_OK:
 			requestCmd(CAM_QUERY);

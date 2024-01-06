@@ -13,7 +13,7 @@ class CameraModule : public Module {
 	CameraState state;
 	std::string viewfinderTitle;
 	enum CameraState::CameraResult lastResult = CameraState::CAMERA_OK;
-	CameraData::CameraProperties camProps;
+	CameraProperties camProps;
 
 protected:
 	void cameraSelect();

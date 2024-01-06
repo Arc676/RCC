@@ -1,52 +1,48 @@
 #include "camdata.h"
 
 #include <cstring>
+#include <string>
 
-size_t CameraData::serialize(byte* const buf) const {
+#include "Stream/buffer.h"
+
+void CameraData::serialize(Buffer<byte>& buf) const {
 	if (!exists()) {
-		return 0;
+		return;
 	}
-
-	size_t written = 0;
 
 	const auto& props = camera->properties();
-
-	size_t len = props.size();
-	memcpy(buf + written, &len, sizeof(size_t));
-	written += sizeof(size_t);
-
+	buf << props.size();
 	for (const auto& [id, value] : props) {
-		memcpy(buf + written, &id, sizeof(unsigned int));
-		written += sizeof(unsigned int);
-
-		auto data  = value.toString();
-		size_t len = data.size() + 1;
-		memcpy(buf + written, data.c_str(), len);
-		written += len;
+		buf << id << value.toString();
 	}
-
-	return written;
 }
 
-CameraData::CameraProperties
-// NOLINTNEXTLINE(misc-unused-parameters)
-CameraData::deserialize(const byte* const buf, const size_t len) {
-	CameraData::CameraProperties props;
-
-	size_t pos = 0;
+void CameraProperties::deserialize(Buffer<const byte>& buf) {
+	props.clear();
 
 	size_t count;
-	memcpy(&count, buf + pos, sizeof(size_t));
-	pos += sizeof(size_t);
+	buf >> count;
 
 	for (int i = 0; i < count; i++) {
 		unsigned int key;
-		memcpy(&key, buf + pos, sizeof(unsigned int));
-		pos += sizeof(unsigned int);
-		std::string data((char*)buf + pos);
-		pos += data.size() + 1;
+		std::string data;
+		buf >> key >> data;
 		props[key] = std::move(data);
 	}
+}
 
-	return props;
+CameraProperties::iterator CameraProperties::begin() {
+	return props.begin();
+}
+
+CameraProperties::iterator CameraProperties::end() {
+	return props.end();
+}
+
+CameraProperties::const_iterator CameraProperties::cbegin() const {
+	return props.begin();
+}
+
+CameraProperties::const_iterator CameraProperties::cend() const {
+	return props.end();
 }

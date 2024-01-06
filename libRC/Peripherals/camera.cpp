@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 
+#include "Stream/buffer.h"
 #include "libcamera/camera.h"
 #include "libcamera/stream.h"
 
@@ -95,32 +96,29 @@ enum CameraState::CameraResult CameraState::configureCamera(
 	return ret;
 }
 
-size_t CameraState::serialize(byte* const buf) const {
+void CameraState::serialize(Buffer<byte>& buf) const {
 	size_t written = 0;
 
 	Metadata meta(*this);
-	memcpy((void*)buf, &meta, sizeof(struct Metadata));
-	written += sizeof(struct Metadata);
+	buf << meta;
 
 	for (const auto& cam : cameras) {
-		size_t len = cam.length() + 1;
-		memcpy(buf + written, cam.c_str(), len);
-		written += len;
+		buf << cam;
 	}
-
-	return written;
 }
 
-void CameraState::deserialize(const byte* buf, const size_t len) {
+void CameraState::deserialize(Buffer<const byte>& buf) {
+	size_t start = buf.tell();
+
 	Metadata meta;
-	memcpy(&meta, (void*)buf, sizeof(struct Metadata));
-	size_t pos = sizeof(struct Metadata);
+	buf >> meta;
 
 	meta.retrieve(*this);
 	for (int i = 0; i < meta.camCount; i++) {
-		cameras.emplace_back((char*)buf + pos);
-		pos += cameras.back().size() + 1;
+		std::string cam;
+		buf >> cam;
+		cameras.emplace_back(std::move(cam));
 	}
 
-	deserializedSize = len;
+	deserializedSize = buf.tell() - start;
 }

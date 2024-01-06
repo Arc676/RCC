@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "Stream/buffer.h"
 #include "interface.h"
 #include "libcamera/camera.h"
 #include "libcamera/stream.h"
@@ -157,9 +158,9 @@ public:
 
 	int& getStreamPort() { return streamPort; }
 
-	size_t serialize(byte*) const;
+	void serialize(Buffer<byte>&) const;
 
-	void deserialize(const byte*, size_t);
+	void deserialize(Buffer<const byte>&);
 };
 
 #endif

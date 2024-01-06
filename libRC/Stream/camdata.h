@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "Stream/buffer.h"
 #include "interface.h"
 #include "libcamera/camera.h"
 
@@ -14,13 +15,27 @@ public:
 	CameraData(const SharedCamera& camera)
 		: camera(camera) {}
 
-	using CameraProperties = std::unordered_map<unsigned int, std::string>;
-
 	bool exists() const { return camera != nullptr; }
 
-	size_t serialize(byte*) const;
+	void serialize(Buffer<byte>&) const;
+};
 
-	static CameraProperties deserialize(const byte*, size_t);
+class CameraProperties {
+	using Map = std::unordered_map<unsigned int, std::string>;
+
+	using iterator       = Map::iterator;
+	using const_iterator = Map::const_iterator;
+
+	Map props;
+
+public:
+	void deserialize(Buffer<const byte>&);
+
+	iterator begin();
+	iterator end();
+
+	const_iterator cbegin() const;
+	const_iterator cend() const;
 };
 
 #endif
