@@ -165,7 +165,7 @@ void Camera::handleCameraDeactivation(struct Response& response) {
 	}
 }
 
-void Camera::respond(Buf& msg, struct Response& response) {
+bool Camera::respond(Buf& msg, struct Response& response) {
 	byte opCode;
 	msg >> opCode;
 	switch (opCode) {
@@ -182,27 +182,23 @@ void Camera::respond(Buf& msg, struct Response& response) {
 			} else {
 				response << CAM_STATE << camState;
 			}
-			break;
+			return true;
 		}
 		case CAM_DEACTIVATE:
 			handleCameraDeactivation(response);
-			break;
+			return true;
 		case CAM_ACTIVATE:
 			writeResult(activateCamera(), response);
-			break;
+			return true;
 		case CAM_CONFIGURE:
 			writeResult(configureCamera(), response);
-			break;
+			return true;
 		case CAM_START: {
 			int start;
 			writeResult(startCamera(start), response);
-			break;
+			return true;
 		}
 		default:
-			Logger::log(
-				ERROR,
-				"Command 0x%02X was improperly dispatched to camera module\n",
-				opCode);
-			break;
+			return false;
 	}
 }

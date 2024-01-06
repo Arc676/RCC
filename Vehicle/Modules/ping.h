@@ -9,7 +9,7 @@ class Ping : public Responder {
 public:
 	const char* name() const override { return "Ping"; }
 
-	void respond(Buf&, struct Response&) override;
+	bool respond(Buf&, struct Response&) override;
 };
 
 #endif

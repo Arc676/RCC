@@ -62,8 +62,9 @@ public:
 	 * @param msg Command buffer
 	 * @param response Response object in which to construct reply message, if
 	 * any
+	 * @return Whether the command was successfully handled
 	 */
-	virtual void respond(Buf& msg, struct Response& response) = 0;
+	virtual bool respond(Buf& msg, struct Response& response) = 0;
 
 	virtual const char* name() const = 0;
 };

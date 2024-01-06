@@ -69,13 +69,13 @@ enum SocketStatus RC::setupStream() {
 	return res;
 }
 
-void RC::respond(Buf& msg, struct Response& response) {
+bool RC::respond(Buf& msg, struct Response& response) {
 	byte opCode;
 	msg >> opCode;
 	switch (opCode) {
 		case RC_QUERY:
 			response << RC_OK << setup << stream.getStatus();
-			break;
+			return true;
 		case RC_CONFIG:
 			msg >> setup;
 			if (msg.ok()) {
@@ -88,17 +88,13 @@ void RC::respond(Buf& msg, struct Response& response) {
 			} else {
 				response << RC_ERROR << INVALID_REQUEST;
 			}
-			break;
+			return true;
 		case RC_STOP:
 			stopStream();
 			response << RC_OK << stream.getStatus();
-			break;
+			return true;
 		default:
-			Logger::log(
-				ERROR,
-				"Command 0x%02X was improperly dispatched to RC module\n",
-				opCode);
-			break;
+			return false;
 	}
 }
 

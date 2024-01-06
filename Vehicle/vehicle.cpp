@@ -53,15 +53,22 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 
 			Responder* responder = getResponder(opCode);
 			if (responder != nullptr) {
-				responder->respond(buf, response);
-
-				size_t len = response.getSize();
-				if (len > 0) {
-					Logger::log(DEBUG,
-					            "\"%s\" responder prepared %zu bytes for reply "
-					            "to command 0x%02X\n",
-					            responder->name(), len, msg[0]);
-					controlStream.send(response.getBuffer(), len);
+				bool success = responder->respond(buf, response);
+				if (success) {
+					size_t len = response.getSize();
+					if (len > 0) {
+						Logger::log(
+							DEBUG,
+							"\"%s\" responder prepared %zu bytes for reply "
+							"to command 0x%02X\n",
+							responder->name(), len, msg[0]);
+						controlStream.send(response.getBuffer(), len);
+					}
+				} else {
+					Logger::log(ERROR,
+					            "Command 0x%02X was improperly dispatched to "
+					            "\"%s\" module\n",
+					            opCode, responder->name());
 				}
 			} else {
 				Logger::log(WARN, "Unhandled command: 0x%02X\n", msg[0]);
