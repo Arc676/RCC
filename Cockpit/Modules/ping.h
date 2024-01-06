@@ -28,7 +28,7 @@ public:
 		return opCode == PING_ACK;
 	}
 
-	void handleMessage(const byte* msg, size_t len) override;
+	void handleMessage(ConstBuf&) override;
 
 	void render() override;
 };

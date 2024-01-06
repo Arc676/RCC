@@ -48,6 +48,11 @@ void RCModule::render() {
 
 		transmissionControls();
 		renderSocketStates();
+
+		if (!lastReadOK) {
+			ImGui::Text(
+				"Failed to read expected data from last response from vehicle");
+		}
 	}
 }
 
@@ -118,8 +123,11 @@ void RCModule::renderSocketStates() const {
 	}
 }
 
-void RCModule::handleMessage(const byte* const buf, size_t len) {
-	if (buf[0] == RC_OK) {
+void RCModule::handleMessage(ConstBuf& msg) {
+	byte response;
+	msg >> response;
+	lastReadOK = true;
+	if (response == RC_OK) {
 		const auto* last = checkLastCmd().first;
 		switch (last[0]) {
 			case RC_CONFIG: {
@@ -128,21 +136,16 @@ void RCModule::handleMessage(const byte* const buf, size_t len) {
 				break;
 			}
 			case RC_QUERY:
-				if (len >= 1 + sizeof(RCSetup) + sizeof(enum SocketStatus)) {
-					memcpy(&setup, buf + 1, sizeof(RCSetup));
-					memcpy(&remoteSockState, buf + 1 + sizeof(RCSetup),
-					       sizeof(enum SocketStatus));
-				}
+				msg >> setup >> remoteSockState;
+				lastReadOK = msg.ok();
 				break;
 			case RC_STOP:
-				if (len >= 1 + sizeof(enum SocketStatus)) {
-					memcpy(&remoteSockState, buf + 1,
-					       sizeof(enum SocketStatus));
-				}
+				msg >> remoteSockState;
+				lastReadOK = msg.ok();
 				break;
 		}
 	} else {
-		memcpy(&remoteSockState, buf + 1, sizeof(enum SocketStatus));
+		msg >> remoteSockState;
 	}
 }
 

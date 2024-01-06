@@ -36,13 +36,15 @@ const char* PingModule::decodeResponse() const {
 	}
 }
 
-void PingModule::handleMessage(const byte* msg, size_t len) {
-	response = msg[0];
+void PingModule::handleMessage(ConstBuf& msg) {
+	byte response;
+	msg >> response;
+
 	auto now = std::chrono::system_clock::now();
 	latency  = std::chrono::duration_cast<std::chrono::microseconds>(
                   now.time_since_epoch())
 	          - latency;
-	if (len != 1) {
+	if (msg.size() != 1) {
 		response = PING_INVALID;
 		return;
 	}

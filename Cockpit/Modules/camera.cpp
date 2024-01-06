@@ -149,10 +149,13 @@ void CameraModule::renderViewfinder() {
 	ImGui::End();
 }
 
-void CameraModule::handleMessage(const byte* const msg, const size_t len) {
-	switch (msg[0]) {
+void CameraModule::handleMessage(ConstBuf& msg) {
+	byte response;
+	msg >> response;
+	switch (response) {
 		case CAM_STATE:
-			state.deserialize(msg + 1, len - 1);
+			msg >> state;
+			// state.deserialize(msg + 1, len - 1);
 			if (state.cameraIsRunning()) {
 				const auto& names = state.getCameraNames();
 				size_t idx        = state.getSelected();
@@ -164,17 +167,16 @@ void CameraModule::handleMessage(const byte* const msg, const size_t len) {
 			}
 			break;
 		case CAM_PROPS:
-			camProps = CameraData::deserialize(msg + 1, len - 1);
+			msg >> camProps;
+			// camProps = CameraData::deserialize(msg + 1, len - 1);
 			break;
 		case CAM_OK:
 			requestCmd(CAM_QUERY);
 			lastResult = CameraState::CAMERA_OK;
 			break;
 		case CAM_ERROR:
-			if (len >= 1 + sizeof(enum CameraState::CameraResult)) {
-				memcpy(&lastResult, msg + 1,
-				       sizeof(enum CameraState::CameraResult));
-			} else {
+			msg >> lastResult;
+			if (!msg.ok()) {
 				lastResult = CameraState::UNKNOWN_ERROR;
 			}
 			break;

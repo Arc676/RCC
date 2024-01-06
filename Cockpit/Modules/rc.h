@@ -27,6 +27,8 @@ class RCModule : public Module {
 	int transmitDelay = DEFAULT_TRANSMISSION_DELAY;
 	RCSetup setup;
 
+	bool lastReadOK = true;
+
 	enum ControllerType {
 		KEYBOARD,
 		JOYSTICK,
@@ -67,7 +69,7 @@ public:
 
 	void handleEvent(const SDL_Event*) override;
 
-	void handleMessage(const byte*, size_t) override;
+	void handleMessage(ConstBuf&) override;
 
 	void render() override;
 };

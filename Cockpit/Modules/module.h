@@ -8,6 +8,7 @@
 #include <cstring>
 #include <utility>
 
+#include "Stream/buffer.h"
 #include "Stream/netstream.h"
 #include "interface.h"
 
@@ -21,6 +22,8 @@ class Module {
 	const Dashboard* dash;
 
 protected:
+	using ConstBuf = Buffer<const byte>;
+
 	/**
 	 * @brief Get the dashboard object
 	 *
@@ -96,9 +99,8 @@ public:
 	 * @brief Handle an incoming message
 	 *
 	 * @param msg Message buffer
-	 * @param len Message length
 	 */
-	virtual void handleMessage(const byte* msg, size_t len) = 0;
+	virtual void handleMessage(ConstBuf& msg) = 0;
 
 	/**
 	 * @brief Determine whether this module should be used to handle SDL events

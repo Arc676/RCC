@@ -38,7 +38,7 @@ public:
 		return (opCode & OPCODE_ID_BITMASK) == CAMERA_CMD;
 	}
 
-	void handleMessage(const byte*, size_t) override;
+	void handleMessage(ConstBuf&) override;
 };
 
 #endif

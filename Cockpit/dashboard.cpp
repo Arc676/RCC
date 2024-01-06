@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <thread>
 
+#include "Stream/buffer.h"
 #include "Stream/netstream.h"
 #include "imgui.h"
 #include "interface.h"
@@ -59,9 +60,10 @@ void Dashboard::handleEvent(const SDL_Event* const event) {
 }
 
 void Dashboard::handleMessage(const byte* msg, size_t len) {
+	Buffer buf(msg, len);
 	for (const auto& module : modules) {
-		if (module->canHandleMessage(msg[0])) {
-			module->handleMessage(msg, len);
+		if (module->canHandleMessage(buf.peek())) {
+			module->handleMessage(buf);
 		}
 	}
 }
