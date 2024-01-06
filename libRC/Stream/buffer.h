@@ -12,6 +12,20 @@
 template <typename T>
 concept IsByte = sizeof(T) == 1;
 
+template <typename T>
+	requires IsByte<T>
+class Buffer;
+
+template <typename T>
+concept Serializable = requires(const T x) {
+	{ x.serialize(*(Buffer<byte>*)0) };
+};
+
+template <typename T>
+concept Deserializable = requires(T x) {
+	{ x.deserialize(*(Buffer<const byte>*)0) };
+};
+
 template <typename Data>
 	requires IsByte<Data>
 class Buffer {
@@ -48,6 +62,8 @@ public:
 		reset();
 	}
 
+	size_t tell() const { return readPos; }
+
 	void rewind() { readPos = 0; }
 
 	template <typename T>
@@ -55,7 +71,9 @@ public:
 		requires(!std::is_const_v<Data>)
 	{
 		if (good) {
-			if constexpr (std::is_same_v<T, std::string>) {
+			if constexpr (Serializable<T>) {
+				in.serialize(*this);
+			} else if constexpr (std::is_same_v<T, std::string>) {
 				append(in.c_str(), in.length() + 1);
 			} else {
 				append(&in, sizeof(T));
@@ -66,13 +84,17 @@ public:
 
 	template <typename T>
 	Buffer& operator>>(T& out) {
+		if constexpr (Deserializable<T>) {
+			out.deserialize(*this);
+			return *this;
+		}
 		if (readPos + sizeof(T) > len) {
 			good = false;
 		}
 		if (good) {
 			if constexpr (std::is_same_v<T, std::string>) {
 				out = std::string((char*)(data + readPos));
-				readPos += out.size + 1;
+				readPos += out.size() + 1;
 			} else {
 				memcpy(&out, data + readPos, sizeof(T));
 				readPos += sizeof(T);
