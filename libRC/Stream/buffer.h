@@ -43,7 +43,10 @@ public:
 
 	void reset() { good = true; }
 
-	void clear() { len = 0; }
+	void clear() {
+		len = 0;
+		reset();
+	}
 
 	void rewind() { readPos = 0; }
 

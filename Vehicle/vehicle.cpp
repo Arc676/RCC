@@ -29,7 +29,7 @@ Responder* Vehicle::getResponder(const byte opCode) {
 }
 
 void Vehicle::handleMessage(const byte* msg, size_t len) {
-	static struct Response response;
+	static Buffer<byte> response;
 
 	if (len == 0) {
 		connected = false;
@@ -48,8 +48,7 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 			controlStream.disconnectClient();
 			break;
 		default: {
-			// NOLINTNEXTLINE (memset_s not in gcc)
-			memset(&response, 0, sizeof(struct Response));
+			response.clear();
 
 			Responder* responder = getResponder(opCode);
 			if (responder != nullptr) {

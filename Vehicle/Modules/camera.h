@@ -38,9 +38,9 @@ class Camera : public Responder {
 
 	void requestCompleted(libcamera::Request*);
 
-	void handleCameraDeactivation(struct Response&);
+	void handleCameraDeactivation(Buf&);
 
-	static void writeResult(CameraResult, struct Response&);
+	static void writeResult(CameraResult, Buf&);
 
 public:
 	Camera();
@@ -49,7 +49,7 @@ public:
 
 	const char* name() const override { return "Camera"; }
 
-	bool respond(Buf&, struct Response&) override;
+	bool respond(ConstBuf&, Buf&) override;
 };
 
 #endif

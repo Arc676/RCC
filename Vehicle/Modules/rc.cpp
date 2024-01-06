@@ -69,7 +69,7 @@ enum SocketStatus RC::setupStream() {
 	return res;
 }
 
-bool RC::respond(Buf& msg, struct Response& response) {
+bool RC::respond(ConstBuf& msg, Buf& response) {
 	byte opCode;
 	msg >> opCode;
 	switch (opCode) {

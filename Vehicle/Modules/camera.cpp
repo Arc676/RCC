@@ -132,7 +132,7 @@ enum CameraState::CameraResult Camera::deactivateCamera(int& stop,
 	return CameraState::BAD_CAMERA;
 }
 
-void Camera::writeResult(const CameraResult res, struct Response& response) {
+void Camera::writeResult(const CameraResult res, Buf& response) {
 	if (res == CameraState::CAMERA_OK) {
 		response << CAM_OK;
 	} else {
@@ -140,7 +140,7 @@ void Camera::writeResult(const CameraResult res, struct Response& response) {
 	}
 }
 
-void Camera::handleCameraDeactivation(struct Response& response) {
+void Camera::handleCameraDeactivation(Buf& response) {
 	int stop = 0, release = 0;
 	auto res = deactivateCamera(stop, release);
 	if (res == CameraState::CAMERA_OK) {
@@ -165,7 +165,7 @@ void Camera::handleCameraDeactivation(struct Response& response) {
 	}
 }
 
-bool Camera::respond(Buf& msg, struct Response& response) {
+bool Camera::respond(ConstBuf& msg, Buf& response) {
 	byte opCode;
 	msg >> opCode;
 	switch (opCode) {

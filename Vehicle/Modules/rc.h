@@ -26,7 +26,7 @@ public:
 
 	const char* name() const override { return "RC Stream"; }
 
-	bool respond(Buf&, struct Response&) override;
+	bool respond(ConstBuf&, Buf&) override;
 
 	bool shouldTerminate() const override { return stopReceiving; }
 
