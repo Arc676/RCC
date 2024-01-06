@@ -33,9 +33,11 @@ public:
 
 	operator bool() const { return good; }
 
-	void clear() { good = true; }
+	void reset() { good = true; }
 
-	void reset() { readPos = 0; }
+	void clear() { len = 0; }
+
+	void rewind() { readPos = 0; }
 
 	template <typename T>
 	Buffer& operator<<(const T& in) {
