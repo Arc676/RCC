@@ -33,7 +33,7 @@ public:
 
 	~Buffer();
 
-	size_t getSize() const { return len; }
+	size_t size() const { return len; }
 
 	const Data* getBuffer() const { return data; }
 

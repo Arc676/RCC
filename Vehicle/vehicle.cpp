@@ -54,7 +54,7 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 			if (responder != nullptr) {
 				bool success = responder->respond(buf, response);
 				if (success) {
-					size_t len = response.getSize();
+					size_t len = response.size();
 					if (len > 0) {
 						Logger::log(
 							DEBUG,
