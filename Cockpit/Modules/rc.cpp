@@ -17,34 +17,38 @@
 #include "imgui.h"
 #include "interface.h"
 
+void RCModule::streamSetup() {
+	if (setup.running) {
+		ImGui::Text("Vehicle is listening on port %d using %s", setup.port,
+		            setup.protocol == IPPROTO_TCP ? "TCP" : "UDP");
+	} else {
+		ImGui::RadioButton("TCP", &setup.protocol, IPPROTO_TCP);
+		ImGui::SameLine();
+		ImGui::RadioButton("UDP", &setup.protocol, IPPROTO_UDP);
+		ImGui::InputInt("RC Port", &setup.port);
+	}
+	if (ImGui::Button("Query Status")) {
+		requestCmd(RC_QUERY);
+	}
+
+	ImGui::SameLine();
+	if (remoteSockState == SOCKET_OK) {
+		if (ImGui::Button("Disable Stream")) {
+			stopTransmitting();
+			requestCmd(RC_STOP);
+		}
+	} else {
+		if (ImGui::Button("Configure Stream")) {
+			static byte buf[1 + sizeof(RCSetup)] = {RC_CONFIG};
+			memcpy(buf + 1, &setup, sizeof(RCSetup));
+			requestCmd(buf, sizeof(buf));
+		}
+	}
+}
+
 void RCModule::render() {
 	if (ImGui::CollapsingHeader("Remote Control Stream")) {
-		if (setup.running) {
-			ImGui::Text("Vehicle is listening on port %d using %s", setup.port,
-			            setup.protocol == IPPROTO_TCP ? "TCP" : "UDP");
-		} else {
-			ImGui::RadioButton("TCP", &setup.protocol, IPPROTO_TCP);
-			ImGui::SameLine();
-			ImGui::RadioButton("UDP", &setup.protocol, IPPROTO_UDP);
-			ImGui::InputInt("RC Port", &setup.port);
-		}
-		if (ImGui::Button("Query Status")) {
-			requestCmd(RC_QUERY);
-		}
-
-		ImGui::SameLine();
-		if (remoteSockState == SOCKET_OK) {
-			if (ImGui::Button("Disable Stream")) {
-				stopTransmitting();
-				requestCmd(RC_STOP);
-			}
-		} else {
-			if (ImGui::Button("Configure Stream")) {
-				static byte buf[1 + sizeof(RCSetup)] = {RC_CONFIG};
-				memcpy(buf + 1, &setup, sizeof(RCSetup));
-				requestCmd(buf, sizeof(buf));
-			}
-		}
+		streamSetup();
 
 		transmissionControls();
 		renderSocketStates();

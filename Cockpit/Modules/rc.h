@@ -40,6 +40,8 @@ class RCModule : public Module {
 	ControllerMap controls;
 	RCState state;
 
+	void streamSetup();
+
 	void transmissionControls();
 
 	void setTransmissionDelay();
