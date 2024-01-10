@@ -1,10 +1,13 @@
 #include "rc.h"
 
+#include <string>
+
 using ControlHandler = RCState::ControlHandler;
 
-ControlHandler::ControlHandler(RCState& state, CCPtr dst, CC_t val,
-                               bool isDoubleMapped)
+ControlHandler::ControlHandler(const std::string& name, RCState& state,
+                               CCPtr dst, CC_t val, bool isDoubleMapped)
 	: state(state)
+	, name(name)
 	, ccDst(dst)
 	, ccValue(val)
 	, isDoubleMapped(isDoubleMapped)

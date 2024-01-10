@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 
 #include <cstdint>
+#include <string>
 
 #include "interface.h"
 
@@ -26,6 +27,8 @@ struct __attribute__((packed)) RCState {
 	CC_t steering     = CC_NEUTRAL;
 
 	class ControlHandler {
+		const std::string name;
+
 		bool isDoubleMapped  = false;
 		bool isDiscreteInput = false;
 		bool isContinuous    = true;
@@ -48,10 +51,12 @@ struct __attribute__((packed)) RCState {
 		bool valueIsSet() const;
 
 	public:
-		ControlHandler(RCState& state, CCPtr dst, CC_t val = CC_MAX,
-		               bool isDoubleMapped = false);
+		ControlHandler(const std::string& name, RCState& state, CCPtr dst,
+		               CC_t val = CC_MAX, bool isDoubleMapped = false);
 
 		void operator()(const float& val) const;
+
+		const std::string& getName() const { return name; }
 	};
 };
 
