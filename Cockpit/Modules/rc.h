@@ -41,8 +41,14 @@ class RCModule : public Module {
 	RCState state;
 
 	bool showControlSetup = false;
+	std::pair<ControlID, ControllerType> listening =
+		std::make_pair(-1, KEYBOARD);
+
+	void showControls(ControllerType type);
 
 	void changeControls();
+
+	bool interceptInput(const SDL_Event*);
 
 	void streamSetup();
 

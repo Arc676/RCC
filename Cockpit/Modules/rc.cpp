@@ -71,28 +71,44 @@ void RCModule::render() {
 }
 
 void RCModule::changeControls() {
-	static ControllerType shown = KEYBOARD;
-	ImGui::RadioButton("Keyboard", (int*)&shown, KEYBOARD);
-	ImGui::SameLine();
-	ImGui::RadioButton("Joystick", (int*)&shown, JOYSTICK);
+	if (ImGui::BeginTabBar("ControllerTabs")) {
+		if (ImGui::BeginTabItem("Keyboard")) {
+			showControls(KEYBOARD);
+			ImGui::EndTabItem();
+		}
+		if (ImGui::BeginTabItem("Joystick")) {
+			showControls(JOYSTICK);
+			ImGui::EndTabItem();
+		}
+		ImGui::EndTabBar();
+	}
+}
 
+void RCModule::showControls(const ControllerType type) {
 	if (ImGui::BeginTable("ControlTable", 2)) {
 		ImGui::TableSetupColumn("Control");
-		if (shown == KEYBOARD) {
+		if (type == KEYBOARD) {
 			ImGui::TableSetupColumn("Key");
-		} else if (shown == JOYSTICK) {
+		} else if (type == JOYSTICK) {
 			ImGui::TableSetupColumn("Axis/Button");
 		}
 		ImGui::TableHeadersRow();
 
-		for (auto& [input, handler] : controls[shown]) {
+		for (auto& [input, handler] : controls[type]) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%s", handler.getName().c_str());
 			ImGui::TableNextColumn();
-			const char* inputName =
-				shown == KEYBOARD ? SDL_GetScancodeName((SDL_Scancode)input)
-								  : "WIP";
-			ImGui::Text("%s", inputName);
+			const char* inputName;
+			if (input == listening.first) {
+				inputName = "Waiting...";
+			} else if (type == KEYBOARD) {
+				inputName = SDL_GetScancodeName((SDL_Scancode)input);
+			} else {
+				inputName = "WIP";
+			}
+			if (ImGui::Selectable(inputName)) {
+				listening = std::make_pair(input, type);
+			}
 		}
 
 		ImGui::EndTable();
@@ -192,7 +208,33 @@ void RCModule::handleMessage(ConstBuf& msg) {
 	}
 }
 
+bool RCModule::interceptInput(const SDL_Event* const event) {
+	const auto [toReplace, controller] = listening;
+	auto& inputs                       = controls[controller];
+	if (toReplace != -1) {
+		ControlID newInput = -1;
+		if (controller == KEYBOARD && event->type == SDL_KEYDOWN) {
+			newInput = event->key.keysym.scancode;
+		} else {
+			return false;
+		}
+		if (newInput != toReplace) {
+			if (inputs.contains(newInput)) {
+				return false;
+			}
+			auto handler  = inputs.extract(listening.first);
+			handler.key() = newInput;
+			inputs.insert(std::move(handler));
+		}
+	}
+	listening = std::make_pair(-1, KEYBOARD);
+	return true;
+}
+
 void RCModule::handleEvent(const SDL_Event* const event) {
+	if (interceptInput(event)) {
+		return;
+	}
 	float btnState = 1;
 	switch (event->type) {
 		case SDL_KEYUP:
