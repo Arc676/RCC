@@ -1,6 +1,7 @@
 #include "rc.h"
 
 #include <SDL_events.h>
+#include <SDL_keyboard.h>
 #include <SDL_scancode.h>
 #include <SDL_timer.h>
 #include <netinet/in.h>
@@ -57,6 +58,44 @@ void RCModule::render() {
 			ImGui::Text(
 				"Failed to read expected data from last response from vehicle");
 		}
+
+		if (showControlSetup) {
+			if (ImGui::Begin("Vehicle Controls", &showControlSetup)) {
+				changeControls();
+			}
+			ImGui::End();
+		} else if (ImGui::Button("Change Controller Inputs")) {
+			showControlSetup = true;
+		}
+	}
+}
+
+void RCModule::changeControls() {
+	static ControllerType shown = KEYBOARD;
+	ImGui::RadioButton("Keyboard", (int*)&shown, KEYBOARD);
+	ImGui::SameLine();
+	ImGui::RadioButton("Joystick", (int*)&shown, JOYSTICK);
+
+	if (ImGui::BeginTable("ControlTable", 2)) {
+		ImGui::TableSetupColumn("Control");
+		if (shown == KEYBOARD) {
+			ImGui::TableSetupColumn("Key");
+		} else if (shown == JOYSTICK) {
+			ImGui::TableSetupColumn("Axis/Button");
+		}
+		ImGui::TableHeadersRow();
+
+		for (auto& [input, handler] : controls[shown]) {
+			ImGui::TableNextColumn();
+			ImGui::Text("%s", handler.getName().c_str());
+			ImGui::TableNextColumn();
+			const char* inputName =
+				shown == KEYBOARD ? SDL_GetScancodeName((SDL_Scancode)input)
+								  : "WIP";
+			ImGui::Text("%s", inputName);
+		}
+
+		ImGui::EndTable();
 	}
 }
 

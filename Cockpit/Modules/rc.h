@@ -29,7 +29,7 @@ class RCModule : public Module {
 
 	bool lastReadOK = true;
 
-	enum ControllerType {
+	enum ControllerType : int {
 		KEYBOARD,
 		JOYSTICK,
 	};
@@ -39,6 +39,10 @@ class RCModule : public Module {
 	using ControllerMap = std::map<ControllerType, InputMap>;
 	ControllerMap controls;
 	RCState state;
+
+	bool showControlSetup = false;
+
+	void changeControls();
 
 	void streamSetup();
 
