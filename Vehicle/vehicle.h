@@ -50,6 +50,8 @@ public:
 
 	bool shouldTerminate() const override { return !connected; };
 
+	void shutdown();
+
 	operator bool() const { return startupSuccessful; }
 };
 

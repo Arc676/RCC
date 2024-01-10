@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <csignal>
+
 #include "Modules/modules.h"
 #include "Modules/ping.h"
 #include "Stream/buffer.h"
@@ -106,6 +108,7 @@ void Vehicle::run() {
 		const enum SocketStatus res = controlStream.acceptConnection();
 		if (res != SOCKET_OK) {
 			Logger::log(ERROR, "%s\n", getSocketError(res));
+			continue;
 		}
 
 		Logger::log(INFO, "Got connection.\n");
@@ -119,8 +122,29 @@ void Vehicle::run() {
 	controlStream.disconnect();
 }
 
+void Vehicle::shutdown() {
+	shutdownRequested = true;
+	if (connected) {
+		connected = false;
+		controlStream.disconnectClient();
+	}
+	controlStream.disconnect();
+}
+
+Vehicle* vptr = nullptr;
+
+void sighandler(int) {
+	if (vptr != nullptr) {
+		vptr->shutdown();
+	}
+}
+
 int main(int argc, char* argv[]) {
 	Vehicle vehicle{argc, argv};
+	vptr = &vehicle;
+
+	signal(SIGINT, sighandler);
+
 	if (vehicle) {
 		vehicle.run();
 	}
