@@ -3,6 +3,7 @@
 
 #include <netinet/in.h>
 
+#include <compare>
 #include <cstdint>
 #include <string>
 
@@ -57,6 +58,8 @@ struct __attribute__((packed)) RCState {
 		void operator()(const float& val) const;
 
 		const std::string& getName() const { return name; }
+
+		std::weak_ordering operator<=>(const ControlHandler& other) const;
 	};
 };
 

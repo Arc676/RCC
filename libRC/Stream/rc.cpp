@@ -1,5 +1,6 @@
 #include "rc.h"
 
+#include <compare>
 #include <string>
 
 using ControlHandler = RCState::ControlHandler;
@@ -44,4 +45,9 @@ void ControlHandler::operator()(const float& val) const {
 			state.*ccDst = val;
 		}
 	}
+}
+
+std::weak_ordering ControlHandler::operator<=>(
+	const ControlHandler& other) const {
+	return name <=> other.name;
 }
