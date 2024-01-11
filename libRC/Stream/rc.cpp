@@ -5,17 +5,14 @@
 
 using ControlHandler = RCState::ControlHandler;
 
-ControlHandler::ControlHandler(unsigned id, const std::string& name,
-                               RCState& state, CCPtr dst)
+ControlHandler::ControlHandler(HandlerID id, RCState& state, CCPtr dst)
 	: state(state)
 	, id(id)
-	, name(name)
 	, ccDst(dst) {}
 
-ControlHandler::ControlHandler(unsigned id, const std::string& name,
-                               RCState& state, CCPtr dst, CC_t val,
-                               bool isDoubleMapped)
-	: ControlHandler(id, name, state, dst) {
+ControlHandler::ControlHandler(HandlerID id, RCState& state, CCPtr dst,
+                               CC_t val, bool isDoubleMapped)
+	: ControlHandler(id, state, dst) {
 	ccValue              = val;
 	this->isDoubleMapped = isDoubleMapped;
 	isDiscreteInput      = true;
@@ -54,10 +51,26 @@ void ControlHandler::operator()(const float& val) const {
 	}
 }
 
-std::weak_ordering ControlHandler::operator<=>(
+std::strong_ordering ControlHandler::operator<=>(
 	const ControlHandler& other) const {
-	if (id == other.id) {
-		return name <=> other.name;
-	}
 	return id <=> other.id;
+}
+
+const char* ControlHandler::getName() const {
+	switch (id) {
+		case KB_ACCEL:
+		case GP_ACCEL:
+			return "Accelerate";
+		case KB_BRAKE:
+		case GP_BRAKE:
+			return "Brake";
+		case KB_LEFT:
+			return "Turn left";
+		case KB_RIGHT:
+			return "Turn right";
+		case GP_STEERING:
+			return "Steering";
+		default:
+			return "Unknown control";
+	}
 }

@@ -28,8 +28,20 @@ struct __attribute__((packed)) RCState {
 	CC_t steering     = CC_NEUTRAL;
 
 	class ControlHandler {
-		const unsigned id;
-		const std::string name;
+	public:
+		enum HandlerID {
+			KB_ACCEL,
+			KB_BRAKE,
+			KB_LEFT,
+			KB_RIGHT,
+
+			GP_ACCEL,
+			GP_BRAKE,
+			GP_STEERING,
+		};
+
+	private:
+		HandlerID id;
 
 		bool isDoubleMapped  = false;
 		bool isDiscreteInput = false;
@@ -53,17 +65,16 @@ struct __attribute__((packed)) RCState {
 		bool valueIsSet() const;
 
 	public:
-		ControlHandler(unsigned id, const std::string& name, RCState& state,
-		               CCPtr dst, CC_t val, bool isDoubleMapped = false);
+		ControlHandler(HandlerID id, RCState& state, CCPtr dst, CC_t val,
+		               bool isDoubleMapped = false);
 
-		ControlHandler(unsigned id, const std::string& name, RCState& state,
-		               CCPtr dst);
+		ControlHandler(HandlerID id, RCState& state, CCPtr dst);
 
 		void operator()(const float& val) const;
 
-		const std::string& getName() const { return name; }
+		const char* getName() const;
 
-		std::weak_ordering operator<=>(const ControlHandler& other) const;
+		std::strong_ordering operator<=>(const ControlHandler& other) const;
 	};
 };
 

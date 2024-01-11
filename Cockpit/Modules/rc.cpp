@@ -153,7 +153,7 @@ void RCModule::showControls(const bool keyboard) {
 			}
 
 			ImGui::TableNextColumn();
-			ImGui::Text("%s", handler.getName().c_str());
+			ImGui::Text("%s", handler.getName());
 			ImGui::TableNextColumn();
 			const char* inputName;
 			if (listener.active && listener.it == it) {
@@ -275,9 +275,8 @@ void RCModule::handleMessage(ConstBuf& msg) {
 bool RCModule::isDuplicateInput(bool keyboard, const ControlID& cid) {
 	for (const auto& [handler, inputs] : ism) {
 		if (cid == (keyboard ? inputs.first : inputs.second)) {
-			duplicateInput = {getInputName(cid),
-			                  listener.it->first.getName().c_str(),
-			                  handler.getName().c_str()};
+			duplicateInput = {getInputName(cid), listener.it->first.getName(),
+			                  handler.getName()};
 			return true;
 		}
 	}
