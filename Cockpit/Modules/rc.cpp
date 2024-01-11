@@ -11,6 +11,7 @@
 
 #include <cassert>
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -318,8 +319,9 @@ void RCModule::handleEvent(const SDL_Event* const event) {
 			if (event->caxis.which != joystickID) {
 				return;
 			}
-			id       = (SDL_GameControllerAxis)event->caxis.axis;
-			btnState = event->caxis.value;
+			id = (SDL_GameControllerAxis)event->caxis.axis;
+			btnState =
+				(RCState::CC_t)event->caxis.value / INT16_MAX * RCState::CC_MAX;
 			break;
 	}
 	const auto& control = controls.find(id);
