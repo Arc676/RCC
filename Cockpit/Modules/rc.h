@@ -43,7 +43,7 @@ class RCModule : public Module {
 	} listener;
 
 	SDL_GameController* joystick = nullptr;
-	SDL_JoystickID joystickID    = 0;
+	SDL_JoystickID joystickID    = -1;
 	int selectedJoystick         = -1;
 	const char* joystickError    = nullptr;
 	struct {

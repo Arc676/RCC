@@ -118,6 +118,7 @@ void RCModule::joystickSelect() {
 					selectedJoystick = i;
 					joystickID       = SDL_JoystickInstanceID(
                         SDL_GameControllerGetJoystick(joystick));
+					joystickError = nullptr;
 				}
 				if (selected) {
 					ImGui::SetItemDefaultFocus();
@@ -346,6 +347,15 @@ void RCModule::handleEvent(const SDL_Event* const event) {
 			id = (SDL_GameControllerAxis)event->caxis.axis;
 			btnState =
 				(RCState::CC_t)event->caxis.value / INT16_MAX * RCState::CC_MAX;
+			break;
+		// joystick disconnection
+		case SDL_CONTROLLERDEVICEREMOVED:
+			if (event->jdevice.which == joystickID) {
+				SDL_GameControllerClose(joystick);
+				joystick         = nullptr;
+				joystickError    = "The selected joystick was disconnected";
+				selectedJoystick = joystickID = -1;
+			}
 			break;
 	}
 	const auto& control = controls.find(id);
