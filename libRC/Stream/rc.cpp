@@ -6,13 +6,18 @@
 using ControlHandler = RCState::ControlHandler;
 
 ControlHandler::ControlHandler(const std::string& name, RCState& state,
-                               CCPtr dst, CC_t val, bool isDoubleMapped)
+                               CCPtr dst)
 	: state(state)
 	, name(name)
-	, ccDst(dst)
-	, ccValue(val)
-	, isDoubleMapped(isDoubleMapped)
-	, isDiscreteInput(true) {}
+	, ccDst(dst) {}
+
+ControlHandler::ControlHandler(const std::string& name, RCState& state,
+                               CCPtr dst, CC_t val, bool isDoubleMapped)
+	: ControlHandler(name, state, dst) {
+	ccValue              = val;
+	this->isDoubleMapped = isDoubleMapped;
+	isDiscreteInput      = true;
+}
 
 void ControlHandler::setValue() const {
 	if (isContinuous) {

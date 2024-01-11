@@ -53,7 +53,9 @@ struct __attribute__((packed)) RCState {
 
 	public:
 		ControlHandler(const std::string& name, RCState& state, CCPtr dst,
-		               CC_t val = CC_MAX, bool isDoubleMapped = false);
+		               CC_t val, bool isDoubleMapped = false);
+
+		ControlHandler(const std::string& name, RCState& state, CCPtr dst);
 
 		void operator()(const float& val) const;
 
