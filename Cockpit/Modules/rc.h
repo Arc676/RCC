@@ -46,6 +46,15 @@ class RCModule : public Module {
 	SDL_JoystickID joystickID    = 0;
 	int selectedJoystick         = -1;
 	const char* joystickError    = nullptr;
+	struct {
+		const char* name = nullptr;
+		const char* ctrl1;
+		const char* ctrl2;
+
+		void clear() { name = ctrl1 = ctrl2 = nullptr; }
+
+		bool exists() const { return name != nullptr; }
+	} duplicateInput;
 
 	const char* joystickName() const;
 
@@ -54,6 +63,8 @@ class RCModule : public Module {
 	void showControls(bool keyboard);
 
 	void changeControls();
+
+	bool isDuplicateInput(bool, const ControlID&);
 
 	bool interceptInput(const SDL_Event*);
 

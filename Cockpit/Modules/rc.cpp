@@ -16,6 +16,7 @@
 #include <cstring>
 #include <iostream>
 #include <thread>
+#include <utility>
 #include <variant>
 
 #include "Controls/input.h"
@@ -169,6 +170,11 @@ void RCModule::showControls(const bool keyboard) {
 	if (ImGui::Button("Save Changes")) {
 		controls = createInputMap(ism);
 	}
+	if (duplicateInput.exists()) {
+		ImGui::Text("Failed to set input: cannot set %s for both %s and %s",
+		            duplicateInput.name, duplicateInput.ctrl1,
+		            duplicateInput.ctrl2);
+	}
 }
 
 void RCModule::startTransmitting() {
@@ -264,44 +270,57 @@ void RCModule::handleMessage(ConstBuf& msg) {
 	}
 }
 
-bool RCModule::interceptInput(const SDL_Event* const event) {
-	if (listener.active) {
-		if (event->type == SDL_KEYDOWN
-		    && event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-			listener.active = false;
-			return true;
-		}
-		ControlID newInput = SDL_SCANCODE_UNKNOWN;
-		if (listener.keyboard) {
-			if (event->type != SDL_KEYDOWN) {
-				return false;
-			}
-			newInput = event->key.keysym.scancode;
-		} else {
-			switch (event->type) {
-				case SDL_CONTROLLERAXISMOTION:
-					newInput = (SDL_GameControllerAxis)event->caxis.axis;
-					break;
-				case SDL_CONTROLLERBUTTONDOWN:
-					newInput = (SDL_GameControllerButton)event->cbutton.button;
-					break;
-				default:
-					return false;
-			}
-		}
-		auto& toReplace = listener.keyboard ? listener.it->second.first
-		                                    : listener.it->second.second;
-		if (newInput != toReplace) {
-			toReplace       = newInput;
-			listener.active = false;
+bool RCModule::isDuplicateInput(bool keyboard, const ControlID& cid) {
+	for (const auto& [handler, inputs] : ism) {
+		if (cid == (keyboard ? inputs.first : inputs.second)) {
+			duplicateInput = {getInputName(cid),
+			                  listener.it->first.getName().c_str(),
+			                  handler.getName().c_str()};
 			return true;
 		}
 	}
 	return false;
 }
 
+bool RCModule::interceptInput(const SDL_Event* const event) {
+	if (event->type == SDL_KEYDOWN
+	    && event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+		return true;
+	}
+	ControlID newInput = SDL_SCANCODE_UNKNOWN;
+	if (listener.keyboard) {
+		if (event->type != SDL_KEYDOWN) {
+			return false;
+		}
+		newInput = event->key.keysym.scancode;
+	} else {
+		switch (event->type) {
+			case SDL_CONTROLLERAXISMOTION:
+				newInput = (SDL_GameControllerAxis)event->caxis.axis;
+				break;
+			case SDL_CONTROLLERBUTTONDOWN:
+				newInput = (SDL_GameControllerButton)event->cbutton.button;
+				break;
+			default:
+				return false;
+		}
+	}
+	auto& toReplace = listener.keyboard ? listener.it->second.first
+	                                    : listener.it->second.second;
+	if (newInput != toReplace) {
+		if (isDuplicateInput(listener.keyboard, newInput)) {
+			return true;
+		}
+		toReplace = newInput;
+		duplicateInput.clear();
+		return true;
+	}
+	return false;
+}
+
 void RCModule::handleEvent(const SDL_Event* const event) {
-	if (interceptInput(event)) {
+	if (listener.active && interceptInput(event)) {
+		listener.active = false;
 		return;
 	}
 	float btnState = 1;
