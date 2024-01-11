@@ -21,6 +21,7 @@
 class RCModule : public Module {
 	constexpr static int DEFAULT_TRANSMISSION_DELAY = 100;
 	constexpr static int MAX_TRANSMISSION_DELAY     = 1000;
+	constexpr static int FILENAME_BUFLEN            = 255;
 
 	// connection to vehicle
 	NetworkStream stream;
@@ -37,6 +38,7 @@ class RCModule : public Module {
 	bool inputsChanged    = false;
 	InputSetupMap ism;
 	InputMap controls;
+	char inputMapFilename[FILENAME_BUFLEN] = {0};
 	struct {
 		bool active = false;
 		bool keyboard;
@@ -61,6 +63,8 @@ class RCModule : public Module {
 	const char* joystickName() const;
 
 	void joystickSelect();
+
+	void rwControls();
 
 	void showControls(bool keyboard);
 

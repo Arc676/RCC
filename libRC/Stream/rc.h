@@ -72,6 +72,8 @@ struct __attribute__((packed)) RCState {
 
 		void operator()(const float& val) const;
 
+		const HandlerID& getID() const { return id; }
+
 		const char* getName() const;
 
 		std::strong_ordering operator<=>(const ControlHandler& other) const;

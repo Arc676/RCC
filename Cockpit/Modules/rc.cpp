@@ -78,6 +78,54 @@ void RCModule::render() {
 	}
 }
 
+void RCModule::rwControls() {
+	static const char* ioRes = nullptr;
+	ImGui::InputText("Filename", inputMapFilename, FILENAME_BUFLEN);
+	if (ImGui::Button("Save Input Map")) {
+		FILE* out = fopen(inputMapFilename, "wb");
+		if (out != nullptr) {
+			try {
+				writeISM(out, ism);
+				fclose(out);
+				ioRes = "Saved input map to file";
+			} catch (...) {
+				ioRes = "Failed to write input map";
+			}
+		} else {
+			ioRes = "Failed to open file for writing";
+		}
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Restore Input Map")) {
+		FILE* in = fopen(inputMapFilename, "rb");
+		if (in != nullptr) {
+			try {
+				readISM(in, ism);
+				fclose(in);
+				controls      = createInputMap(ism);
+				inputsChanged = false;
+				ioRes         = "Restored input map from file";
+			} catch (...) {
+				ioRes = "Failed to read input map";
+			}
+		} else {
+			ioRes = "Failed to open file for reading";
+		}
+	}
+	if (ImGui::Button("Restore Default Controls")) {
+		ism           = getDefaultInputs(state);
+		controls      = createInputMap(ism);
+		inputsChanged = false;
+	}
+	if (ioRes != nullptr) {
+		ImGui::Text("%s", ioRes);
+		ImGui::SameLine();
+		if (ImGui::Button("OK")) {
+			ioRes = nullptr;
+		}
+	}
+}
+
 void RCModule::changeControls() {
 	if (ImGui::BeginTabBar("ControllerTabs")) {
 		if (ImGui::BeginTabItem("Keyboard")) {
@@ -90,6 +138,18 @@ void RCModule::changeControls() {
 		}
 		ImGui::EndTabBar();
 	}
+	ImGui::Separator();
+	if (listener.active) {
+		ImGui::Text("Trigger the desired input or press ESC to cancel");
+	} else {
+		ImGui::Text("Click on a control to change it");
+	}
+	if (inputsChanged && ImGui::Button("Save Changes")) {
+		controls      = createInputMap(ism);
+		inputsChanged = false;
+	}
+	ImGui::Separator();
+	rwControls();
 }
 
 const char* RCModule::joystickName() const {
@@ -167,10 +227,6 @@ void RCModule::showControls(const bool keyboard) {
 		}
 
 		ImGui::EndTable();
-	}
-	if (inputsChanged && ImGui::Button("Save Changes")) {
-		controls      = createInputMap(ism);
-		inputsChanged = false;
 	}
 	if (duplicateInput.exists()) {
 		ImGui::Text("Failed to set input: cannot set %s for both %s and %s",

@@ -4,6 +4,10 @@
 #include <SDL_keyboard.h>
 #include <SDL_scancode.h>
 
+#include <cstddef>
+#include <cstdio>
+#include <stdexcept>
+#include <utility>
 #include <variant>
 
 #include "Stream/rc.h"
@@ -12,26 +16,24 @@ InputSetupMap getDefaultInputs(RCState& state) {
 	using RCS = RCState;
 	using CH  = RCS::ControlHandler;
 
-	// NOLINTBEGIN(readability-magic-numbers)
 	InputSetupMap map{
 		// keyboard-only inputs
-		{CH(0, "Accelerate", state, &RCS::acceleration, RCS::CC_MAX),
+		{CH(CH::KB_ACCEL, state, &RCS::acceleration, RCS::CC_MAX),
 	     {SDL_SCANCODE_W, SDL_CONTROLLER_AXIS_INVALID}},
-		{CH(1, "Brake", state, &RCS::brakes, RCS::CC_MAX),
+		{CH(CH::KB_BRAKE, state, &RCS::brakes, RCS::CC_MAX),
 	     {SDL_SCANCODE_S, SDL_CONTROLLER_AXIS_INVALID}},
-		{CH(2, "Left", state, &RCS::steering, RCS::CC_MIN, true),
+		{CH(CH::KB_LEFT, state, &RCS::steering, RCS::CC_MIN, true),
 	     {SDL_SCANCODE_A, SDL_CONTROLLER_AXIS_INVALID}},
-		{CH(3, "Right", state, &RCS::steering, RCS::CC_MAX, true),
+		{CH(CH::KB_RIGHT, state, &RCS::steering, RCS::CC_MAX, true),
 	     {SDL_SCANCODE_D, SDL_CONTROLLER_AXIS_INVALID}},
 
 		// joystick-only inputs
-		{CH(10, "Accelerate", state, &RCS::acceleration),
+		{CH(CH::GP_ACCEL, state, &RCS::acceleration),
 	     {SDL_SCANCODE_UNKNOWN, SDL_CONTROLLER_AXIS_TRIGGERRIGHT}},
-		{CH(11, "Brake", state, &RCS::brakes),
+		{CH(CH::GP_BRAKE, state, &RCS::brakes),
 	     {SDL_SCANCODE_UNKNOWN, SDL_CONTROLLER_AXIS_TRIGGERLEFT}},
-		{CH(12, "Steering", state, &RCS::steering),
+		{CH(CH::GP_STEERING, state, &RCS::steering),
 	     {SDL_SCANCODE_UNKNOWN, SDL_CONTROLLER_AXIS_LEFTX}}};
-	// NOLINTEND(readability-magic-numbers)
 
 	return map;
 }
@@ -78,4 +80,79 @@ InputMap createInputMap(const InputSetupMap& ism) {
 		}
 	}
 	return map;
+}
+
+template <typename T>
+void tryWrite(FILE* const file, const T* ptr, size_t size = sizeof(T),
+              size_t count = 1) {
+	auto written = fwrite(ptr, size, count, file);
+	if (written != count) {
+		throw std::runtime_error("Failed to write to file");
+	}
+}
+
+void writeISM(FILE* const file, const InputSetupMap& ism) {
+	for (const auto& [handler, inputs] : ism) {
+		tryWrite(file, &handler.getID());
+		SDL_Scancode key = std::get<SDL_Scancode>(inputs.first);
+		tryWrite(file, &key);
+		const auto& joystickInput = inputs.second;
+		const bool isAxis =
+			std::holds_alternative<SDL_GameControllerAxis>(joystickInput);
+		tryWrite(file, &isAxis);
+		if (isAxis) {
+			SDL_GameControllerAxis axis =
+				std::get<SDL_GameControllerAxis>(joystickInput);
+			tryWrite(file, &axis);
+		} else {
+			SDL_GameControllerButton btn =
+				std::get<SDL_GameControllerButton>(joystickInput);
+			tryWrite(file, &btn);
+		}
+	}
+}
+
+template <typename T>
+void tryRead(FILE* const file, T* value, size_t size = sizeof(T),
+             size_t count = 1) {
+	auto read = fread(value, size, count, file);
+	if (read != count) {
+		throw std::runtime_error("Failed to read");
+	}
+}
+
+void readISM(FILE* const file, InputSetupMap& ism) {
+	using HandlerID = RCState::ControlHandler::HandlerID;
+
+	while (true) {
+		HandlerID id;
+		bool isAxis;
+		SDL_Scancode key;
+		SDL_GameControllerAxis axis;
+		SDL_GameControllerButton btn;
+		ControlID joystick;
+
+		try {
+			tryRead(file, &id);
+		} catch (...) {
+			if (feof(file) != 0) {
+				return;
+			}
+		}
+		tryRead(file, &key);
+		tryRead(file, &isAxis);
+		if (isAxis) {
+			tryRead(file, &axis);
+			joystick = axis;
+		} else {
+			tryRead(file, &btn);
+			joystick = btn;
+		}
+		for (auto& [handler, inputs] : ism) {
+			if (handler.getID() == id) {
+				inputs = std::make_pair(key, joystick);
+				break;
+			}
+		}
+	}
 }
