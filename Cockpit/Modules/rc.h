@@ -22,30 +22,26 @@ class RCModule : public Module {
 	constexpr static int DEFAULT_TRANSMISSION_DELAY = 100;
 	constexpr static int MAX_TRANSMISSION_DELAY     = 1000;
 
+	// connection to vehicle
 	NetworkStream stream;
 	enum SocketStatus remoteSockState = DISCONNECTED;
 	enum SocketStatus localSockState  = DISCONNECTED;
 	std::thread transmitThread;
 	int transmitDelay = DEFAULT_TRANSMISSION_DELAY;
 	RCSetup setup;
-
+	RCState state;
 	bool lastReadOK = true;
 
+	// input setup
+	bool showControlSetup = false;
+	bool inputsChanged    = false;
 	InputSetupMap ism;
 	InputMap controls;
-	RCState state;
-
-	bool showControlSetup = false;
 	struct {
 		bool active = false;
 		bool keyboard;
 		InputSetupMap::iterator it;
 	} listener;
-
-	SDL_GameController* joystick = nullptr;
-	SDL_JoystickID joystickID    = -1;
-	int selectedJoystick         = -1;
-	const char* joystickError    = nullptr;
 	struct {
 		const char* name = nullptr;
 		const char* ctrl1;
@@ -55,6 +51,12 @@ class RCModule : public Module {
 
 		bool exists() const { return name != nullptr; }
 	} duplicateInput;
+
+	// joystick selection
+	SDL_GameController* joystick = nullptr;
+	SDL_JoystickID joystickID    = -1;
+	int selectedJoystick         = -1;
+	const char* joystickError    = nullptr;
 
 	const char* joystickName() const;
 
@@ -89,7 +91,8 @@ public:
 	 */
 	RCModule(const Dashboard* dash)
 		: Module(dash) {
-		ism = getDefaultInputs(state);
+		ism      = getDefaultInputs(state);
+		controls = createInputMap(ism);
 	}
 
 	bool canHandleMessage(const byte cmd) const override {

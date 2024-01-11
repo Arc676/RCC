@@ -168,8 +168,9 @@ void RCModule::showControls(const bool keyboard) {
 
 		ImGui::EndTable();
 	}
-	if (ImGui::Button("Save Changes")) {
-		controls = createInputMap(ism);
+	if (inputsChanged && ImGui::Button("Save Changes")) {
+		controls      = createInputMap(ism);
+		inputsChanged = false;
 	}
 	if (duplicateInput.exists()) {
 		ImGui::Text("Failed to set input: cannot set %s for both %s and %s",
@@ -312,7 +313,8 @@ bool RCModule::interceptInput(const SDL_Event* const event) {
 		if (isDuplicateInput(listener.keyboard, newInput)) {
 			return true;
 		}
-		toReplace = newInput;
+		toReplace     = newInput;
+		inputsChanged = true;
 		duplicateInput.clear();
 		return true;
 	}
