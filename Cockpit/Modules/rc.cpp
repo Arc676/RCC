@@ -294,11 +294,12 @@ bool RCModule::interceptInput(const SDL_Event* const event) {
 		auto& toReplace = listener.keyboard ? listener.it->second.first
 		                                    : listener.it->second.second;
 		if (newInput != toReplace) {
-			toReplace = newInput;
+			toReplace       = newInput;
+			listener.active = false;
+			return true;
 		}
 	}
-	listener.active = false;
-	return true;
+	return false;
 }
 
 void RCModule::handleEvent(const SDL_Event* const event) {
