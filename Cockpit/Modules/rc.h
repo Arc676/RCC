@@ -2,6 +2,7 @@
 #define RC_MODULE_H
 
 #include <SDL_events.h>
+#include <SDL_gamecontroller.h>
 #include <SDL_joystick.h>
 #include <SDL_keycode.h>
 #include <netinet/in.h>
@@ -11,6 +12,7 @@
 #include <map>
 #include <thread>
 
+#include "Controls/input.h"
 #include "Stream/netstream.h"
 #include "Stream/rc.h"
 #include "interface.h"
@@ -29,29 +31,27 @@ class RCModule : public Module {
 
 	bool lastReadOK = true;
 
-	enum ControllerType : int {
-		KEYBOARD,
-		JOYSTICK,
-	};
-
-	using ControlID     = uint32_t;
-	using InputMap      = std::map<ControlID, RCState::ControlHandler>;
-	using ControllerMap = std::map<ControllerType, InputMap>;
-	ControllerMap controls;
+	InputSetupMap ism;
+	InputMap controls;
 	RCState state;
-	SDL_Joystick* joystick    = nullptr;
-	int selectedJoystick      = -1;
-	const char* joystickError = nullptr;
 
 	bool showControlSetup = false;
-	std::pair<ControlID, ControllerType> listening =
-		std::make_pair(-1, KEYBOARD);
+	struct {
+		bool active = false;
+		bool keyboard;
+		InputSetupMap::iterator it;
+	} listener;
+
+	SDL_GameController* joystick = nullptr;
+	SDL_JoystickID joystickID    = 0;
+	int selectedJoystick         = -1;
+	const char* joystickError    = nullptr;
 
 	const char* joystickName() const;
 
 	void joystickSelect();
 
-	void showControls(ControllerType type);
+	void showControls(bool keyboard);
 
 	void changeControls();
 
@@ -76,7 +76,10 @@ public:
 	 *
 	 * @param dash Owning dashboard
 	 */
-	RCModule(const Dashboard* dash);
+	RCModule(const Dashboard* dash)
+		: Module(dash) {
+		ism = getDefaultInputs(state);
+	}
 
 	bool canHandleMessage(const byte cmd) const override {
 		return cmd == RC_OK || cmd == RC_ERROR;

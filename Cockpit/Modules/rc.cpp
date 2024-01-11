@@ -2,6 +2,7 @@
 
 #include <SDL_error.h>
 #include <SDL_events.h>
+#include <SDL_gamecontroller.h>
 #include <SDL_joystick.h>
 #include <SDL_keyboard.h>
 #include <SDL_scancode.h>
@@ -12,8 +13,11 @@
 #include <cstddef>
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 #include <thread>
+#include <variant>
 
+#include "Controls/input.h"
 #include "Stream/netstream.h"
 #include "Stream/rc.h"
 #include "dashboard.h"
@@ -75,11 +79,11 @@ void RCModule::render() {
 void RCModule::changeControls() {
 	if (ImGui::BeginTabBar("ControllerTabs")) {
 		if (ImGui::BeginTabItem("Keyboard")) {
-			showControls(KEYBOARD);
+			showControls(true);
 			ImGui::EndTabItem();
 		}
 		if (ImGui::BeginTabItem("Joystick")) {
-			showControls(JOYSTICK);
+			showControls(false);
 			ImGui::EndTabItem();
 		}
 		ImGui::EndTabBar();
@@ -90,7 +94,7 @@ const char* RCModule::joystickName() const {
 	if (selectedJoystick < 0) {
 		return "Please select...";
 	}
-	return SDL_JoystickNameForIndex(selectedJoystick);
+	return SDL_GameControllerNameForIndex(selectedJoystick);
 }
 
 void RCModule::joystickSelect() {
@@ -100,15 +104,18 @@ void RCModule::joystickSelect() {
 	} else if (ImGui::BeginCombo("Select Joystick", joystickName())) {
 		for (int i = 0; i < stickCount; i++) {
 			const bool selected = i == selectedJoystick;
-			if (ImGui::Selectable(SDL_JoystickNameForIndex(i), selected)) {
+			if (ImGui::Selectable(SDL_GameControllerNameForIndex(i),
+			                      selected)) {
 				if (joystick != nullptr) {
-					SDL_JoystickClose(joystick);
+					SDL_GameControllerClose(joystick);
 				}
-				joystick = SDL_JoystickOpen(i);
+				joystick = SDL_GameControllerOpen(i);
 				if (joystick == nullptr) {
 					joystickError = SDL_GetError();
 				} else {
 					selectedJoystick = i;
+					joystickID       = SDL_JoystickInstanceID(
+                        SDL_GameControllerGetJoystick(joystick));
 				}
 				if (selected) {
 					ImGui::SetItemDefaultFocus();
@@ -122,37 +129,52 @@ void RCModule::joystickSelect() {
 	}
 }
 
-void RCModule::showControls(const ControllerType type) {
-	if (type == JOYSTICK) {
+void RCModule::showControls(const bool keyboard) {
+	if (!keyboard) {
 		joystickSelect();
 	}
 	if (ImGui::BeginTable("ControlTable", 2)) {
 		ImGui::TableSetupColumn("Control");
-		if (type == KEYBOARD) {
+		if (keyboard) {
 			ImGui::TableSetupColumn("Key");
-		} else if (type == JOYSTICK) {
+		} else {
 			ImGui::TableSetupColumn("Axis/Button");
 		}
 		ImGui::TableHeadersRow();
 
-		for (auto& [input, handler] : controls[type]) {
+		for (auto it = ism.begin(); it != ism.end(); it++) {
+			const auto& [handler, inputs] = *it;
+			const ControlID& input = keyboard ? inputs.first : inputs.second;
+			if (!isValidMapping(input)) {
+				continue;
+			}
+
 			ImGui::TableNextColumn();
 			ImGui::Text("%s", handler.getName().c_str());
 			ImGui::TableNextColumn();
 			const char* inputName;
-			if (input == listening.first) {
+			if (listener.active && listener.it == it) {
 				inputName = "Waiting...";
-			} else if (type == KEYBOARD) {
-				inputName = SDL_GetScancodeName((SDL_Scancode)input);
+			} else if (keyboard) {
+				inputName = SDL_GetScancodeName(std::get<SDL_Scancode>(input));
 			} else {
-				inputName = "WIP";
+				if (std::holds_alternative<SDL_GameControllerAxis>(input)) {
+					inputName = SDL_GameControllerGetStringForAxis(
+						std::get<SDL_GameControllerAxis>(input));
+				} else {
+					inputName = SDL_GameControllerGetStringForButton(
+						std::get<SDL_GameControllerButton>(input));
+				}
 			}
 			if (ImGui::Selectable(inputName)) {
-				listening = std::make_pair(input, type);
+				listener = {true, keyboard, it};
 			}
 		}
 
 		ImGui::EndTable();
+	}
+	if (ImGui::Button("Save Changes")) {
+		controls = createInputMap(ism);
 	}
 }
 
@@ -250,25 +272,32 @@ void RCModule::handleMessage(ConstBuf& msg) {
 }
 
 bool RCModule::interceptInput(const SDL_Event* const event) {
-	const auto [toReplace, controller] = listening;
-	auto& inputs                       = controls[controller];
-	if (toReplace != -1) {
-		ControlID newInput = -1;
-		if (controller == KEYBOARD && event->type == SDL_KEYDOWN) {
-			newInput = event->key.keysym.scancode;
-		} else {
-			return false;
-		}
-		if (newInput != toReplace) {
-			if (inputs.contains(newInput)) {
+	if (listener.active) {
+		ControlID newInput = SDL_SCANCODE_UNKNOWN;
+		if (listener.keyboard) {
+			if (event->type != SDL_KEYDOWN) {
 				return false;
 			}
-			auto handler  = inputs.extract(listening.first);
-			handler.key() = newInput;
-			inputs.insert(std::move(handler));
+			newInput = event->key.keysym.scancode;
+		} else {
+			switch (event->type) {
+				case SDL_CONTROLLERAXISMOTION:
+					newInput = (SDL_GameControllerAxis)event->caxis.axis;
+					break;
+				case SDL_CONTROLLERBUTTONDOWN:
+					newInput = (SDL_GameControllerButton)event->cbutton.button;
+					break;
+				default:
+					return false;
+			}
+		}
+		auto& toReplace = listener.keyboard ? listener.it->second.first
+		                                    : listener.it->second.second;
+		if (newInput != toReplace) {
+			toReplace = newInput;
 		}
 	}
-	listening = std::make_pair(-1, KEYBOARD);
+	listener.active = false;
 	return true;
 }
 
@@ -278,12 +307,12 @@ void RCModule::handleEvent(const SDL_Event* const event) {
 	}
 	float btnState = 1;
 	switch (event->type) {
+		// keyboard inputs
 		case SDL_KEYUP:
 			btnState = 0;
 		case SDL_KEYDOWN: {
-			const auto& keys    = controls[KEYBOARD];
-			const auto& control = keys.find(event->key.keysym.scancode);
-			if (control != keys.end()) {
+			const auto& control = controls.find(event->key.keysym.scancode);
+			if (control != controls.end()) {
 				control->second(btnState);
 			}
 		} break;
