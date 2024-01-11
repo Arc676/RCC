@@ -21,6 +21,8 @@ InputSetupMap getDefaultInputs(RCState& state);
 
 bool isValidMapping(const ControlID& cid);
 
+const char* getInputName(const ControlID& cid);
+
 InputMap createInputMap(const InputSetupMap& ism);
 
 #endif

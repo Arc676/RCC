@@ -155,16 +155,8 @@ void RCModule::showControls(const bool keyboard) {
 			const char* inputName;
 			if (listener.active && listener.it == it) {
 				inputName = "Waiting...";
-			} else if (keyboard) {
-				inputName = SDL_GetScancodeName(std::get<SDL_Scancode>(input));
 			} else {
-				if (std::holds_alternative<SDL_GameControllerAxis>(input)) {
-					inputName = SDL_GameControllerGetStringForAxis(
-						std::get<SDL_GameControllerAxis>(input));
-				} else {
-					inputName = SDL_GameControllerGetStringForButton(
-						std::get<SDL_GameControllerButton>(input));
-				}
+				inputName = getInputName(input);
 			}
 			if (ImGui::Selectable(inputName)) {
 				listener = {true, keyboard, it};

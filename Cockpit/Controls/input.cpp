@@ -1,6 +1,7 @@
 #include "input.h"
 
 #include <SDL_gamecontroller.h>
+#include <SDL_keyboard.h>
 #include <SDL_scancode.h>
 
 #include <variant>
@@ -41,6 +42,21 @@ bool isValidMapping(const ControlID& cid) {
 		       != SDL_CONTROLLER_BUTTON_INVALID;
 	}
 	return false;
+}
+
+const char* getInputName(const ControlID& cid) {
+	if (std::holds_alternative<SDL_Scancode>(cid)) {
+		return SDL_GetScancodeName(std::get<SDL_Scancode>(cid));
+	}
+	if (std::holds_alternative<SDL_GameControllerAxis>(cid)) {
+		return SDL_GameControllerGetStringForAxis(
+			std::get<SDL_GameControllerAxis>(cid));
+	}
+	if (std::holds_alternative<SDL_GameControllerButton>(cid)) {
+		return SDL_GameControllerGetStringForButton(
+			std::get<SDL_GameControllerButton>(cid));
+	}
+	return nullptr;
 }
 
 InputMap createInputMap(const InputSetupMap& ism) {
