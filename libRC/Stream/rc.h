@@ -28,6 +28,7 @@ struct __attribute__((packed)) RCState {
 	CC_t steering     = CC_NEUTRAL;
 
 	class ControlHandler {
+		const unsigned id;
 		const std::string name;
 
 		bool isDoubleMapped  = false;
@@ -52,10 +53,11 @@ struct __attribute__((packed)) RCState {
 		bool valueIsSet() const;
 
 	public:
-		ControlHandler(const std::string& name, RCState& state, CCPtr dst,
-		               CC_t val, bool isDoubleMapped = false);
+		ControlHandler(unsigned id, const std::string& name, RCState& state,
+		               CCPtr dst, CC_t val, bool isDoubleMapped = false);
 
-		ControlHandler(const std::string& name, RCState& state, CCPtr dst);
+		ControlHandler(unsigned id, const std::string& name, RCState& state,
+		               CCPtr dst);
 
 		void operator()(const float& val) const;
 

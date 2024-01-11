@@ -5,15 +5,17 @@
 
 using ControlHandler = RCState::ControlHandler;
 
-ControlHandler::ControlHandler(const std::string& name, RCState& state,
-                               CCPtr dst)
+ControlHandler::ControlHandler(unsigned id, const std::string& name,
+                               RCState& state, CCPtr dst)
 	: state(state)
+	, id(id)
 	, name(name)
 	, ccDst(dst) {}
 
-ControlHandler::ControlHandler(const std::string& name, RCState& state,
-                               CCPtr dst, CC_t val, bool isDoubleMapped)
-	: ControlHandler(name, state, dst) {
+ControlHandler::ControlHandler(unsigned id, const std::string& name,
+                               RCState& state, CCPtr dst, CC_t val,
+                               bool isDoubleMapped)
+	: ControlHandler(id, name, state, dst) {
 	ccValue              = val;
 	this->isDoubleMapped = isDoubleMapped;
 	isDiscreteInput      = true;
@@ -54,5 +56,8 @@ void ControlHandler::operator()(const float& val) const {
 
 std::weak_ordering ControlHandler::operator<=>(
 	const ControlHandler& other) const {
-	return name <=> other.name;
+	if (id == other.id) {
+		return name <=> other.name;
+	}
+	return id <=> other.id;
 }

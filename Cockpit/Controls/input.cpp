@@ -12,19 +12,26 @@ InputSetupMap getDefaultInputs(RCState& state) {
 	using RCS = RCState;
 	using CH  = RCS::ControlHandler;
 
-	// controller-agnostic inputs
-	const CH accel{"Accelerate", state, &RCS::acceleration, RCS::CC_MAX};
-	const CH brake{"Brake", state, &RCS::brakes, RCS::CC_MAX};
-
+	// NOLINTBEGIN(readability-magic-numbers)
 	InputSetupMap map{
-		{accel, {SDL_SCANCODE_W, SDL_CONTROLLER_AXIS_TRIGGERRIGHT}},
-		{brake, {SDL_SCANCODE_S, SDL_CONTROLLER_AXIS_TRIGGERLEFT}},
-		{CH("Left", state, &RCS::steering, RCS::CC_MIN, true),
+		// keyboard-only inputs
+		{CH(0, "Accelerate", state, &RCS::acceleration, RCS::CC_MAX),
+	     {SDL_SCANCODE_W, SDL_CONTROLLER_AXIS_INVALID}},
+		{CH(1, "Brake", state, &RCS::brakes, RCS::CC_MAX),
+	     {SDL_SCANCODE_S, SDL_CONTROLLER_AXIS_INVALID}},
+		{CH(2, "Left", state, &RCS::steering, RCS::CC_MIN, true),
 	     {SDL_SCANCODE_A, SDL_CONTROLLER_AXIS_INVALID}},
-		{CH("Right", state, &RCS::steering, RCS::CC_MAX, true),
+		{CH(3, "Right", state, &RCS::steering, RCS::CC_MAX, true),
 	     {SDL_SCANCODE_D, SDL_CONTROLLER_AXIS_INVALID}},
-		{CH("Steering", state, &RCS::steering),
+
+		// joystick-only inputs
+		{CH(10, "Accelerate", state, &RCS::acceleration),
+	     {SDL_SCANCODE_UNKNOWN, SDL_CONTROLLER_AXIS_TRIGGERRIGHT}},
+		{CH(11, "Brake", state, &RCS::brakes),
+	     {SDL_SCANCODE_UNKNOWN, SDL_CONTROLLER_AXIS_TRIGGERLEFT}},
+		{CH(12, "Steering", state, &RCS::steering),
 	     {SDL_SCANCODE_UNKNOWN, SDL_CONTROLLER_AXIS_LEFTX}}};
+	// NOLINTEND(readability-magic-numbers)
 
 	return map;
 }
