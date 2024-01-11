@@ -266,6 +266,11 @@ void RCModule::handleMessage(ConstBuf& msg) {
 
 bool RCModule::interceptInput(const SDL_Event* const event) {
 	if (listener.active) {
+		if (event->type == SDL_KEYDOWN
+		    && event->key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
+			listener.active = false;
+			return true;
+		}
 		ControlID newInput = SDL_SCANCODE_UNKNOWN;
 		if (listener.keyboard) {
 			if (event->type != SDL_KEYDOWN) {
