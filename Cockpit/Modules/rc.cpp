@@ -1,6 +1,8 @@
 #include "rc.h"
 
+#include <SDL_error.h>
 #include <SDL_events.h>
+#include <SDL_joystick.h>
 #include <SDL_keyboard.h>
 #include <SDL_scancode.h>
 #include <SDL_timer.h>
@@ -84,7 +86,46 @@ void RCModule::changeControls() {
 	}
 }
 
+const char* RCModule::joystickName() const {
+	if (selectedJoystick < 0) {
+		return "Please select...";
+	}
+	return SDL_JoystickNameForIndex(selectedJoystick);
+}
+
+void RCModule::joystickSelect() {
+	const int stickCount = SDL_NumJoysticks();
+	if (stickCount == 0) {
+		ImGui::Text("No joysticks detected");
+	} else if (ImGui::BeginCombo("Select Joystick", joystickName())) {
+		for (int i = 0; i < stickCount; i++) {
+			const bool selected = i == selectedJoystick;
+			if (ImGui::Selectable(SDL_JoystickNameForIndex(i), selected)) {
+				if (joystick != nullptr) {
+					SDL_JoystickClose(joystick);
+				}
+				joystick = SDL_JoystickOpen(i);
+				if (joystick == nullptr) {
+					joystickError = SDL_GetError();
+				} else {
+					selectedJoystick = i;
+				}
+				if (selected) {
+					ImGui::SetItemDefaultFocus();
+				}
+			}
+		}
+		ImGui::EndCombo();
+	}
+	if (joystickError != nullptr) {
+		ImGui::Text("Failed to enable joystick: %s", joystickError);
+	}
+}
+
 void RCModule::showControls(const ControllerType type) {
+	if (type == JOYSTICK) {
+		joystickSelect();
+	}
 	if (ImGui::BeginTable("ControlTable", 2)) {
 		ImGui::TableSetupColumn("Control");
 		if (type == KEYBOARD) {

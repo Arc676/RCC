@@ -39,10 +39,17 @@ class RCModule : public Module {
 	using ControllerMap = std::map<ControllerType, InputMap>;
 	ControllerMap controls;
 	RCState state;
+	SDL_Joystick* joystick    = nullptr;
+	int selectedJoystick      = -1;
+	const char* joystickError = nullptr;
 
 	bool showControlSetup = false;
 	std::pair<ControlID, ControllerType> listening =
 		std::make_pair(-1, KEYBOARD);
+
+	const char* joystickName() const;
+
+	void joystickSelect();
 
 	void showControls(ControllerType type);
 
