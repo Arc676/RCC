@@ -299,16 +299,32 @@ void RCModule::handleEvent(const SDL_Event* const event) {
 		return;
 	}
 	float btnState = 1;
+	ControlID id;
 	switch (event->type) {
-		// keyboard inputs
+		// gamepad buttons
+		case SDL_CONTROLLERBUTTONUP:
+			btnState = 0;
+		case SDL_CONTROLLERBUTTONDOWN:
+			id = (SDL_GameControllerButton)event->cbutton.button;
+			break;
+		// keyboard input
 		case SDL_KEYUP:
 			btnState = 0;
-		case SDL_KEYDOWN: {
-			const auto& control = controls.find(event->key.keysym.scancode);
-			if (control != controls.end()) {
-				control->second(btnState);
+		case SDL_KEYDOWN:
+			id = event->key.keysym.scancode;
+			break;
+		// gamepad joysticks
+		case SDL_CONTROLLERAXISMOTION:
+			if (event->caxis.which != joystickID) {
+				return;
 			}
-		} break;
+			id       = (SDL_GameControllerAxis)event->caxis.axis;
+			btnState = event->caxis.value;
+			break;
+	}
+	const auto& control = controls.find(id);
+	if (control != controls.end()) {
+		control->second(btnState);
 	}
 }
 
