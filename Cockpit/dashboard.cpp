@@ -25,6 +25,9 @@ bool Dashboard::menuBar() {
 			}
 		}
 		if (ImGui::MenuItem("Quit")) {
+			if (connectionStatus == SOCKET_OK) {
+				disconnect();
+			}
 			return true;
 		}
 		ImGui::EndMenu();
