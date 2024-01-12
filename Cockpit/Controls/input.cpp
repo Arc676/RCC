@@ -125,11 +125,11 @@ void readISM(FILE* const file, InputSetupMap& ism) {
 	using HandlerID = RCState::ControlHandler::HandlerID;
 
 	while (true) {
-		HandlerID id;
-		bool isAxis;
-		SDL_Scancode key;
-		SDL_GameControllerAxis axis;
-		SDL_GameControllerButton btn;
+		static HandlerID id;
+		static bool isAxis;
+		static SDL_Scancode key;
+		static SDL_GameControllerAxis axis;
+		static SDL_GameControllerButton btn;
 		ControlID joystick;
 
 		try {

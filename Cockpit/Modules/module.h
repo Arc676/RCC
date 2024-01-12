@@ -33,7 +33,7 @@ protected:
 	 *
 	 * @return Pointer to dashboard
 	 */
-	const Dashboard* getDashboard() const { return dash; }
+	[[nodiscard]] const Dashboard* getDashboard() const { return dash; }
 
 	/**
 	 * @brief Get the command buffer
@@ -74,7 +74,7 @@ public:
 	 * @param dash The dashboard from which modules can retrieve relevant
 	 * information
 	 */
-	Module(const Dashboard* dash)
+	explicit Module(const Dashboard* dash)
 		: dash(dash)
 		, cmd(MESSAGE_BUFLEN) {}
 
@@ -84,7 +84,7 @@ public:
 	 * @param opCode The reply opcode
 	 * @return Whether this module should handle the message
 	 */
-	virtual bool canHandleMessage(byte opCode) const = 0;
+	[[nodiscard]] virtual bool canHandleMessage(byte opCode) const = 0;
 
 	/**
 	 * @brief Handle an incoming message
@@ -98,7 +98,7 @@ public:
 	 *
 	 * @return Whether the module handles events
 	 */
-	virtual bool handlesEvents() const { return false; }
+	[[nodiscard]] virtual bool handlesEvents() const { return false; }
 
 	/**
 	 * @brief Handle an SDL event
@@ -117,7 +117,7 @@ public:
 	 *
 	 * @return Whether the module command should be sent
 	 */
-	bool shouldSendCmd() const { return cmdRequested; }
+	[[nodiscard]] bool shouldSendCmd() const { return cmdRequested; }
 
 	/**
 	 * @brief Get the command to be sent and mark the module as no longer

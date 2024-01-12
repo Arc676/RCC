@@ -20,8 +20,8 @@ class Dashboard : public MessageHandler {
 	// connection state
 	enum SocketStatus connectionStatus = DISCONNECTED;
 	NetworkStream connection;
-	char vehicleIP[IP_ADDR_BUFLEN] = {0};
-	int vehiclePort                = DEFAULT_CONTROL_PORT;
+	std::array<char, IP_ADDR_BUFLEN> vehicleIP{0};
+	int vehiclePort = DEFAULT_CONTROL_PORT;
 	std::thread controlThread;
 
 	// command modules
@@ -46,6 +46,12 @@ protected:
 	void disconnect();
 
 public:
+	virtual ~Dashboard()              = default;
+	Dashboard(Dashboard&&)            = delete;
+	Dashboard(Dashboard&)             = delete;
+	Dashboard& operator=(Dashboard&)  = delete;
+	Dashboard& operator=(Dashboard&&) = delete;
+
 	Dashboard()
 		: modules(makeModules<MODULES>(this)) {}
 
@@ -53,14 +59,14 @@ public:
 
 	void handleEvent(const SDL_Event* event);
 
-	void handleMessage(const byte*, size_t) override;
+	void handleMessage(const byte* msg, size_t len) override;
 
-	bool shouldTerminate() const override {
+	[[nodiscard]] bool shouldTerminate() const override {
 		return connectionStatus != SOCKET_OK;
 	}
 
-	const char* getDeviceAddress() const {
-		return connectionStatus == SOCKET_OK ? vehicleIP : nullptr;
+	[[nodiscard]] const char* getDeviceAddress() const {
+		return connectionStatus == SOCKET_OK ? vehicleIP.data() : nullptr;
 	};
 };
 

@@ -79,9 +79,9 @@ void RCModule::render() {
 
 void RCModule::rwControls() {
 	static const char* ioRes = nullptr;
-	ImGui::InputText("Filename", inputMapFilename, FILENAME_BUFLEN);
+	ImGui::InputText("Filename", inputMapFilename.data(), FILENAME_BUFLEN);
 	if (ImGui::Button("Save Input Map")) {
-		FILE* out = fopen(inputMapFilename, "wb");
+		FILE* out = fopen(inputMapFilename.data(), "wb");
 		if (out != nullptr) {
 			try {
 				writeISM(out, ism);
@@ -96,7 +96,7 @@ void RCModule::rwControls() {
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Restore Input Map")) {
-		FILE* in = fopen(inputMapFilename, "rb");
+		FILE* in = fopen(inputMapFilename.data(), "rb");
 		if (in != nullptr) {
 			try {
 				readISM(in, ism);
@@ -214,7 +214,7 @@ void RCModule::showControls(const bool keyboard) {
 			ImGui::TableNextColumn();
 			ImGui::Text("%s", handler.getName());
 			ImGui::TableNextColumn();
-			const char* inputName;
+			const char* inputName = nullptr;
 			if (listener.active && listener.it == it) {
 				inputName = "Waiting...";
 			} else {
@@ -302,7 +302,7 @@ void RCModule::renderSocketStates() const {
 }
 
 void RCModule::handleMessage(ConstBuf& msg) {
-	byte response;
+	byte response = 0;
 	msg >> response;
 	lastReadOK = true;
 	if (response == RC_OK) {

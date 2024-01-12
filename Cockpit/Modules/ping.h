@@ -16,19 +16,19 @@ class PingModule : public Module {
 	 *
 	 * @return Human-readable representation of the vehicle's ping response
 	 */
-	const char* decodeResponse() const;
+	[[nodiscard]] const char* decodeResponse() const;
 
 public:
-	PingModule(const Dashboard* dash)
+	explicit PingModule(const Dashboard* dash)
 		: Module(dash) {
 		getCmdBuffer() << PING;
 	}
 
-	bool canHandleMessage(const byte opCode) const override {
+	[[nodiscard]] bool canHandleMessage(const byte opCode) const override {
 		return opCode == PING_ACK;
 	}
 
-	void handleMessage(ConstBuf&) override;
+	void handleMessage(ConstBuf& msg) override;
 
 	void render() override;
 };

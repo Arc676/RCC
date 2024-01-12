@@ -5,6 +5,7 @@
 #include <SDL2/SDL_video.h>
 #include <getopt.h>
 
+#include <array>
 #include <cstddef>
 #include <iostream>
 
@@ -20,6 +21,7 @@ void initializeUI(SDL_Window* const window, SDL_Renderer* const renderer) {
 	ImGui::CreateContext();
 
 	ImGuiIO& io = ImGui::GetIO();
+	// NOLINTNEXTLINE(hicpp-signed-bitwise)
 	io.ConfigFlags |=
 		ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_NavEnableGamepad;
 
@@ -52,17 +54,17 @@ int main(int argc, char* argv[]) {
 
 	unsigned winFlags = SDL_WINDOW_FULLSCREEN;
 
-	static const char* shortOpts    = "wh";
-	static struct option longOpts[] = {
-		{"help", no_argument, NULL, 'h'},
-		{"windowed", no_argument, NULL, 'w'},
-		{0, 0, 0, 0},
-	};
+	static const char* shortOpts = "wh";
+	static std::array<struct option, 3> longOpts{{
+		{"help", no_argument, nullptr, 'h'},
+		{"windowed", no_argument, nullptr, 'w'},
+		{nullptr, 0, nullptr, 0},
+	}};
 
 	while (true) {
 		int idx = 0;
 		// NOLINTNEXTLINE(concurrency-mt-unsafe)
-		int opt = getopt_long(argc, argv, shortOpts, longOpts, &idx);
+		int opt = getopt_long(argc, argv, shortOpts, longOpts.data(), &idx);
 
 		if (opt == -1) {
 			break;
@@ -103,7 +105,7 @@ int main(int argc, char* argv[]) {
 		}
 		ImGui::Render();
 
-		// NOLINTNEXTLINE(readability-magic-numbers)
+		// NOLINTNEXTLINE(*-magic-numbers)
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 

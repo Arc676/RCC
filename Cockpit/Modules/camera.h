@@ -29,7 +29,7 @@ protected:
 	void renderViewfinder();
 
 public:
-	CameraModule(const Dashboard* dash)
+	explicit CameraModule(const Dashboard* dash)
 		: Module(dash) {}
 
 	void render() override;
@@ -38,7 +38,7 @@ public:
 		return (opCode & OPCODE_ID_BITMASK) == CAMERA_CMD;
 	}
 
-	void handleMessage(ConstBuf&) override;
+	void handleMessage(ConstBuf& msg) override;
 };
 
 #endif

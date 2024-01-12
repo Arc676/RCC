@@ -73,13 +73,14 @@ void Dashboard::handleMessage(const byte* msg, size_t len) {
 
 void Dashboard::connectionWindow() {
 	if (ImGui::Begin("Connection", &showConnectionWindow)) {
-		ImGui::InputText("Vehicle IP Address", vehicleIP, IP_ADDR_BUFLEN);
+		ImGui::InputText("Vehicle IP Address", vehicleIP.data(),
+		                 IP_ADDR_BUFLEN);
 		ImGui::InputInt("Control Post", &vehiclePort);
 		ImGui::Text("Status: %s", getSocketError(connectionStatus));
 
 		if (connectionStatus == DISCONNECTED && ImGui::Button("Connect")) {
-			connectionStatus =
-				connection.initClient(vehicleIP, vehiclePort, IPPROTO_TCP);
+			connectionStatus = connection.initClient(vehicleIP.data(),
+			                                         vehiclePort, IPPROTO_TCP);
 			if (connectionStatus == SOCKET_OK) {
 				controlThread     = connection.createRecvThread(this);
 				showCommandWindow = true;

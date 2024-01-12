@@ -7,6 +7,7 @@
 #include <SDL_keycode.h>
 #include <netinet/in.h>
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <map>
@@ -38,20 +39,20 @@ class RCModule : public Module {
 	bool inputsChanged    = false;
 	InputSetupMap ism;
 	InputMap controls;
-	char inputMapFilename[FILENAME_BUFLEN] = {0};
+	std::array<char, FILENAME_BUFLEN> inputMapFilename{0};
 	struct {
-		bool active = false;
-		bool keyboard;
+		bool active   = false;
+		bool keyboard = true;
 		InputSetupMap::iterator it;
 	} listener;
 	struct {
-		const char* name = nullptr;
-		const char* ctrl1;
-		const char* ctrl2;
+		const char* name  = nullptr;
+		const char* ctrl1 = nullptr;
+		const char* ctrl2 = nullptr;
 
 		void clear() { name = ctrl1 = ctrl2 = nullptr; }
 
-		bool exists() const { return name != nullptr; }
+		[[nodiscard]] bool exists() const { return name != nullptr; }
 	} duplicateInput;
 
 	// joystick selection
@@ -60,7 +61,7 @@ class RCModule : public Module {
 	int selectedJoystick         = -1;
 	const char* joystickError    = nullptr;
 
-	const char* joystickName() const;
+	[[nodiscard]] const char* joystickName() const;
 
 	void joystickSelect();
 
@@ -93,23 +94,23 @@ public:
 	 *
 	 * @param dash Owning dashboard
 	 */
-	RCModule(const Dashboard* dash)
+	explicit RCModule(const Dashboard* dash)
 		: Module(dash) {
 		ism      = getDefaultInputs(state);
 		controls = createInputMap(ism);
 	}
 
-	bool canHandleMessage(const byte cmd) const override {
+	[[nodiscard]] bool canHandleMessage(const byte cmd) const override {
 		return cmd == RC_OK || cmd == RC_ERROR;
 	}
 
 	void transmitLoop() const;
 
-	bool handlesEvents() const override { return true; }
+	[[nodiscard]] bool handlesEvents() const override { return true; }
 
-	void handleEvent(const SDL_Event*) override;
+	void handleEvent(const SDL_Event* event) override;
 
-	void handleMessage(ConstBuf&) override;
+	void handleMessage(ConstBuf& msg) override;
 
 	void render() override;
 };

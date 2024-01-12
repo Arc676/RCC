@@ -166,11 +166,11 @@ void Camera::handleCameraDeactivation(Buf& response) {
 }
 
 bool Camera::respond(ConstBuf& msg, Buf& response) {
-	byte opCode;
+	byte opCode = 0;
 	msg >> opCode;
 	switch (opCode) {
 		case CAM_QUERY: {
-			size_t idx;
+			size_t idx = 0;
 			msg >> idx;
 			if (msg.ok()) {
 				if (idx < camMgr->cameras().size()) {
@@ -194,7 +194,7 @@ bool Camera::respond(ConstBuf& msg, Buf& response) {
 			writeResult(configureCamera(), response);
 			return true;
 		case CAM_START: {
-			int start;
+			int start = 0;
 			writeResult(startCamera(start), response);
 			return true;
 		}
