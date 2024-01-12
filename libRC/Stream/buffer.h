@@ -16,14 +16,14 @@ template <typename T>
 	requires IsByte<T>
 class Buffer;
 
-template <typename T>
+template <typename T, typename U>
 concept Serializable = requires(const T x) {
-	{ x.serialize(*(Buffer<byte>*)0) };
+	{ x.serialize(*(Buffer<U>*)0) };
 };
 
-template <typename T>
+template <typename T, typename U>
 concept Deserializable = requires(T x) {
-	{ x.deserialize(*(Buffer<const byte>*)0) };
+	{ x.deserialize(*(Buffer<const U>*)0) };
 };
 
 template <typename Data>
@@ -71,7 +71,7 @@ public:
 		requires(!std::is_const_v<Data>)
 	{
 		if (good) {
-			if constexpr (Serializable<T>) {
+			if constexpr (Serializable<T, Data>) {
 				in.serialize(*this);
 			} else if constexpr (std::is_same_v<T, std::string>) {
 				append(in.c_str(), in.length() + 1);
@@ -84,7 +84,7 @@ public:
 
 	template <typename T>
 	Buffer& operator>>(T& out) {
-		if constexpr (Deserializable<T>) {
+		if constexpr (Deserializable<T, Data>) {
 			out.deserialize(*this);
 			return *this;
 		}
