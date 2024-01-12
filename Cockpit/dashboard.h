@@ -46,7 +46,7 @@ protected:
 	void disconnect();
 
 public:
-	virtual ~Dashboard()                   = default;
+	~Dashboard() override                  = default;
 	Dashboard(const Dashboard&)            = delete;
 	Dashboard(Dashboard&&)                 = default;
 	Dashboard& operator=(const Dashboard&) = delete;

@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstring>
 #include <thread>
@@ -57,6 +58,7 @@ enum SocketStatus NetworkStream::initServer(const int port,
 	myAddr.sin_family      = AF_INET;
 	myAddr.sin_port        = htons(port);
 	myAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	// NOLINTNEXTLINE(*cstyle-cast)
 	if (bind(sock, (struct sockaddr*)&myAddr, sizeof(myAddr)) < 0) {
 		return BIND_FAILED;
 	}
@@ -89,8 +91,6 @@ enum SocketStatus NetworkStream::initClient(const char* const host,
 	clientSock     = 0;
 	this->protocol = protocol;
 	this->port     = port;
-	// NOLINTNEXTLINE (strncpy_s not in gcc)
-	strncpy(ipAddress, host, IP_ADDR_BUFLEN);
 
 	const int type = typeForProtocol(protocol);
 	sock           = socket(AF_INET, type, protocol);
@@ -102,6 +102,7 @@ enum SocketStatus NetworkStream::initClient(const char* const host,
 	hostAddr.sin_family      = AF_INET;
 	hostAddr.sin_port        = htons(port);
 	hostAddr.sin_addr.s_addr = inet_addr(host);
+	// NOLINTNEXTLINE(*cstyle-cast)
 	if (connect(sock, (struct sockaddr*)&hostAddr, sizeof(hostAddr)) < 0) {
 		return CONNECT_FAILED;
 	}
@@ -143,22 +144,21 @@ size_t NetworkStream::send(const byte* const data, const size_t len) const {
 	return sent;
 }
 
-size_t NetworkStream::receive() const {
+size_t NetworkStream::receive() {
 	if (protocol == IPPROTO_TCP) {
 		const int socket = clientSock != 0 ? clientSock : sock;
-		return read(socket, (void*)msgBuffer, MESSAGE_BUFLEN);
+		return read(socket, msgBuffer.data(), MESSAGE_BUFLEN);
 	}
 	struct sockaddr addr {};
 	socklen_t len = sizeof(sockaddr);
-	return recvfrom(sock, (void*)msgBuffer, MESSAGE_BUFLEN, 0, &addr, &len);
+	return recvfrom(sock, msgBuffer.data(), MESSAGE_BUFLEN, 0, &addr, &len);
 }
 
-void NetworkStream::recvLoop(MessageHandler* handler) const {
+void NetworkStream::recvLoop(MessageHandler* handler) {
 	while (!handler->shouldTerminate()) {
 		const size_t bytes = receive();
-		handler->handleMessage(msgBuffer, bytes);
-		// NOLINTNEXTLINE (memset_s not in gcc)
-		memset((void*)msgBuffer, 0, MESSAGE_BUFLEN);
+		handler->handleMessage(msgBuffer.data(), bytes);
+		std::ranges::fill(msgBuffer, (byte)0);
 	}
 }
 

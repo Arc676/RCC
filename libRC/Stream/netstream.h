@@ -3,6 +3,7 @@
 
 #include <sys/socket.h>
 
+#include <array>
 #include <cstddef>
 #include <thread>
 
@@ -61,19 +62,18 @@ enum SocketStatus {
 const char* getSocketError(enum SocketStatus status);
 
 class NetworkStream {
-	int protocol                   = 0;
-	int sock                       = 0;
-	char ipAddress[IP_ADDR_BUFLEN] = {0};
-	int port                       = 0;
+	int protocol = 0;
+	int sock     = 0;
+	int port     = 0;
 
 	int clientSock = 0;
 	struct sockaddr clientAddr {};
 
-	byte msgBuffer[MESSAGE_BUFLEN] = {0};
+	std::array<byte, MESSAGE_BUFLEN> msgBuffer{0};
 
 	enum SocketStatus status = DISCONNECTED;
 
-	[[nodiscard]] size_t receive() const;
+	[[nodiscard]] size_t receive();
 
 public:
 	/**
@@ -142,7 +142,7 @@ public:
 	 *
 	 * @param handler Message handler for the incoming messages
 	 */
-	void recvLoop(MessageHandler* handler) const;
+	void recvLoop(MessageHandler* handler);
 
 	/**
 	 * @brief Create a new thread on which to receive messages using the stream
