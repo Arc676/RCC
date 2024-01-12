@@ -48,9 +48,8 @@ void RCModule::streamSetup() {
 		}
 	} else {
 		if (ImGui::Button("Configure Stream")) {
-			static byte buf[1 + sizeof(RCSetup)] = {RC_CONFIG};
-			memcpy(buf + 1, &setup, sizeof(RCSetup));
-			requestCmd(buf, sizeof(buf));
+			getCleanCmdBuffer() << RC_CONFIG << setup;
+			requestCmd();
 		}
 	}
 }
@@ -307,8 +306,9 @@ void RCModule::handleMessage(ConstBuf& msg) {
 	msg >> response;
 	lastReadOK = true;
 	if (response == RC_OK) {
-		const auto* last = checkLastCmd().first;
-		switch (last[0]) {
+		Buf& last = getCmdBuffer();
+		last.rewind();
+		switch (last.peek()) {
 			case RC_CONFIG: {
 				remoteSockState = SOCKET_OK;
 				startTransmitting();

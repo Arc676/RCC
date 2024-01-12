@@ -21,7 +21,7 @@ class PingModule : public Module {
 public:
 	PingModule(const Dashboard* dash)
 		: Module(dash) {
-		setCmd(PING);
+		getCmdBuffer() << PING;
 	}
 
 	bool canHandleMessage(const byte opCode) const override {

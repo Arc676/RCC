@@ -15,8 +15,12 @@
 class Dashboard;
 
 class Module {
+protected:
+	using Buf = Buffer<byte>;
+
+private:
 	bool cmdRequested = false;
-	byte cmd[MESSAGE_BUFLEN];
+	Buf cmd;
 	size_t cmdLength = 0;
 
 	const Dashboard* dash;
@@ -32,34 +36,29 @@ protected:
 	const Dashboard* getDashboard() const { return dash; }
 
 	/**
-	 * @brief Set the command to be sent
+	 * @brief Get the command buffer
 	 *
-	 * @param cmd Command buffer
-	 * @param len Command length
+	 * @return Command buffer
 	 */
-	void setCmd(const byte* cmd, size_t len) {
-		assert(len <= MESSAGE_BUFLEN);
-		memcpy(this->cmd, cmd, len);
-		cmdLength = len;
+	Buf& getCmdBuffer() { return cmd; }
+
+	/**
+	 * @brief Get the command buffer after clearing it
+	 *
+	 * @return Command buffer
+	 */
+	Buf& getCleanCmdBuffer() {
+		cmd.clear();
+		return getCmdBuffer();
 	}
 
 	/**
-	 * @brief Set a single byte command
+	 * @brief Requests a single byte command
 	 *
-	 * @param cmd Command opcode
+	 * @param cmd Command to send
 	 */
-	void setCmd(const byte cmd) {
-		this->cmd[0] = cmd;
-		cmdLength    = 1;
-	}
-
-	void requestCmd(const byte* cmd, size_t len) {
-		setCmd(cmd, len);
-		requestCmd();
-	}
-
 	void requestCmd(const byte cmd) {
-		setCmd(cmd);
+		getCleanCmdBuffer() << cmd;
 		requestCmd();
 	}
 
@@ -67,15 +66,6 @@ protected:
 	 * @brief Indicate that the provided command should be sent to the vehicle
 	 */
 	void requestCmd() { cmdRequested = true; }
-
-	/**
-	 * @brief Check last requested command (for internal use)
-	 *
-	 * @return Buffer and length for last requested command
-	 */
-	std::pair<const byte*, size_t> checkLastCmd() const {
-		return std::make_pair(cmd, cmdLength);
-	}
 
 public:
 	/**
@@ -85,7 +75,8 @@ public:
 	 * information
 	 */
 	Module(const Dashboard* dash)
-		: dash(dash) {}
+		: dash(dash)
+		, cmd(MESSAGE_BUFLEN) {}
 
 	/**
 	 * @brief Determine whether this module is set up to handle a given response
@@ -134,9 +125,9 @@ public:
 	 *
 	 * @return The command buffer and its length as a std::pair
 	 */
-	std::pair<const byte*, size_t> getCmdData() {
+	const Buf& getCmdData() {
 		cmdRequested = false;
-		return std::make_pair(cmd, cmdLength);
+		return cmd;
 	}
 };
 

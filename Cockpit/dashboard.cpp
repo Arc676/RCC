@@ -112,8 +112,8 @@ void Dashboard::commandHandler() {
 	}
 	for (const auto& module : modules) {
 		if (module->shouldSendCmd()) {
-			auto data = module->getCmdData();
-			connection.send(data.first, data.second);
+			const auto& data = module->getCmdData();
+			connection.send(data.getBuffer(), data.size());
 		}
 	}
 }

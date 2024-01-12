@@ -52,10 +52,9 @@ void CameraModule::cameraSelect() {
 			ImGui::EndTable();
 		}
 		if (ImGui::Button("Get camera data")) {
-			byte cmd[1 + sizeof(size_t)] = {CAM_QUERY};
-			size_t selected              = state.getSelected();
-			memcpy(cmd + 1, &selected, sizeof(size_t));
-			requestCmd(cmd, sizeof(cmd));
+			size_t selected = state.getSelected();
+			getCleanCmdBuffer() << CAM_QUERY << selected;
+			requestCmd();
 		}
 		ImGui::TreePop();
 	}

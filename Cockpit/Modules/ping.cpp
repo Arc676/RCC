@@ -37,7 +37,6 @@ const char* PingModule::decodeResponse() const {
 }
 
 void PingModule::handleMessage(ConstBuf& msg) {
-	byte response;
 	msg >> response;
 
 	auto now = std::chrono::system_clock::now();
