@@ -27,7 +27,7 @@ public:
 	 */
 	virtual bool respond(ConstBuf& msg, Buf& response) = 0;
 
-	virtual const char* name() const = 0;
+	[[nodiscard]] virtual const char* name() const = 0;
 };
 
 #endif

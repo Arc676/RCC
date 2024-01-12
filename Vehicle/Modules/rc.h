@@ -24,13 +24,15 @@ class RC : public Responder, public MessageHandler {
 public:
 	~RC();
 
-	const char* name() const override { return "RC Stream"; }
+	[[nodiscard]] const char* name() const override { return "RC Stream"; }
 
-	bool respond(ConstBuf&, Buf&) override;
+	bool respond(ConstBuf& msg, Buf& response) override;
 
-	bool shouldTerminate() const override { return stopReceiving; }
+	[[nodiscard]] bool shouldTerminate() const override {
+		return stopReceiving;
+	}
 
-	void handleMessage(const byte*, size_t) override;
+	void handleMessage(const byte* msg, size_t len) override;
 };
 
 #endif

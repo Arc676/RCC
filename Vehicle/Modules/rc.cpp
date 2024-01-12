@@ -70,7 +70,7 @@ enum SocketStatus RC::setupStream() {
 }
 
 bool RC::respond(ConstBuf& msg, Buf& response) {
-	byte opCode;
+	byte opCode = 0;
 	msg >> opCode;
 	switch (opCode) {
 		case RC_QUERY:

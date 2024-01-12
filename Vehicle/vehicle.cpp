@@ -1,10 +1,10 @@
 #include "vehicle.h"
 
 #include <netinet/in.h>
-#include <stddef.h>
-#include <string.h>
 
 #include <csignal>
+#include <cstddef>
+#include <cstring>
 
 #include "Modules/modules.h"
 #include "Modules/ping.h"
@@ -79,6 +79,7 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 	}
 }
 
+// NOLINTNEXTLINE(*c-arrays)
 Vehicle::Vehicle(int argc, char* argv[])
 	: opts(argc, argv) {
 	if (opts.helpWasRequested()) {
@@ -131,9 +132,9 @@ void Vehicle::shutdown() {
 	controlStream.disconnect();
 }
 
-Vehicle* vptr = nullptr;
+Vehicle* vptr = nullptr;  // NOLINT(*global-variables)
 
-void sighandler(int) {
+void sighandler(int /*unused*/) {
 	if (vptr != nullptr) {
 		vptr->shutdown();
 	}

@@ -47,9 +47,9 @@ public:
 
 	~Camera();
 
-	const char* name() const override { return "Camera"; }
+	[[nodiscard]] const char* name() const override { return "Camera"; }
 
-	bool respond(ConstBuf&, Buf&) override;
+	bool respond(ConstBuf& msg, Buf& response) override;
 };
 
 #endif

@@ -8,7 +8,7 @@
 #define ERROR 1
 
 class Logger {
-	static unsigned verbosity;
+	static unsigned verbosity;  // NOLINT(*global-variables)
 
 public:
 	static void setVerbosity(unsigned level) { verbosity = level; }

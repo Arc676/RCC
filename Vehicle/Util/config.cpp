@@ -1,8 +1,10 @@
 #include "config.h"
 
 #include <getopt.h>
-#include <stdio.h>
-#include <stdlib.h>
+
+#include <array>
+#include <cstdlib>
+#include <iostream>
 
 #include "interface.h"
 #include "logging.h"
@@ -14,26 +16,28 @@ void CmdlineArgs::dump() const {
 }
 
 void CmdlineArgs::printHelp() {
-	printf(
-		"Arguments:\n\
+	std::cout << "Arguments:\n\
     -p <port>, --port=<port>\tsets the port on which to listen for controllers\n\
     -v, --verbose[=level]\tsets verbosity level\n\
-    --help\t\t\tshows this help message\n");
+    --help\t\t\tshows this help message"
+			  << std::endl;
 }
 
 CmdlineArgs::CmdlineArgs(int argc, char** argv) {
 	static const char* SHORT_OPTS = "vp:";
-#define LONG_COUNT 3
-	static const struct option LONG_OPTS[LONG_COUNT + 1] = {
-		{"help", no_argument, NULL, 0},
-		{"verbose", optional_argument, NULL, 'V'},
-		{"port", required_argument, NULL, 'p'},
-		{0, 0, 0, 0}};
+	constexpr unsigned LONG_COUNT = 3;
+	static const std::array<struct option, LONG_COUNT + 1> LONG_OPTS{
+		{{"help", no_argument, nullptr, 0},
+	     {"verbose", optional_argument, nullptr, 'V'},
+	     {"port", required_argument, nullptr, 'p'},
+	     {nullptr, 0, nullptr, 0}}};
 
 	while (true) {
 		int idx = 0;
-		// NOLINTNEXTLINE(concurrency-mt-unsafe)
-		const int opt = getopt_long(argc, argv, SHORT_OPTS, LONG_OPTS, &idx);
+		// NOLINTBEGIN(concurrency-mt-unsafe)
+		const int opt =
+			getopt_long(argc, argv, SHORT_OPTS, LONG_OPTS.data(), &idx);
+		// NOLINTEND(concurrency-mt-unsafe)
 
 		// End of args
 		if (opt == -1) {
@@ -57,6 +61,8 @@ CmdlineArgs::CmdlineArgs(int argc, char** argv) {
 				}
 			case 'v':
 				verbosity++;
+				break;
+			default:
 				break;
 		}
 	}

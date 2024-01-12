@@ -1,9 +1,9 @@
 #include "logging.h"
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 
-unsigned Logger::verbosity = 0;
+unsigned Logger::verbosity = 0;  // NOLINT(*global-variables)
 
 void Logger::log(unsigned level, const char* fmt, ...) {
 	if (verbosity < level) {
@@ -26,8 +26,10 @@ void Logger::log(unsigned level, const char* fmt, ...) {
 			break;
 	}
 
+	// NOLINTBEGIN(*decay)
 	va_list args;
 	va_start(args, fmt);
 	vprintf(fmt, args);
 	va_end(args);
+	// NOLINTEND(*decay)
 }

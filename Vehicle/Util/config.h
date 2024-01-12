@@ -27,13 +27,13 @@ public:
 	 * @param argc Argument count
 	 * @param argv Argument vector
 	 */
-	CmdlineArgs(int argc, char* argv[]);
+	CmdlineArgs(int argc, char* argv[]);  // NOLINT(*c-arrays)
 
-	unsigned getVerbosity() const { return verbosity; }
+	[[nodiscard]] unsigned getVerbosity() const { return verbosity; }
 
-	int getControlPort() const { return controlPort; }
+	[[nodiscard]] int getControlPort() const { return controlPort; }
 
-	bool helpWasRequested() const { return helpRequested; }
+	[[nodiscard]] bool helpWasRequested() const { return helpRequested; }
 };
 
 #endif

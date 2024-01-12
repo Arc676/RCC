@@ -39,20 +39,20 @@ public:
 	 * @param argc Number of command line arguments
 	 * @param argv Command line arguments
 	 */
-	Vehicle(int argc, char* argv[]);
+	Vehicle(int argc, char* argv[]);  // NOLINT(*c-arrays)
 
 	/**
 	 * @brief Vehicle server loop
 	 */
 	void run();
 
-	void handleMessage(const byte*, size_t) override;
+	void handleMessage(const byte* msg, size_t len) override;
 
-	bool shouldTerminate() const override { return !connected; };
+	[[nodiscard]] bool shouldTerminate() const override { return !connected; };
 
 	void shutdown();
 
-	operator bool() const { return startupSuccessful; }
+	explicit operator bool() const { return startupSuccessful; }
 };
 
 #endif

@@ -7,9 +7,9 @@
 
 class Ping : public Responder {
 public:
-	const char* name() const override { return "Ping"; }
+	[[nodiscard]] const char* name() const override { return "Ping"; }
 
-	bool respond(ConstBuf&, Buf&) override;
+	bool respond(ConstBuf& msg, Buf& response) override;
 };
 
 #endif
