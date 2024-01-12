@@ -7,7 +7,7 @@
 using ControlHandler = RCState::ControlHandler;
 
 ControlHandler::ControlHandler(HandlerID id, RCState& state, Ptr dst)
-	: state(state)
+	: state(&state)
 	, id(id)
 	, dst(dst) {}
 
@@ -23,19 +23,19 @@ ControlHandler::ControlHandler(HandlerID id, RCState& state, Ptr dst, Value val,
 
 void ControlHandler::setValue() const {
 	if (isContinuous) {
-		state.*std::get<CCPtr>(dst) = std::get<CC_t>(value);
+		state->*std::get<CCPtr>(dst) = std::get<CC_t>(value);
 	}
 }
 
 void ControlHandler::unsetValue() const {
 	if (isContinuous) {
-		state.*std::get<CCPtr>(dst) = CC_NEUTRAL;
+		state->*std::get<CCPtr>(dst) = CC_NEUTRAL;
 	}
 }
 
 bool ControlHandler::valueIsSet() const {
 	if (isContinuous) {
-		return state.*std::get<CCPtr>(dst) == std::get<CC_t>(value);
+		return state->*std::get<CCPtr>(dst) == std::get<CC_t>(value);
 	}
 	return false;
 }
@@ -49,7 +49,7 @@ void ControlHandler::operator()(const float& val) const {
 		}
 	} else {
 		if (isContinuous) {
-			state.*std::get<CCPtr>(dst) = val;
+			state->*std::get<CCPtr>(dst) = val;
 		}
 	}
 }

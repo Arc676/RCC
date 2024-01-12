@@ -62,7 +62,7 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 							DEBUG,
 							"\"%s\" responder prepared %zu bytes for reply "
 							"to command 0x%02X\n",
-							responder->name(), len, msg[0]);
+							responder->name(), len, opCode);
 						controlStream.send(response.getBuffer(), len);
 					}
 				} else {
@@ -72,7 +72,7 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 					            opCode, responder->name());
 				}
 			} else {
-				Logger::log(WARN, "Unhandled command: 0x%02X\n", msg[0]);
+				Logger::log(WARN, "Unhandled command: 0x%02X\n", opCode);
 			}
 			break;
 		}

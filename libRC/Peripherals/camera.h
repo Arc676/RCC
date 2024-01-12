@@ -1,6 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+#include <array>
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -38,7 +39,7 @@ public:
 		bool viewfinder = false;
 	};
 
-	enum StreamDestination : int {
+	enum StreamDestination : unsigned {
 		STREAM_IS_NAMED = 0b10,
 		STREAM_HAS_PORT = 0b01,
 
@@ -50,26 +51,26 @@ public:
 private:
 	struct RoleSelect selectedRoles;
 	enum StreamDestination chosenDst = STREAM_TO_CONTROLLER;
-	char streamDst[DST_BUFLEN]       = {0};
-	int streamPort                   = DEFAULT_STREAM_PORT;
+	std::array<char, DST_BUFLEN> streamDst{0};
+	int streamPort = DEFAULT_STREAM_PORT;
 
 	[[nodiscard]] std::vector<libcamera::StreamRole> getRoleVec() const;
 
 	struct __attribute__((packed)) Metadata {
 		// camera state
-		bool enabled : 1;
-		bool running : 1;
+		bool enabled : 1 = false;
+		bool running : 1 = false;
 		// camera roles
-		bool rawEnabled : 1;
-		bool stillsEnabled : 1;
-		bool videoEnabled : 1;
-		bool viewfinderEnabled : 1;
+		bool rawEnabled : 1        = false;
+		bool stillsEnabled : 1     = false;
+		bool videoEnabled : 1      = false;
+		bool viewfinderEnabled : 1 = false;
 		// stream output
-		enum StreamDestination dst : 2;
+		enum StreamDestination dst : 2 = STREAM_TO_CONTROLLER;
 
 		// user config
-		size_t selectedCam;
-		size_t camCount;
+		size_t selectedCam = 0;
+		size_t camCount    = 0;
 
 		Metadata() = default;
 
@@ -159,7 +160,7 @@ public:
 
 	enum StreamDestination& getStreamDst() { return chosenDst; }
 
-	char* getStreamBuf() { return streamDst; }
+	char* getStreamBuf() { return streamDst.data(); }
 
 	int& getStreamPort() { return streamPort; }
 

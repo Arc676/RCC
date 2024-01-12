@@ -45,7 +45,12 @@ class Camera : public Responder {
 public:
 	Camera();
 
-	~Camera();
+	~Camera() override;
+
+	Camera(const Camera&)            = delete;
+	Camera(Camera&&)                 = default;
+	Camera& operator=(const Camera&) = delete;
+	Camera& operator=(Camera&&)      = default;
 
 	[[nodiscard]] const char* name() const override { return "Camera"; }
 

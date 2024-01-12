@@ -15,6 +15,14 @@
 
 class MessageHandler {
 public:
+	MessageHandler()          = default;
+	virtual ~MessageHandler() = default;
+
+	MessageHandler(const MessageHandler&)            = delete;
+	MessageHandler(MessageHandler&&)                 = default;
+	MessageHandler& operator=(const MessageHandler&) = delete;
+	MessageHandler& operator=(MessageHandler&&)      = default;
+
 	/**
 	 * @brief Indicates that messages should no longer be received on a given
 	 * stream
@@ -53,15 +61,15 @@ enum SocketStatus {
 const char* getSocketError(enum SocketStatus status);
 
 class NetworkStream {
-	int protocol;
-	int sock;
-	char ipAddress[IP_ADDR_BUFLEN];
-	int port;
+	int protocol                   = 0;
+	int sock                       = 0;
+	char ipAddress[IP_ADDR_BUFLEN] = {0};
+	int port                       = 0;
 
-	int clientSock;
-	struct sockaddr clientAddr;
+	int clientSock = 0;
+	struct sockaddr clientAddr {};
 
-	byte msgBuffer[MESSAGE_BUFLEN];
+	byte msgBuffer[MESSAGE_BUFLEN] = {0};
 
 	enum SocketStatus status = DISCONNECTED;
 

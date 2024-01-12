@@ -11,6 +11,7 @@ void Buffer<Data>::append(const void* src, size_t size)
 		good = false;
 		return;
 	}
+	// NOLINTNEXTLINE(*pointer-arithmetic)
 	memcpy(data + len, src, size);
 	len += size;
 }

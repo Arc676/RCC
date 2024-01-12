@@ -149,7 +149,7 @@ void CameraModule::renderViewfinder() {
 }
 
 void CameraModule::handleMessage(ConstBuf& msg) {
-	byte response;
+	byte response = 0;
 	msg >> response;
 	switch (response) {
 		case CAM_STATE:

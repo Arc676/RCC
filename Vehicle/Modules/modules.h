@@ -17,6 +17,13 @@ protected:
 	using Buf      = Buffer<byte>;
 
 public:
+	Responder()                            = default;
+	virtual ~Responder()                   = default;
+	Responder(const Responder&)            = delete;
+	Responder(Responder&&)                 = default;
+	Responder& operator=(const Responder&) = delete;
+	Responder& operator=(Responder&&)      = default;
+
 	/**
 	 * @brief Respond to an incoming command
 	 *

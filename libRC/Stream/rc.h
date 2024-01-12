@@ -50,7 +50,7 @@ struct __attribute__((packed)) RCState {
 
 		using CCPtr = CC_t RCState::*;
 
-		RCState& state;
+		RCState* state;
 
 		using Ptr   = std::variant<CCPtr>;
 		using Value = std::variant<CC_t>;

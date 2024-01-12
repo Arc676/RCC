@@ -22,7 +22,13 @@ class RC : public Responder, public MessageHandler {
 	void stopStream();
 
 public:
-	~RC();
+	RC() = default;
+	~RC() override;
+
+	RC(const RC&)            = delete;
+	RC(RC&&)                 = default;
+	RC& operator=(const RC&) = delete;
+	RC& operator=(RC&&)      = default;
 
 	[[nodiscard]] const char* name() const override { return "RC Stream"; }
 

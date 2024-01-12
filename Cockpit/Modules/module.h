@@ -68,6 +68,12 @@ protected:
 	void requestCmd() { cmdRequested = true; }
 
 public:
+	virtual ~Module()                = default;
+	Module(const Module&)            = default;
+	Module(Module&&)                 = delete;
+	Module& operator=(const Module&) = delete;
+	Module& operator=(Module&&)      = delete;
+
 	/**
 	 * @brief Construct a new module
 	 *

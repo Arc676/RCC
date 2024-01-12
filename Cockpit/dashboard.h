@@ -31,7 +31,7 @@ class Dashboard : public MessageHandler {
 		return {std::make_unique<Modules>(dash)...};
 	}
 #define MODULES PingModule, CameraModule, RCModule
-	const decltype(makeModules<MODULES>(nullptr)) modules;
+	decltype(makeModules<MODULES>(nullptr)) modules;
 
 	// UI state
 	bool showConnectionWindow = true;
@@ -46,11 +46,11 @@ protected:
 	void disconnect();
 
 public:
-	virtual ~Dashboard()              = default;
-	Dashboard(Dashboard&&)            = delete;
-	Dashboard(Dashboard&)             = delete;
-	Dashboard& operator=(Dashboard&)  = delete;
-	Dashboard& operator=(Dashboard&&) = delete;
+	virtual ~Dashboard()                   = default;
+	Dashboard(const Dashboard&)            = delete;
+	Dashboard(Dashboard&&)                 = default;
+	Dashboard& operator=(const Dashboard&) = delete;
+	Dashboard& operator=(Dashboard&&)      = default;
 
 	Dashboard()
 		: modules(makeModules<MODULES>(this)) {}

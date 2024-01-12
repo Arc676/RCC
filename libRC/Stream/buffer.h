@@ -52,9 +52,9 @@ template <typename Data>
 	requires IsByte<Data>
 class Buffer {
 	Data* data;
-	size_t len            = 0;
-	const size_t capacity = 0;
-	const bool owned      = true;
+	size_t len      = 0;
+	size_t capacity = 0;
+	bool owned      = true;
 
 	bool good      = true;
 	size_t readPos = 0;

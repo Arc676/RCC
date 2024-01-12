@@ -136,6 +136,7 @@ size_t NetworkStream::send(const byte* const data, const size_t len) const {
 		const size_t toSend = remaining > MAX_UDP_LEN ? MAX_UDP_LEN : remaining;
 		sent += sendto(socket, ptr, toSend, 0, &clientAddr,
 		               sizeof(struct sockaddr));
+		// NOLINTNEXTLINE(*pointer-arithmetic)
 		ptr += toSend;
 		remaining -= toSend;
 	}
