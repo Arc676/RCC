@@ -45,8 +45,11 @@ concept Serializable = requires(const T x) {
  */
 template <typename T, typename U>
 concept Deserializable = requires(T x) {
-	{ x.deserialize(*(Buffer<const U>*)0) };
+	{ x.deserialize(*(const Buffer<U>*)0) };
 };
+
+template <typename T>
+concept Writable = !std::is_const_v<T>;
 
 template <typename Data>
 	requires IsByte<Data>
@@ -67,15 +70,17 @@ class Buffer {
 	 * @param size Size of data
 	 */
 	void append(const void* src, size_t size)
-		requires(!std::is_const_v<Data>);
+		requires Writable<Data>;
 
 public:
 	/**
-	 * @brief Construct a new Buffer object with new heap space
+	 * @brief Construct a new Buffer object with new heap space (only meaningful
+	 * for writable buffers)
 	 *
 	 * @param capacity Buffer capacity
 	 */
-	explicit Buffer(size_t capacity = MESSAGE_BUFLEN);
+	explicit Buffer(size_t capacity = MESSAGE_BUFLEN)
+		requires Writable<Data>;
 
 	/**
 	 * @brief Construct a new Buffer object with existing heap space (assumes
@@ -87,6 +92,27 @@ public:
 	Buffer(Data* buf, size_t size);
 
 	~Buffer();
+
+	/**
+	 * @brief Copy constructor for writable buffers (copy the contents of the
+	 * other buffer)
+	 */
+	Buffer(const Buffer&)
+		requires Writable<Data>;
+	/**
+	 * @brief Copy constructor for read-only buffers (point to the other buffer)
+	 */
+	Buffer(const Buffer&)
+		requires(!Writable<Data>);
+	/**
+	 * @brief Move constructor; if the other buffer owned its data, the new
+	 * buffer takes ownership. Otherwise it merely points to that data, in which
+	 * case move construction is equivalent to copy construction for read-only
+	 * buffers.
+	 */
+	Buffer(Buffer&&) noexcept;
+	Buffer& operator=(const Buffer&);
+	Buffer& operator=(Buffer&&) noexcept;
 
 	/**
 	 * @brief Get buffer size
@@ -107,7 +133,10 @@ public:
 	 *
 	 * @return Byte currently under the read position
 	 */
-	Data peek() const { return data[readPos]; }
+	Data peek() const {
+		// NOLINTNEXTLINE(*pointer-arithmetic)
+		return data[readPos];
+	}
 
 	/**
 	 * @brief Query buffer state
@@ -149,9 +178,7 @@ public:
 	 * @return Reference to the buffer object (like with streams)
 	 */
 	template <typename T>
-	Buffer& operator<<(const T& in)
-		requires(!std::is_const_v<Data>)
-	{
+	Buffer& operator<<(const T& in) {
 		if (good) {
 			if constexpr (Serializable<T, Data>) {
 				in.serialize(*this);
