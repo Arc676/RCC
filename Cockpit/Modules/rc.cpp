@@ -329,6 +329,7 @@ void RCModule::handleMessage(ConstBuf& msg) {
 }
 
 bool RCModule::isDuplicateInput(bool keyboard, const ControlID& cid) {
+	// NOLINTNEXTLINE(readability-use-anyofallof)
 	for (const auto& [handler, inputs] : ism) {
 		if (cid == (keyboard ? inputs.first : inputs.second)) {
 			duplicateInput = {getInputName(cid), listener.it->first.getName(),
