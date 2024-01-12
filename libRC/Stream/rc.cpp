@@ -2,37 +2,40 @@
 
 #include <compare>
 #include <string>
+#include <variant>
 
 using ControlHandler = RCState::ControlHandler;
 
-ControlHandler::ControlHandler(HandlerID id, RCState& state, CCPtr dst)
+ControlHandler::ControlHandler(HandlerID id, RCState& state, Ptr dst)
 	: state(state)
 	, id(id)
-	, ccDst(dst) {}
+	, dst(dst) {}
 
-ControlHandler::ControlHandler(HandlerID id, RCState& state, CCPtr dst,
-                               CC_t val, bool isDoubleMapped)
+ControlHandler::ControlHandler(HandlerID id, RCState& state, Ptr dst, Value val,
+                               bool isDoubleMapped)
 	: ControlHandler(id, state, dst) {
-	ccValue              = val;
+	// NOLINTBEGIN(*member-initializer)
+	value                = val;
 	this->isDoubleMapped = isDoubleMapped;
 	isDiscreteInput      = true;
+	// NOLINTEND(*member-initializer)
 }
 
 void ControlHandler::setValue() const {
 	if (isContinuous) {
-		state.*ccDst = ccValue;
+		state.*std::get<CCPtr>(dst) = std::get<CC_t>(value);
 	}
 }
 
 void ControlHandler::unsetValue() const {
 	if (isContinuous) {
-		state.*ccDst = CC_NEUTRAL;
+		state.*std::get<CCPtr>(dst) = CC_NEUTRAL;
 	}
 }
 
 bool ControlHandler::valueIsSet() const {
 	if (isContinuous) {
-		return state.*ccDst == ccValue;
+		return state.*std::get<CCPtr>(dst) == std::get<CC_t>(value);
 	}
 	return false;
 }
@@ -46,7 +49,7 @@ void ControlHandler::operator()(const float& val) const {
 		}
 	} else {
 		if (isContinuous) {
-			state.*ccDst = val;
+			state.*std::get<CCPtr>(dst) = val;
 		}
 	}
 }

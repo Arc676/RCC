@@ -2,6 +2,7 @@
 #define CAMERA_DATA_H
 
 #include <memory>
+#include <utility>
 
 #include "Stream/buffer.h"
 #include "interface.h"
@@ -12,10 +13,10 @@ class CameraData {
 	SharedCamera camera;
 
 public:
-	CameraData(const SharedCamera& camera)
-		: camera(camera) {}
+	explicit CameraData(SharedCamera camera)
+		: camera(std::move(camera)) {}
 
-	bool exists() const { return camera != nullptr; }
+	[[nodiscard]] bool exists() const { return camera != nullptr; }
 
 	void serialize(Buffer<byte>&) const;
 };

@@ -75,7 +75,7 @@ public:
 	 *
 	 * @param capacity Buffer capacity
 	 */
-	Buffer(size_t capacity = MESSAGE_BUFLEN);
+	explicit Buffer(size_t capacity = MESSAGE_BUFLEN);
 
 	/**
 	 * @brief Construct a new Buffer object with existing heap space (assumes
@@ -93,7 +93,7 @@ public:
 	 *
 	 * @return Number of bytes of data present in the buffer
 	 */
-	size_t size() const { return len; }
+	[[nodiscard]] size_t size() const { return len; }
 
 	/**
 	 * @brief Get the buffer
@@ -114,7 +114,7 @@ public:
 	 *
 	 * @return Whether the last I/O operation succeeded
 	 */
-	bool ok() const { return good; }
+	[[nodiscard]] bool ok() const { return good; }
 
 	/**
 	 * @brief Reset buffer state
@@ -134,7 +134,7 @@ public:
 	 *
 	 * @return Current offset from which read operations will occur
 	 */
-	size_t tell() const { return readPos; }
+	[[nodiscard]] size_t tell() const { return readPos; }
 
 	/**
 	 * @brief Reset read position to beginning of buffer

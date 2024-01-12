@@ -18,9 +18,8 @@ void Buffer<Data>::append(const void* src, size_t size)
 template <typename Data>
 	requires IsByte<Data>
 Buffer<Data>::Buffer(size_t capacity)
-	: capacity(capacity) {
-	data = new byte[capacity]();
-}
+	: data(new byte[capacity]())
+	, capacity(capacity) {}
 
 template <typename Data>
 	requires IsByte<Data>

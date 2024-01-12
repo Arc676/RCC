@@ -6,6 +6,7 @@
 #include <compare>
 #include <cstdint>
 #include <string>
+#include <variant>
 
 #include "interface.h"
 
@@ -51,30 +52,29 @@ struct __attribute__((packed)) RCState {
 
 		RCState& state;
 
-		union {
-			CCPtr ccDst;
-		};
-		union {
-			CC_t ccValue;
-		};
+		using Ptr   = std::variant<CCPtr>;
+		using Value = std::variant<CC_t>;
+
+		Ptr dst;
+		Value value;
 
 		void setValue() const;
 
 		void unsetValue() const;
 
-		bool valueIsSet() const;
+		[[nodiscard]] bool valueIsSet() const;
 
 	public:
-		ControlHandler(HandlerID id, RCState& state, CCPtr dst, CC_t val,
+		ControlHandler(HandlerID id, RCState& state, Ptr dst, Value val,
 		               bool isDoubleMapped = false);
 
-		ControlHandler(HandlerID id, RCState& state, CCPtr dst);
+		ControlHandler(HandlerID id, RCState& state, Ptr dst);
 
 		void operator()(const float& val) const;
 
-		const HandlerID& getID() const { return id; }
+		[[nodiscard]] const HandlerID& getID() const { return id; }
 
-		const char* getName() const;
+		[[nodiscard]] const char* getName() const;
 
 		std::strong_ordering operator<=>(const ControlHandler& other) const;
 	};

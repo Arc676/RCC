@@ -110,7 +110,7 @@ void CameraState::serialize(Buffer<byte>& buf) const {
 void CameraState::deserialize(Buffer<const byte>& buf) {
 	size_t start = buf.tell();
 
-	Metadata meta;
+	Metadata meta{};
 	buf >> meta;
 
 	meta.retrieve(*this);

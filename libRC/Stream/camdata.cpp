@@ -20,11 +20,11 @@ void CameraData::serialize(Buffer<byte>& buf) const {
 void CameraProperties::deserialize(Buffer<const byte>& buf) {
 	props.clear();
 
-	size_t count;
+	size_t count = 0;
 	buf >> count;
 
 	for (int i = 0; i < count; i++) {
-		unsigned int key;
+		unsigned int key = 0;
 		std::string data;
 		buf >> key >> data;
 		props[key] = std::move(data);

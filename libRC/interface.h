@@ -1,13 +1,14 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
-typedef unsigned char byte;
+using byte = unsigned char;
 
 // "Open RC Vehicle" on a 10-key layout
-#define DEFAULT_CONTROL_PORT 6728
+constexpr int DEFAULT_CONTROL_PORT = 6728;
 // "Open RC Stream"
-#define DEFAULT_RC_PORT 6727
+constexpr int DEFAULT_RC_PORT = 6727;
 
+// NOLINTBEGIN(hicpp-signed-bitwise)
 // See OpCodes.md for bitmask table
 constexpr byte OPCODE_ID_BITMASK = 0b01111000;
 constexpr byte ERROR_BIT         = 0x80;
@@ -43,6 +44,7 @@ constexpr byte CAM_PROPS = CAMERA_CMD | 0x04;
 
 constexpr byte CAM_OK    = CAMERA_CMD | 0x01;
 constexpr byte CAM_ERROR = ERROR_BIT | CAMERA_CMD | 0x07;
+// NOLINTEND(hicpp-signed-bitwise)
 
 #ifndef NDEBUG
 #include <array>
@@ -54,7 +56,7 @@ constexpr std::pair<int, int> inline verifyUnique() {
 	constexpr std::array<byte, N> ops = {OpCodes...};
 	for (int i = 0; i < N; i++) {
 		for (int j = i + 1; j < N; j++) {
-			if (ops[i] == ops[j]) {
+			if (ops.at(i) == ops.at(j)) {
 				return std::make_pair(i, j);
 			}
 		}

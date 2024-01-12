@@ -1,7 +1,6 @@
 #ifndef NETWORK_STREAM_H
 #define NETWORK_STREAM_H
 
-#include <stddef.h>
 #include <sys/socket.h>
 
 #include <cstddef>
@@ -22,7 +21,7 @@ public:
 	 *
 	 * @return Whether to terminate the message reception loop
 	 */
-	virtual bool shouldTerminate() const = 0;
+	[[nodiscard]] virtual bool shouldTerminate() const = 0;
 
 	/**
 	 * @brief Handle an incoming message from a client
@@ -66,7 +65,7 @@ class NetworkStream {
 
 	enum SocketStatus status = DISCONNECTED;
 
-	size_t receive() const;
+	[[nodiscard]] size_t receive() const;
 
 public:
 	/**
@@ -112,7 +111,7 @@ public:
 	 *
 	 * @return Current socket state
 	 */
-	enum SocketStatus getStatus() const { return status; }
+	[[nodiscard]] enum SocketStatus getStatus() const { return status; }
 
 	/**
 	 * @brief Accept a new client connection

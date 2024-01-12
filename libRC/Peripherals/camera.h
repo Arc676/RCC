@@ -53,7 +53,7 @@ private:
 	char streamDst[DST_BUFLEN]       = {0};
 	int streamPort                   = DEFAULT_STREAM_PORT;
 
-	std::vector<libcamera::StreamRole> getRoleVec() const;
+	[[nodiscard]] std::vector<libcamera::StreamRole> getRoleVec() const;
 
 	struct __attribute__((packed)) Metadata {
 		// camera state
@@ -71,9 +71,9 @@ private:
 		size_t selectedCam;
 		size_t camCount;
 
-		Metadata() {}
+		Metadata() = default;
 
-		Metadata(const CameraState& cam) { store(cam); }
+		explicit Metadata(const CameraState& cam) { store(cam); }
 
 		void store(const CameraState& cam) {
 			enabled     = cam.enabled;
@@ -125,15 +125,19 @@ public:
 
 	void loadCameraNames(const std::vector<SharedCamera>&);
 
-	const std::vector<std::string>& getCameraNames() const { return cameras; }
+	[[nodiscard]] const std::vector<std::string>& getCameraNames() const {
+		return cameras;
+	}
 
-	size_t getDeserializedSize() const { return deserializedSize; }
+	[[nodiscard]] size_t getDeserializedSize() const {
+		return deserializedSize;
+	}
 
-	bool cameraIsEnabled() const { return enabled; }
+	[[nodiscard]] bool cameraIsEnabled() const { return enabled; }
 
-	bool cameraIsRunning() const { return running; }
+	[[nodiscard]] bool cameraIsRunning() const { return running; }
 
-	size_t getSelected() const { return selectedCam; }
+	[[nodiscard]] size_t getSelected() const { return selectedCam; }
 
 	bool selectCamera(size_t);
 
@@ -146,7 +150,8 @@ public:
 		running = false;
 	}
 
-	const libcamera::CameraConfiguration* getConfiguration() const {
+	[[nodiscard]] const libcamera::CameraConfiguration* getConfiguration()
+		const {
 		return config.get();
 	}
 

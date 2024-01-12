@@ -2,12 +2,11 @@
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
-#include <stddef.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
 
 #include <cstddef>
+#include <cstring>
 #include <thread>
 
 const char* getSocketError(const enum SocketStatus status) {
@@ -39,9 +38,8 @@ int typeForProtocol(const int protocol) {
 	return protocol == IPPROTO_TCP ? SOCK_STREAM : SOCK_DGRAM;
 }
 
-NetworkStream::NetworkStream(const int port, const int protocol) {
-	status = initServer(port, protocol);
-}
+NetworkStream::NetworkStream(const int port, const int protocol)
+	: status(initServer(port, protocol)) {}
 
 enum SocketStatus NetworkStream::initServer(const int port,
                                             const int protocol) {
@@ -55,7 +53,7 @@ enum SocketStatus NetworkStream::initServer(const int port,
 		return CREATE_FAILED;
 	}
 
-	struct sockaddr_in myAddr;
+	struct sockaddr_in myAddr {};
 	myAddr.sin_family      = AF_INET;
 	myAddr.sin_port        = htons(port);
 	myAddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -82,9 +80,8 @@ enum SocketStatus NetworkStream::acceptConnection() {
 }
 
 NetworkStream::NetworkStream(const char* const host, const int port,
-                             const int protocol) {
-	status = initClient(host, port, protocol);
-}
+                             const int protocol)
+	: status(initClient(host, port, protocol)) {}
 
 enum SocketStatus NetworkStream::initClient(const char* const host,
                                             const int port,
@@ -101,7 +98,7 @@ enum SocketStatus NetworkStream::initClient(const char* const host,
 		return CREATE_FAILED;
 	}
 
-	struct sockaddr_in hostAddr;
+	struct sockaddr_in hostAddr {};
 	hostAddr.sin_family      = AF_INET;
 	hostAddr.sin_port        = htons(port);
 	hostAddr.sin_addr.s_addr = inet_addr(host);
@@ -150,7 +147,7 @@ size_t NetworkStream::receive() const {
 		const int socket = clientSock != 0 ? clientSock : sock;
 		return read(socket, (void*)msgBuffer, MESSAGE_BUFLEN);
 	}
-	struct sockaddr addr;
+	struct sockaddr addr {};
 	socklen_t len = sizeof(sockaddr);
 	return recvfrom(sock, (void*)msgBuffer, MESSAGE_BUFLEN, 0, &addr, &len);
 }
