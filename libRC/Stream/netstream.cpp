@@ -162,7 +162,6 @@ void NetworkStream::recvLoop(MessageHandler* handler) {
 	}
 }
 
-std::thread NetworkStream::createRecvThread(
-	MessageHandler* const handler) const {
+std::thread NetworkStream::createRecvThread(MessageHandler* const handler) {
 	return std::thread(&NetworkStream::recvLoop, this, handler);
 }

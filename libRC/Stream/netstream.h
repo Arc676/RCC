@@ -150,7 +150,7 @@ public:
 	 * @param handler The message handler
 	 * @return Thread on which the receive-loop runs
 	 */
-	std::thread createRecvThread(MessageHandler* handler) const;
+	std::thread createRecvThread(MessageHandler* handler);
 
 	/**
 	 * @brief Disconnect from the host (clients) or shut down the server socket
