@@ -6,9 +6,7 @@
 #include "Drivers/interface.h"
 #include "Stream/rc.h"
 
-std::shared_ptr<Driver> createDriver(int argc, char** argv) {
-	return std::make_shared<DebugDriver>(argc, argv);
-}
+DEFAULT_DRIVER_CREATOR(DebugDriver)
 
 void DebugDriver::update(const RCState& state) {
 	printf("Acc. %.01f Brk. %.01f Str. %.03f\r", state.acceleration,

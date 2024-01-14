@@ -35,4 +35,10 @@ public:
  */
 extern std::shared_ptr<Driver> createDriver(int argc, char** argv);
 
+// NOLINTNEXTLINE(*macro-usage)
+#define DEFAULT_DRIVER_CREATOR(DriverClass)                       \
+	std::shared_ptr<Driver> createDriver(int argc, char** argv) { \
+		return std::make_shared<DriverClass>(argc, argv);         \
+	}
+
 #endif
