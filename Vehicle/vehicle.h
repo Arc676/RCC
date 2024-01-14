@@ -3,6 +3,7 @@
 
 #include <array>
 #include <cstddef>
+#include <memory>
 
 #include "Drivers/interface.h"
 #include "Modules/camera.h"
@@ -20,7 +21,7 @@ class Vehicle : public MessageHandler {
 
 	bool startupSuccessful = true;
 
-	Driver driver;
+	std::shared_ptr<Driver> driver;
 
 	Ping pingReply;
 	Camera camHandler;

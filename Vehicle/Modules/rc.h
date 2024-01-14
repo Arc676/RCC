@@ -2,7 +2,9 @@
 #define RC_MODULE_H
 
 #include <cstddef>
+#include <memory>
 #include <thread>
+#include <utility>
 
 #include "Drivers/interface.h"
 #include "Stream/netstream.h"
@@ -18,15 +20,15 @@ class RC : public Responder, public MessageHandler {
 	RCSetup setup;
 	RCState state;
 
-	Driver* driver;
+	std::shared_ptr<Driver> driver;
 
 	enum SocketStatus setupStream();
 
 	void stopStream();
 
 public:
-	explicit RC(Driver& driver)
-		: driver(&driver) {}
+	explicit RC(std::shared_ptr<Driver> driver)
+		: driver(std::move(driver)) {}
 	~RC() override;
 
 	RC(const RC&)            = delete;

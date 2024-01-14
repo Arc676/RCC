@@ -5,6 +5,7 @@
 #include <csignal>
 #include <cstddef>
 #include <cstring>
+#include <memory>
 
 #include "Drivers/interface.h"
 #include "Modules/modules.h"
@@ -82,7 +83,7 @@ void Vehicle::handleMessage(const byte* msg, size_t len) {
 
 Vehicle::Vehicle(int argc, char** argv)
 	: opts(argc, argv)
-	, driver(argc, argv)
+	, driver(createDriver(argc, argv))
 	, rc(driver) {
 	if (opts.helpWasRequested()) {
 		return;
