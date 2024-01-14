@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <thread>
 
+#include "Drivers/interface.h"
 #include "Stream/netstream.h"
 #include "Stream/rc.h"
 #include "modules.h"
@@ -17,12 +18,15 @@ class RC : public Responder, public MessageHandler {
 	RCSetup setup;
 	RCState state;
 
+	Driver* driver;
+
 	enum SocketStatus setupStream();
 
 	void stopStream();
 
 public:
-	RC() = default;
+	explicit RC(Driver& driver)
+		: driver(&driver) {}
 	~RC() override;
 
 	RC(const RC&)            = delete;

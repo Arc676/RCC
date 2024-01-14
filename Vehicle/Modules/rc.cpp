@@ -107,5 +107,5 @@ void RC::handleMessage(const byte* const msg, const size_t len) {
 		return;
 	}
 	memcpy(&state, msg, sizeof(RCState));
-	update(state);
+	driver->update(state);
 }

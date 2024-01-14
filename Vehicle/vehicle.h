@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 
+#include "Drivers/interface.h"
 #include "Modules/camera.h"
 #include "Modules/modules.h"
 #include "Modules/ping.h"
@@ -18,6 +19,8 @@ class Vehicle : public MessageHandler {
 	bool shutdownRequested = false;
 
 	bool startupSuccessful = true;
+
+	Driver driver;
 
 	Ping pingReply;
 	Camera camHandler;
@@ -39,7 +42,7 @@ public:
 	 * @param argc Number of command line arguments
 	 * @param argv Command line arguments
 	 */
-	Vehicle(int argc, char* argv[]);  // NOLINT(*c-arrays)
+	Vehicle(int argc, char** argv);
 
 	/**
 	 * @brief Vehicle server loop
