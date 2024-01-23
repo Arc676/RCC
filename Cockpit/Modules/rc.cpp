@@ -78,6 +78,7 @@ void RCModule::render() {
 }
 
 void RCModule::rwControls() {
+	// NOLINTBEGIN(*owning-memory)
 	static const char* ioRes = nullptr;
 	ImGui::InputText("Filename", inputMapFilename.data(), FILENAME_BUFLEN);
 	if (ImGui::Button("Save Input Map")) {
@@ -111,6 +112,7 @@ void RCModule::rwControls() {
 			ioRes = "Failed to open file for reading";
 		}
 	}
+	// NOLINTEND(*owning-memory)
 	if (ImGui::Button("Restore Default Controls")) {
 		ism           = getDefaultInputs(state);
 		controls      = createInputMap(ism);
