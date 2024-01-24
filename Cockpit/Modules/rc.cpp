@@ -426,6 +426,7 @@ void RCModule::handleEvent(const SDL_Event* const event) {
 
 void RCModule::transmitLoop() const {
 	while (remoteSockState == SOCKET_OK) {
+		// NOLINTNEXTLINE(*cstyle-cast)
 		stream.send((byte*)&state, sizeof(RCState));
 		if (transmitDelay > 0) {
 			SDL_Delay(transmitDelay);
