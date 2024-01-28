@@ -1,6 +1,6 @@
-if(NOT DEFINED VEHICLE_DRIVER)
-    set(VEHICLE_DRIVER "Debug")
-    # message(FATAL_ERROR "Cannot build vehicle without specifying a driver")
+set(VEHICLE_DRIVER "" CACHE STRING "Vehicle driver")
+if("${VEHICLE_DRIVER}" STREQUAL "")
+    message(FATAL_ERROR "Cannot build vehicle without specifying a driver")
 endif()
 
 if(NOT EXTERNAL_DRIVER)
