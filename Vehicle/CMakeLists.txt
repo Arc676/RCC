@@ -1,5 +1,7 @@
-set(VEHICLE_DRIVER "" CACHE STRING "Vehicle driver")
-if("${VEHICLE_DRIVER}" STREQUAL "")
+option(EXTERNAL_DRIVER "Use a vehicle driver external to RCC" OFF)
+option(VEHICLE_DRIVER "Driver for Vehicle server" "N/A")
+
+if("${VEHICLE_DRIVER}" STREQUAL "N/A")
     message(FATAL_ERROR "Cannot build vehicle without specifying a driver")
 endif()
 

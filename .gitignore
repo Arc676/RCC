@@ -1,6 +1,7 @@
 .*
 *.ignore
-build
+build*
 compile_commands.json
 dependencies/imgui/imgui
 *.ini
+CMakePresets.json
