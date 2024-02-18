@@ -72,12 +72,14 @@ void CameraModule::roleSelect() {
 
 void CameraModule::dstSelect() {
 	auto& dst = state.getStreamDst();
+	// NOLINTBEGIN(*cstyle-cast)
 	ImGui::RadioButton("Stream to cockpit", (int*)&dst,
 	                   CameraState::STREAM_TO_CONTROLLER);
 	ImGui::RadioButton("Stream to another device", (int*)&dst,
 	                   CameraState::STREAM_TO_EXTERNAL);
 	ImGui::RadioButton("Stream to disk on vehicle", (int*)&dst,
 	                   CameraState::STREAM_TO_DISK);
+	// NOLINTEND(*cstyle-cast)
 
 	if ((dst & CameraState::STREAM_IS_NAMED) != 0) {
 		ImGui::InputText("Stream destination", state.getStreamBuf(),
