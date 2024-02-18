@@ -10,7 +10,8 @@
 
 void CameraModule::render() {
 	renderController();
-	if (state.cameraIsRunning()) {
+	if (state.cameraIsRunning()
+	    && state.getStreamDst() == CameraState::STREAM_TO_CONTROLLER) {
 		renderViewfinder();
 	}
 }
